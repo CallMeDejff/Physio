@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "318365160423",
+    "project_id": "physio-cac10",
+    "storage_bucket": "physio-cac10.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318365160423:android:d869f4000394464b076342",
+        "android_client_info": {
+          "package_name": "com.example.physio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzOSh8szMKCGr9aaSMxABycTuRz2KmRz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,14 @@
+<resources>
+    <string-array name="frequency_options">
+        <item>Codziennie</item>
+        <item>Co drugi dzień</item>
+        <item>Co trzeci dzień</item>
+        <item>Nigdy</item>
+    </string-array>
+
+    <string-array name="time_options">
+        <item>08:00</item>
+        <item>12:00</item>
+        <item>18:00</item>
+    </string-array>
+</resources>
