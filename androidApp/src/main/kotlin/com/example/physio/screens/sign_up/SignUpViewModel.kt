@@ -1,5 +1,6 @@
 package com.example.physio.screens.sign_up
 
+import android.util.Log
 import com.example.physio.DASHBOARD_SCREEN
 import com.example.physio.SIGN_UP_SCREEN
 import com.example.physio.screens.PhysioAppViewModel
@@ -45,10 +46,6 @@ class SignUpViewModel @Inject constructor(
         this.email = email
     }
 
-    fun updatePlainPassword(plainPassword: String) {
-        this.plainPassword = plainPassword
-    }
-
     fun updateRepeatedPassword(repeatedPassword: String) {
         this.repeatedPassword = repeatedPassword
     }
@@ -67,39 +64,82 @@ class SignUpViewModel @Inject constructor(
         this.userType = userType
     }
 
-    fun onSignUpClick(
-        openAndPopUp: (String, String) -> Unit,
-    ) {
-        _showProgress.update { true }
+    private fun dataValidation(): Result<Unit> {
         val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-        when {
-            repeatedPassword != plainPassword -> {
-                _signupMessage.update { "Hasła różnią się od siebie" }
-                _showProgress.update { false }
-                return
+        return when {
+            email.isEmpty() -> {
+                _signupMessage.update { "Podaj adres email" }
+                Log.e("SignUpViewModel", "dataValidation:failure - Email address missing")
+                Result.failure(Exception("Email address missing"))
+            }
+            !email.matches(emailPattern.toRegex()) -> {
+                _signupMessage.update { "Sprawdź czy na pewno podałeś prawdziwy adres email" }
+                Log.e("SignUpViewModel", "dataValidation:failure - Email address pattern mismatch")
+                Result.failure(Exception("Email address pattern mismatch"))
             }
 
-            !email.matches(emailPattern.toRegex()) -> {
-                _signupMessage.update { "Sprawdź czy podałeś poprawny adres email" }
-                _showProgress.update { false }
-                return
+            name.isEmpty() -> {
+                _signupMessage.update { "Podaj imię" }
+                Log.e("SignUpViewModel", "dataValidation:failure - Name missing")
+                Result.failure(Exception("Name missing"))
+            }
+
+            lastname.isEmpty() -> {
+                _signupMessage.update { "Podaj nazwisko" }
+                Log.e("SignUpViewModel", "dataValidation:failure - Lastname missing")
+                Result.failure(Exception("Lastname missing"))
+            }
+
+            password.equals(repeatedPassword).not() -> {
+                _signupMessage.update { "Czy na pewno oba hasła są takie same?" }
+                updateRepeatedPassword("")
+                updatePassword("")
+                Log.e("SignUpViewModel", "dataValidation:failure - passwords mismatch:$password:$repeatedPassword")
+                Result.failure(Exception("passwords mismatch"))
+            }
+
+            password.isEmpty() -> {
+                _signupMessage.update { "Podaj hasło" }
+                Log.e("SignUpViewModel", "dataValidation:failure - Password missing")
+                Result.failure(Exception("Password missing"))
+            }
+
+            else -> {
+                Result.success(Unit)
             }
         }
-        callUserSignUp(openAndPopUp)
     }
 
+    fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {
+        val validationResult = dataValidation()
+        if (validationResult.isSuccess) {
+            _showProgress.update { true }
+            callUserSignUp(openAndPopUp)
+            Log.d("SignUpViewModel", "callUserSignUp:success")
+        } else {
+            _showProgress.update { false }
+            updateRepeatedPassword("")
+            updatePassword("")
+        }
+    }
 
-    private fun callUserSignUp(
-        openAndPopUp: (String, String) -> Unit,
-    ) {
+    private fun callUserSignUp(openAndPopUp: (String, String) -> Unit) {
         launchCatching {
-            accountService.signUp(email, password)
-            val userId = accountService.currentUserId
-            val newUser = User(userId, name, lastname, licenseNumber)
-            storageService.createUser(newUser)
-
-            _signupMessage.update { "Użytkownik utworzony" }
-            openAndPopUp(DASHBOARD_SCREEN, SIGN_UP_SCREEN)
+            val resultSignUp = accountService.signUp(email, password)
+            if (resultSignUp.isSuccess) {
+                Log.d("SignUpViewModel", "resultSignUp:success")
+                val userId = accountService.currentUserId
+                val newUser = User(userId, name, lastname, licenseNumber)
+                storageService.createUser(newUser)
+                _signupMessage.update { "Użytkownik utworzony" }
+                openAndPopUp(DASHBOARD_SCREEN, SIGN_UP_SCREEN)
+            } else {
+                Log.d("SignUpViewModel", "resultSignUp:failed")
+                _signupMessage.update { "Rejestracja nie powiodła się" }
+                updateRepeatedPassword("")
+                updatePassword("")
+            }
+            _showProgress.update { false }
         }
     }
 

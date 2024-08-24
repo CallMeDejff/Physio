@@ -1,4 +1,4 @@
-package com.example.physio.service.Impl
+package com.example.physio.service.impl
 
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService

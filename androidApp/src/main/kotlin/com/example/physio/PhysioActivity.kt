@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import com.google.firebase.BuildConfig
 import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -22,7 +23,7 @@ class PhysioActivity : ComponentActivity() {
     private fun configureFirebaseServices() {
         if (BuildConfig.DEBUG) {
             Firebase.auth.useEmulator(LOCALHOST, AUTH_PORT)
-            //Firebase.firestore.useEmulator(LOCALHOST, FIRESTORE_PORT)
+            Firebase.firestore.useEmulator(LOCALHOST, FIRESTORE_PORT)
         }
     }
 }

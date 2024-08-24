@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.monitor)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.database)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.constraintlayout.compose)

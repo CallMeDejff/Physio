@@ -85,10 +85,6 @@ fun SignUpScreen(
         }
     }
 
-    fun performSignUp() {
-
-    }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -133,7 +129,7 @@ fun SignUpScreen(
                         showProgress.value,
                         onSignUpClick = {
                             viewModel.updateEmail(emailState.value.text)
-                            viewModel.updatePlainPassword(passwordState.value.text)
+                            viewModel.updatePassword(passwordState.value.text)
                             viewModel.updateRepeatedPassword(repeatedPasswordState.value.text)
                             viewModel.updateName(nameState.value.text)
                             viewModel.updateLastname(lastnameState.value.text)

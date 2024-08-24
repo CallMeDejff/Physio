@@ -18,8 +18,8 @@ class LoginViewModel @Inject constructor(
     private val accountService: AccountService
 ): PhysioAppViewModel() {
 
-    var email: String = ""
-    var password: String = ""
+    private var email: String = ""
+    private var password: String = ""
 
     private val _showProgress = MutableStateFlow(false)
     val showProgress = _showProgress.asStateFlow()
@@ -27,18 +27,47 @@ class LoginViewModel @Inject constructor(
     private val _loginMessage = MutableStateFlow<String?>(null)
     val loginMessage = _loginMessage.asStateFlow()
 
-    fun onSignInClick(openAndPopUp: (String, String) -> Unit) {
-        launchCatching {
-            Log.i("LoginViewModel", "onSignInClick: $email, $password")
-            accountService.signIn(email, password)
-            _showProgress.update { true }
-
-            if (BuildConfig.DEBUG) {
-                _loginMessage.update { accountService.currentUserId }
+    private fun dataValidation(): Result<Unit> {
+        return when {
+            email.isEmpty() -> {
+                _loginMessage.update { "Podaj adres email" }
+                Log.e("LoginViewModel", "dataValidation:failure - Email address missing")
+                Result.failure(Exception("Email address missing"))
             }
-
-            openAndPopUp(DASHBOARD_SCREEN, SIGN_IN_SCREEN)
+            password.isEmpty() -> {
+                _loginMessage.update { "Podaj hasło" }
+                Log.e("LoginViewModel", "dataValidation:failure - Password missing")
+                Result.failure(Exception("Password missing"))
+            }
+            else -> {
+                Result.success(Unit)
+            }
         }
+    }
+
+    fun onSignInClick(openAndPopUp: (String, String) -> Unit) {
+        val validationResult = dataValidation()
+        if (validationResult.isSuccess) {
+            _showProgress.update { true }
+            launchCatching {
+                val signInResult = accountService.signIn(email, password)
+                Log.i("LoginViewModel", "onSignInClick:$email")
+                if (signInResult.isSuccess) {
+                    _loginMessage.update { "Użytkownik zalogowany" }
+                    _showProgress.update { false }
+                    openAndPopUp(DASHBOARD_SCREEN, SIGN_IN_SCREEN)
+                } else {
+                    _loginMessage.update { "Logowanie nie powiodło się" }
+                    _showProgress.update { false }
+                }
+
+                if (BuildConfig.DEBUG) {
+                    _loginMessage.update { accountService.currentUserId }
+                }
+            }
+            return
+        }
+
     }
 
     fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {
