@@ -20,7 +20,9 @@ class SplashViewModel @Inject constructor(
       openAndPopUp(DASHBOARD_SCREEN, SPLASH_SCREEN)
       Log.i("SplashViewModel", "accountService.hasUser = true")
     }
-    else openAndPopUp(SIGN_IN_SCREEN, SPLASH_SCREEN)
-    Log.i("SplashViewModel", "accountService.hasUser = false")
+    else {
+      openAndPopUp(SIGN_IN_SCREEN, SPLASH_SCREEN)
+      Log.i("SplashViewModel", "accountService.hasUser = false")
+    }
   }
 }

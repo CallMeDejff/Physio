@@ -17,6 +17,6 @@ open class PhysioAppViewModel : ViewModel() {
     )
 
   companion object {
-    const val ERROR_TAG = "Physio APP ERROR"
+    const val ERROR_TAG = "PhysioApp error"
   }
 }

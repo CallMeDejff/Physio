@@ -1,10 +1,5 @@
-package com.example.physio.activities
+package com.example.physio.screens.wizards.exerciseWizard
 
-import android.annotation.SuppressLint
-import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,10 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatAlignCenter
-import androidx.compose.material.icons.filled.FormatAlignLeft
-import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatColorText
 import androidx.compose.material.icons.filled.FormatItalic
@@ -55,62 +50,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.example.physio.retrofitutil.ApiInterface
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.ui.colorPrimary
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 
-class ExerciseEditor : ComponentActivity(), ExerciseEditorListener {
-
-    private lateinit var apiInterface: ApiInterface
-
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_add_exercise)
-
-        val exerciseId = intent.getIntExtra("exercise_id", -1)
-        val exerciseTitle = intent.getStringExtra("exercise_title") ?: ""
-        val exerciseDescription = intent.getStringExtra("exercise_description") ?: ""
-
-        setContent {
-            ExerciseEditorView(this@ExerciseEditor, exerciseTitle, exerciseDescription)
-        }
-        //apiInterface = ApiClient.apiClient
-    }
-
-    override fun onDescriptionReceived(description: String) {
-        val exerciseId = intent.getIntExtra("exercise_id", -1)
-        val title = intent.getStringExtra("exercise_title") ?: ""
-        Log.d("ExerciseEditor", "Saving exercise with ID: $exerciseId, Title: $title, Description: $description")
-        //saveExercise(exerciseId, title, description)
-    }
-
-    /* private fun saveExercise(id: Int, title: String, description: String) {
-        Log.d("ExerciseEditor", "Calling saveExercise with ID: $id, Title: $title, Description: $description")
-        val call = apiInterface.editExercise(id, title, description)
-        call.enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) {
-                    Log.d("ExerciseEditor", "Edit successful")
-                    Toast.makeText(this@ExerciseEditor, "Ćwiczenie zaktualizowane", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Log.d("ExerciseEditor", "Edit failed: ${response.errorBody()?.string()}")
-                    Toast.makeText(this@ExerciseEditor, "Aktualizacja ćwiczenia nie powiodła się", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Log.d("ExerciseEditor", "Edit failed: ${t.message}")
-                Toast.makeText(this@ExerciseEditor, t.message, Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-} */
-
 @Composable
-fun ExerciseEditorView(listener: ExerciseEditorListener?, initialTitle: String, initialDescription: String) {
+fun ExerciseEditorView(
+    //navigate: (String) -> Unit,
+    //initialTitle: String,
+    initialDescription: String,
+    viewModel: CreatorWizardViewModel = hiltViewModel()
+) {
     val state = rememberRichTextState()
     val titleSize = MaterialTheme.typography.displaySmall.fontSize
     val subtitleSize = MaterialTheme.typography.titleLarge.fontSize
@@ -122,7 +75,7 @@ fun ExerciseEditorView(listener: ExerciseEditorListener?, initialTitle: String, 
     Scaffold {
         Column(
             modifier = Modifier
-                .padding(all = 20.dp)
+                .padding(8.dp)
                 .padding(bottom = it.calculateBottomPadding())
                 .padding(top = it.calculateTopPadding()),
             verticalArrangement = Arrangement.Center,
@@ -142,10 +95,11 @@ fun ExerciseEditorView(listener: ExerciseEditorListener?, initialTitle: String, 
                 onCenterAlignClick = { state.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center)) },
                 onExportClick = {
                     val description = state.toHtml()
-                    listener?.onDescriptionReceived(description)
-                    Log.d("Editor", description)
+                    viewModel.updateExerciseDescription(description)
+
                 }
             )
+
             RichTextEditor(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -207,7 +161,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatBold,
                 contentDescription = "Bold Control",
-                tint = if (boldSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (boldSelected) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -218,7 +172,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatItalic,
                 contentDescription = "Italic Control",
-                tint = if (italicSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (italicSelected) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -229,7 +183,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatUnderlined,
                 contentDescription = "Underline Control",
-                tint = if (underlineSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (underlineSelected) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -240,7 +194,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.Title,
                 contentDescription = "Title Control",
-                tint = if (titleSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (titleSelected) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -251,7 +205,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatSize,
                 contentDescription = "Subtitle Control",
-                tint = if (subtitleSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (subtitleSelected) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -262,7 +216,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatColorText,
                 contentDescription = "Text Color Control",
-                tint = if (textColorSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (textColorSelected) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -273,7 +227,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.AddLink,
                 contentDescription = "Link Control",
-                tint = MaterialTheme.colorScheme.primary
+                tint = colorPrimary
             )
         }
         ControlWrapper(
@@ -282,9 +236,9 @@ fun EditorControls(
             onClick = onStartAlignClick
         ) {
             Icon(
-                imageVector = Icons.Default.FormatAlignLeft,
+                imageVector = Icons.AutoMirrored.Filled.FormatAlignLeft,
                 contentDescription = "Left Align Control",
-                tint = if (alignmentSelected == 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (alignmentSelected == 1) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -295,7 +249,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatAlignCenter,
                 contentDescription = "Center Align Control",
-                tint = if (alignmentSelected == 2) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (alignmentSelected == 2) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -304,9 +258,9 @@ fun EditorControls(
             onClick = onEndAlignClick
         ) {
             Icon(
-                imageVector = Icons.Default.FormatAlignRight,
+                imageVector = Icons.AutoMirrored.Filled.FormatAlignRight,
                 contentDescription = "Right Align Control",
-                tint = if (alignmentSelected == 3) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                tint = if (alignmentSelected == 3) Color.White else colorPrimary
             )
         }
         ControlWrapper(
@@ -317,7 +271,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.Save,
                 contentDescription = "Save Control",
-                tint = MaterialTheme.colorScheme.primary
+                tint = colorPrimary
             )
         }
     }
@@ -335,11 +289,11 @@ fun ControlWrapper(
             .clip(RoundedCornerShape(10.dp))
             .border(
                 width = 2.dp,
-                color = if (selected) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.primary,
+                color = colorPrimary,
                 shape = RoundedCornerShape(10.dp)
             )
             .background(
-                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                color = if (selected) colorPrimary else Color.Transparent,
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable {
@@ -393,4 +347,4 @@ fun LinkDialog(
             }
         }
     )
-}}
+}

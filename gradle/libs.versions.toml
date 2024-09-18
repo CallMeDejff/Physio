@@ -4,29 +4,38 @@ converterGson = "2.9.0"
 facebookLogin = "latest.release"
 firebaseUiAuth = "7.2.0"
 gson = "2.10.1"
+hiltAndroid = "2.51.1"
+hiltCompiler = "2.52"
+hiltNavigationCompose = "1.2.0"
 kotlin = "2.0.10"
 compose = "1.6.8"
 compose-material3 = "1.2.1"
 androidx-activityCompose = "1.9.1"
-materialIconsExtended = "1.6.8"
+materialIconsExtended = "1.7.1"
 appcompat = "1.7.0"
 constraintlayout = "2.1.4"
 constraintlayoutCompose = "1.0.1"
-navigationRuntimeKtx = "2.7.7"
-navigationCompose = "2.7.7"
+navigationRuntimeKtx = "2.8.0"
+navigationCompose = "2.8.0"
 monitor = "1.7.2"
 junitKtx = "1.2.1"
-firebaseFirestoreKtx = "25.0.0"
+firebaseFirestoreKtx = "25.1.0"
 googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
+firebaseAuthKtx = "23.0.0"
 
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
+firebase-storage = { module = "com.google.firebase:firebase-storage" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
+google-firebase-storage = { module = "com.google.firebase:firebase-storage" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
@@ -41,6 +50,8 @@ androidx-monitor = { group = "androidx.test", name = "monitor", version.ref = "m
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -50,5 +61,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
-ksp = { id = "com.google.devtools.ksp", version = "2.0.0-1.0.23" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }

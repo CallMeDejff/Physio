@@ -3,21 +3,21 @@ package com.example.physio.service.impl
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.example.physio.R
+import com.example.physio.models.User
+import com.example.physio.service.authErrors
 import com.example.physio.service.services.AccountService
-import com.example.physio.service.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.auth
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import com.example.physio.R
-import com.example.physio.service.authErrors
-import com.google.firebase.FirebaseNetworkException
-import dagger.hilt.android.qualifiers.ApplicationContext
 
 class AccountServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context

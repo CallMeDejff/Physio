@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
         >
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -24,7 +25,7 @@
             android:authorities="${applicationId}.provider"
             android:grantUriPermissions="true"/>
         <activity
-            android:name=".PhysioActivity"
+            android:name=".activities.PhysioActivity"
             android:exported="true"
             android:theme="@style/Theme.Physio">
             <intent-filter>

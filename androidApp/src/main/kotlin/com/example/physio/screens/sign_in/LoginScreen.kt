@@ -1,9 +1,8 @@
 package com.example.physio.screens.sign_in
 
-import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +23,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -38,7 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -61,9 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.physio.R
-import com.example.physio.activities.SignUpActivity
 import com.example.physio.ui.PhysioTheme
 import com.example.physio.ui.colorPrimary
 import com.example.physio.ui.dark_gray
@@ -73,14 +69,12 @@ import com.example.physio.ui.light_gray
 import com.example.physio.ui.typography
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun LoginScreen(
     openAndPopUp: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
     val showProgress = viewModel.showProgress.collectAsState()
@@ -111,7 +105,8 @@ fun LoginScreen(
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
 
-                        }
+                        },
+                    160
                 )
 
                 Card(
@@ -179,7 +174,7 @@ fun LoginForm(
                 addStyle(styleHighlight, "Zaloguj się do ".length, text.length)
             },
             textAlign = TextAlign.Center,
-            fontSize = 22.sp,
+            fontSize = 24.sp,
         )
         Spacer(modifier = Modifier.height(10.dp))
         LabeledTextField(
@@ -200,7 +195,7 @@ fun LoginForm(
         )
         Spacer(modifier = Modifier.height(10.dp))
         ClickableText(
-            text = AnnotatedString("Zapomniałem hasła", SpanStyle(color = colorPrimary)),
+            text = AnnotatedString("Zapomniałem hasła", SpanStyle(color = colorPrimary, fontSize = 18.sp)),
             onClick = {
                 //onForgotPasswordClick()
             },
@@ -277,10 +272,10 @@ fun LoginForm(
 
         ClickableText(
             text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = Color.Gray, fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)))) {
+                withStyle(style = SpanStyle(color = Color.Gray, fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)), fontSize = 18.sp)) {
                     append("Nie posiadasz konta? ")
                 }
-                withStyle(style = SpanStyle(color = colorPrimary, fontFamily = FontFamily(Font(R.font.helvetica_neue_medium)))) {
+                withStyle(style = SpanStyle(color = colorPrimary, fontFamily = FontFamily(Font(R.font.helvetica_neue_medium)), fontSize = 18.sp)) {
                     append("Zarejestruj się")
                 }
             },
@@ -345,22 +340,28 @@ fun LabeledTextField(
 }
 
 @Composable
-fun HeaderView(modifier: Modifier) {
-    val image = painterResource(id = R.drawable.ic_launcher_background)
-    Box(modifier = modifier) {
+fun HeaderView(modifier: Modifier, paddingValue: Int = 60, logoScale: Float = 1f) {
+    val centeredImage = painterResource(id = R.drawable.logo_clear)
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(color = Color( 0xff1c213f))
+    ) {
         Image(
-            painter = image,
-            contentDescription = "Header Image",
+            painter = centeredImage,
+            contentDescription = "Centered Image",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .padding(
+                    top = 0.dp,
+                    bottom = paddingValue.dp
+                    //bottom = 160.dp
+                    //bottom = 160.dp
+                )
+                .align(Alignment.Center)
+                .scale(logoScale)
         )
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = colorPrimary,
-                radius = size.minDimension / 1.5f,
-                center = Offset(size.width / 1.2f, size.height / 2)
-            )
-        }
     }
 }
 

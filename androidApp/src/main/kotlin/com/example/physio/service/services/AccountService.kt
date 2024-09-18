@@ -1,6 +1,6 @@
 package com.example.physio.service.services
 
-import com.example.physio.service.User
+import com.example.physio.models.User
 import kotlinx.coroutines.flow.Flow
 
 interface AccountService {

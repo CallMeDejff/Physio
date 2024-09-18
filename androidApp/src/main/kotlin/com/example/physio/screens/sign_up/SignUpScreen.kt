@@ -80,6 +80,7 @@ fun SignUpScreen(
             if (message != null) {
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 passwordState.value = TextFieldValue("")
+                repeatedPasswordState.value = TextFieldValue("")
                 viewModel.clearSignupMessage()
             }
         }
@@ -100,8 +101,8 @@ fun SignUpScreen(
                             top.linkTo(parent.top)
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
-
-                        }
+                        },
+                    160
                 )
 
                 Card(

@@ -1,10 +1,11 @@
 package com.example.physio.models
 
+import com.google.firebase.firestore.DocumentId
+
 data class User(
-    val id: Int,
-    val email: String,
-    val newEmail: String,
-    val firstName: String,
-    val lastName: String,
-    val password: String
+    @DocumentId val uid: String = "",
+    val name: String = "",
+    val lastname: String = "",
+    val licenseNumber: Int = 0,
+    val userType: Int = 0
 )

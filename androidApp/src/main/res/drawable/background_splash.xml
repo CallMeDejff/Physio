@@ -14,7 +14,7 @@
 
         <bitmap
             android:gravity="center"
-            android:src="@drawable/rehaactivelogo_basic"
+            android:src="@drawable/logo_clear_blue"
             />
     </item>
 

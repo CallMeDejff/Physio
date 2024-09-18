@@ -3,8 +3,8 @@ package com.example.physio.screens.sign_up
 import android.util.Log
 import com.example.physio.DASHBOARD_SCREEN
 import com.example.physio.SIGN_UP_SCREEN
+import com.example.physio.models.User
 import com.example.physio.screens.PhysioAppViewModel
-import com.example.physio.service.User
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,11 +22,10 @@ class SignUpViewModel @Inject constructor(
     var name: String = ""
     var lastname: String = ""
     var email: String = ""
-    var plainPassword: String = ""
     var repeatedPassword: String = ""
     var password: String = ""
     var licenseNumber: Int = 0
-    var userType: String = ""
+    var userType: Int = 0
 
     private val _showProgress = MutableStateFlow(false)
     val showProgress = _showProgress.asStateFlow()
@@ -60,7 +59,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    fun updateUserType(userType: String) {
+    fun updateUserType(userType: Int) {
         this.userType = userType
     }
 
@@ -69,38 +68,36 @@ class SignUpViewModel @Inject constructor(
         return when {
             email.isEmpty() -> {
                 _signupMessage.update { "Podaj adres email" }
-                Log.e("SignUpViewModel", "dataValidation:failure - Email address missing")
+                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Email address missing")
                 Result.failure(Exception("Email address missing"))
             }
             !email.matches(emailPattern.toRegex()) -> {
                 _signupMessage.update { "Sprawdź czy na pewno podałeś prawdziwy adres email" }
-                Log.e("SignUpViewModel", "dataValidation:failure - Email address pattern mismatch")
+                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Email address pattern mismatch")
                 Result.failure(Exception("Email address pattern mismatch"))
             }
 
             name.isEmpty() -> {
                 _signupMessage.update { "Podaj imię" }
-                Log.e("SignUpViewModel", "dataValidation:failure - Name missing")
+                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Name missing")
                 Result.failure(Exception("Name missing"))
             }
 
             lastname.isEmpty() -> {
                 _signupMessage.update { "Podaj nazwisko" }
-                Log.e("SignUpViewModel", "dataValidation:failure - Lastname missing")
+                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Lastname missing")
                 Result.failure(Exception("Lastname missing"))
             }
 
             password.equals(repeatedPassword).not() -> {
                 _signupMessage.update { "Czy na pewno oba hasła są takie same?" }
-                updateRepeatedPassword("")
-                updatePassword("")
-                Log.e("SignUpViewModel", "dataValidation:failure - passwords mismatch:$password:$repeatedPassword")
+                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - passwords mismatch")
                 Result.failure(Exception("passwords mismatch"))
             }
 
             password.isEmpty() -> {
                 _signupMessage.update { "Podaj hasło" }
-                Log.e("SignUpViewModel", "dataValidation:failure - Password missing")
+                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Password missing")
                 Result.failure(Exception("Password missing"))
             }
 
@@ -115,7 +112,7 @@ class SignUpViewModel @Inject constructor(
         if (validationResult.isSuccess) {
             _showProgress.update { true }
             callUserSignUp(openAndPopUp)
-            Log.d("SignUpViewModel", "callUserSignUp:success")
+            Log.d(SIGNUP_VIEWMODEL_TAG, "callUserSignUp:success")
         } else {
             _showProgress.update { false }
             updateRepeatedPassword("")
@@ -127,15 +124,17 @@ class SignUpViewModel @Inject constructor(
         launchCatching {
             val resultSignUp = accountService.signUp(email, password)
             if (resultSignUp.isSuccess) {
-                Log.d("SignUpViewModel", "resultSignUp:success")
+                Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
                 val userId = accountService.currentUserId
-                val newUser = User(userId, name, lastname, licenseNumber)
+
+                val userType = if (licenseNumber == 0) { 0 } else { 1 }
+                val newUser = User(userId, name, lastname, licenseNumber, userType)
+                Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
                 storageService.createUser(newUser)
-                _signupMessage.update { "Użytkownik utworzony" }
+                Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
                 openAndPopUp(DASHBOARD_SCREEN, SIGN_UP_SCREEN)
             } else {
-                Log.d("SignUpViewModel", "resultSignUp:failed")
-                _signupMessage.update { "Rejestracja nie powiodła się" }
+                Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:failed")
                 updateRepeatedPassword("")
                 updatePassword("")
             }
@@ -145,5 +144,9 @@ class SignUpViewModel @Inject constructor(
 
     fun clearSignupMessage() {
         _signupMessage.update { null }
+    }
+
+    companion object{
+        val SIGNUP_VIEWMODEL_TAG = "SignUpViewModel"
     }
 }

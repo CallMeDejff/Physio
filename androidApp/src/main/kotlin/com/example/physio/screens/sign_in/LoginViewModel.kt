@@ -6,6 +6,7 @@ import com.example.physio.SIGN_IN_SCREEN
 import com.example.physio.SIGN_UP_SCREEN
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.StorageService
 import com.google.firebase.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val storageService: StorageService
 ): PhysioAppViewModel() {
 
     private var email: String = ""
@@ -53,6 +55,7 @@ class LoginViewModel @Inject constructor(
                 val signInResult = accountService.signIn(email, password)
                 Log.i("LoginViewModel", "onSignInClick:$email")
                 if (signInResult.isSuccess) {
+                    storageService.getUserInfo(accountService.currentUserId)
                     _loginMessage.update { "Użytkownik zalogowany" }
                     _showProgress.update { false }
                     openAndPopUp(DASHBOARD_SCREEN, SIGN_IN_SCREEN)
