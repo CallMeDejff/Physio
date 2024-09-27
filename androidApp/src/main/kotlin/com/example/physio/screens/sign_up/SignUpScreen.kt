@@ -102,7 +102,7 @@ fun SignUpScreen(
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                         },
-                    160
+                    160, 0.8f
                 )
 
                 Card(
@@ -155,7 +155,6 @@ fun SignUpForm(
     showProgress: Boolean,
     onSignUpClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     val isLicenseChecked = remember { mutableStateOf(false) }
 
     Column(

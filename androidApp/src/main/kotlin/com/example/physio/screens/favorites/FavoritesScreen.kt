@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.physio.PhysioAppState
 import com.example.physio.service.UserPreferences
 import com.example.physio.ui.PhysioBarTheme
 import com.example.physio.ui.colorPrimary
@@ -32,15 +31,16 @@ import com.example.physio.ui.ghost_white
 @Composable
 fun FavoritesScreen(
     navController: NavController,
-    appState: PhysioAppState,
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val userPreferences = UserPreferences(LocalContext.current)
 
     PhysioBarTheme {
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 60.dp),
+            color = MaterialTheme.colorScheme.background,
         ) {
             Box(
                 modifier = Modifier

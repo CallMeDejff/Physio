@@ -9,7 +9,7 @@ import com.example.physio.R
 
 val typography = androidx.compose.material3.Typography(
     bodyLarge = TextStyle(
-        fontFamily = FontFamily(Font(R.font.helvetica_neue_bold)),
+        fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 20.sp,
@@ -24,16 +24,16 @@ val typography = androidx.compose.material3.Typography(
         lineHeight = 20.sp
     ),
     labelMedium = TextStyle(
+        fontSize = 19.sp,
+        fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
+        fontWeight = FontWeight.Normal,
+        lineHeight = 19.sp
+    ),
+    labelSmall = TextStyle(
         fontSize = 17.sp,
         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
         fontWeight = FontWeight.Normal,
-        lineHeight = 16.sp
-    ),
-    labelSmall = TextStyle(
-        fontSize = 15.sp,
-        fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
-        fontWeight = FontWeight.Normal,
-        lineHeight = 16.sp
+        lineHeight = 17.sp
     ),
     headlineSmall = TextStyle(
         fontSize = 18.sp,

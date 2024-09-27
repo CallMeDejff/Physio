@@ -106,7 +106,7 @@ fun LoginScreen(
                             end.linkTo(parent.end)
 
                         },
-                    160
+                    160, 0.8f
                 )
 
                 Card(
@@ -304,7 +304,7 @@ fun LabeledTextField(
     ) {
         Text(
             text = label,
-            style = typography.labelLarge.copy(color = gray),
+            style = typography.labelMedium.copy(color = gray),
             modifier = Modifier.padding(bottom = 10.dp, top = 10.dp)
         )
         OutlinedTextField(
@@ -317,7 +317,7 @@ fun LabeledTextField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    style = typography.bodyLarge.copy(color = light_gray)
+                    style = typography.labelMedium.copy(color = light_gray)
                 )
             },
             leadingIcon = {

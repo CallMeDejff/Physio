@@ -24,12 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.example.physio.ui.colorPrimary
 import com.example.physio.ui.colorSecondary
+import com.example.physio.ui.gray
 import com.example.physio.ui.typography
 import kotlinx.coroutines.delay
 
@@ -82,7 +84,12 @@ fun AutoComplete(
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions.Default,
-            colors = TextFieldDefaults.colors()
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = colorPrimary,
+                unfocusedIndicatorColor = gray,
+            )
         )
 
         DropdownMenu(
@@ -101,7 +108,7 @@ fun AutoComplete(
                 }.sortedBy { it.second }
             } else {
                 itemList.sortedBy { it.second }
-            }
+            }.take(5)
 
             filteredItems.forEach { item ->
                 val isSelected = selectedItems.contains(item.first)

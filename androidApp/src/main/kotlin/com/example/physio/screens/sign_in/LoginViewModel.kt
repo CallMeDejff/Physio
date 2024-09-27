@@ -1,9 +1,8 @@
 package com.example.physio.screens.sign_in
 
 import android.util.Log
-import com.example.physio.DASHBOARD_SCREEN
-import com.example.physio.SIGN_IN_SCREEN
-import com.example.physio.SIGN_UP_SCREEN
+import com.example.physio.navigation.AuthScreen
+import com.example.physio.navigation.Graph
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
@@ -58,7 +57,8 @@ class LoginViewModel @Inject constructor(
                     storageService.getUserInfo(accountService.currentUserId)
                     _loginMessage.update { "Użytkownik zalogowany" }
                     _showProgress.update { false }
-                    openAndPopUp(DASHBOARD_SCREEN, SIGN_IN_SCREEN)
+
+                    openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                 } else {
                     _loginMessage.update { "Logowanie nie powiodło się" }
                     _showProgress.update { false }
@@ -74,7 +74,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {
-        openAndPopUp(SIGN_UP_SCREEN, SIGN_IN_SCREEN)
+        openAndPopUp(AuthScreen.SignUp.route, AuthScreen.SignIn.route)
     }
 
     fun updateEmail(newEmail: String) {

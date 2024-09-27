@@ -1,9 +1,9 @@
 package com.example.physio.screens.favorites
 
+import com.example.physio.navigation.WizardScreen
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
-import com.example.physio.ui.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -16,7 +16,7 @@ class FavoritesViewModel @Inject constructor(
     fun onAddExerciseClick(navigate: (String) -> Unit) {
         //navigate(Screens.ExerciseEditor.route)
         //navigate(Screens.ExerciseWizard.route)
-        navigate(Screens.CreatorWizard.route)
+        navigate(WizardScreen.CreatorWizard.route)
     }
 
 }

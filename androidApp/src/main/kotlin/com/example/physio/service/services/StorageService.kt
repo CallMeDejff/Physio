@@ -7,22 +7,25 @@ import com.example.physio.models.User
 
 interface StorageService {
     suspend fun createUser(user: User)
-    suspend fun getUserInfo(userId: String): User?
-    suspend fun createExercise(exercise: Exercise)
     suspend fun createExerciseWithMedia(exercise: Exercise, mediaUris: List<Uri>)
-    suspend fun updateExercise(exercise: Exercise)
-    suspend fun deleteExercise(exerciseId: String)
-    suspend fun getExercise(exerciseId: String): Exercise?
-    suspend fun getExercises(): List<Exercise>
-    suspend fun uploadFilesToFirebase(uris: List<Uri>): List<String>
     suspend fun createExercisePackage(exercisePackage: ExercisePackage)
-    suspend fun updateExercisePackage(exercisePackage: ExercisePackage)
     suspend fun deleteExercisePackage(exercisePackageId: String)
+    suspend fun deleteExercise(exerciseId: String)
+    suspend fun getUserInfo(userId: String): User?
     suspend fun getExercisePackage(exercisePackageId: String): ExercisePackage?
     suspend fun getExercisePackages(): List<ExercisePackage>
     suspend fun getEquipmentList(): List<Pair<String, String>>
+    suspend fun getPackagesList(): List<Pair<String, String>>
+    suspend fun getEquipmentIdsForExercises(exerciseIds: List<String>): Map<String, List<String>>
     suspend fun getConditionsList(): List<Pair<String, String>>
-
+    suspend fun getExercise(exerciseId: String): Exercise?
+    suspend fun getPackage(packageId: String): ExercisePackage?
+    suspend fun getExercises(): List<Pair<String, String>>
+    suspend fun getUsersList(): List<User>
+    suspend fun updateExercise(exercise: Exercise, mediaUris: List<Uri>?)
+    suspend fun updateExercisePackage(exercisePackage: ExercisePackage)
+    suspend fun uploadFilesToFirebase(uris: List<Uri>): List<String>
+    //suspend fun uploadSingleFileToFirebase(uri: Uri): String
     //suspend fun updateNote(user: User)
     //suspend fun deleteNote(noteId: String)
 }

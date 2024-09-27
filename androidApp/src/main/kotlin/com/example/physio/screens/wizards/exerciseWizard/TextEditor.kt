@@ -50,7 +50,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.physio.screens.wizards.CreatorWizardViewModel
 import com.example.physio.ui.colorPrimary
 import com.mohamedrejeb.richeditor.model.RichTextState
@@ -58,11 +57,9 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 
 @Composable
-fun ExerciseEditorView(
-    //navigate: (String) -> Unit,
-    //initialTitle: String,
+fun TextEditorView(
     initialDescription: String,
-    viewModel: CreatorWizardViewModel = hiltViewModel()
+    viewModel: CreatorWizardViewModel
 ) {
     val state = rememberRichTextState()
     val titleSize = MaterialTheme.typography.displaySmall.fontSize

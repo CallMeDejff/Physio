@@ -1,9 +1,9 @@
 package com.example.physio.screens.sign_up
 
 import android.util.Log
-import com.example.physio.DASHBOARD_SCREEN
-import com.example.physio.SIGN_UP_SCREEN
 import com.example.physio.models.User
+import com.example.physio.navigation.AuthScreen
+import com.example.physio.navigation.Graph
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
@@ -124,15 +124,19 @@ class SignUpViewModel @Inject constructor(
         launchCatching {
             val resultSignUp = accountService.signUp(email, password)
             if (resultSignUp.isSuccess) {
+
                 Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
                 val userId = accountService.currentUserId
 
                 val userType = if (licenseNumber == 0) { 0 } else { 1 }
-                val newUser = User(userId, name, lastname, licenseNumber, userType)
+                val newUser = User(userId, name, lastname, email, licenseNumber, userType)
                 Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
+
                 storageService.createUser(newUser)
                 Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
-                openAndPopUp(DASHBOARD_SCREEN, SIGN_UP_SCREEN)
+                openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
+
+                //openAndPopUp(BottomBarScreen.Home.route, AuthScreen.SignUp.route)
             } else {
                 Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:failed")
                 updateRepeatedPassword("")
@@ -147,6 +151,6 @@ class SignUpViewModel @Inject constructor(
     }
 
     companion object{
-        val SIGNUP_VIEWMODEL_TAG = "SignUpViewModel"
+        const val SIGNUP_VIEWMODEL_TAG = "SignUpViewModel"
     }
 }

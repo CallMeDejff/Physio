@@ -4,32 +4,29 @@ import androidx.compose.runtime.Stable
 import androidx.navigation.NavHostController
 import javax.inject.Inject
 
-@Stable
-class PhysioAppState @Inject constructor(
-    val navController: NavHostController
-) {
-    fun popUp() {
+
+    fun popUp(navController: NavHostController) {
         navController.popBackStack()
     }
 
-    fun navigate(route: String) {
+    fun navigate(navController: NavHostController, route: String) {
         navController.navigate(route) {
             launchSingleTop = true
             restoreState = true
         }
     }
 
-    fun navigateAndPopUp(route: String, popUp: String) {
+    fun navigateAndPopUp(navController: NavHostController, route: String, popUp: String) {
         navController.navigate(route) {
             launchSingleTop = true
             popUpTo(popUp) { inclusive = true }
         }
     }
 
-    fun clearAndNavigate(route: String) {
+    fun clearAndNavigate(navController: NavHostController, route: String) {
         navController.navigate(route) {
             launchSingleTop = true
             popUpTo(0) { inclusive = true }
         }
     }
-}
+

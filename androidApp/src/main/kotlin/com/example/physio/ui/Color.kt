@@ -8,14 +8,14 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 val blue = Color(0xFF426291)
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
+val Purple80 = Color(0xFFD2D6FF)
+val PurpleGrey80 = Color(0xFFC2C9DC)
 val Pink80 = Color(0xFFEFB8C8)
 
 //val colorPrimary = Color(0xFF1BA57B)
 val colorPrimary = Purple40
 val colorSecondary= PurpleGrey40
-val colorTertiary = Purple402
+val colorTertiary = PurpleGrey80
 val gray = Color(0xFF4B4F5A)
 val dark_gray = Color(0xFF54555A)
 val light_gray = Color(0xFF696969)
