@@ -1,8 +1,6 @@
 package com.example.physio.models
 
-import com.google.firebase.firestore.DocumentId
-
 data class Equipment(
-    @DocumentId val id: String = "",
+    val id: String = "",
     val name: String = ""
 )

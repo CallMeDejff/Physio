@@ -10,19 +10,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-  private val accountService: AccountService
+    private val accountService: AccountService
 ) : PhysioAppViewModel() {
 
-  fun onAppStart(openAndPopUp: (String, String) -> Unit) {
-    if (accountService.hasUser())
-    {
-      //openAndPopUp(DASHBOARD_SCREEN, SPLASH_SCREEN)
-      openAndPopUp(Graph.HOME, AuthScreen.Splash.route)
-      Log.i("SplashViewModel", "accountService.hasUser = true")
+    fun onAppStart(openAndPopUp: (String, String) -> Unit) {
+        if (accountService.hasUser()) {
+            openAndPopUp(Graph.HOME, AuthScreen.Splash.route)
+            Log.i("SplashViewModel", "accountService.hasUser = true")
+        } else {
+            openAndPopUp(AuthScreen.SignIn.route, AuthScreen.Splash.route)
+            Log.i("SplashViewModel", "accountService.hasUser = false")
+        }
     }
-    else {
-      openAndPopUp(AuthScreen.SignIn.route, AuthScreen.Splash.route)
-      Log.i("SplashViewModel", "accountService.hasUser = false")
-    }
-  }
 }

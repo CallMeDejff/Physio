@@ -10,10 +10,17 @@ import com.example.physio.R
 val typography = androidx.compose.material3.Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         fontSize = 22.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.5.sp
+    ),
+
+    headlineMedium = TextStyle(
+        fontSize = 19.sp,
+        fontFamily = FontFamily(Font(R.font.helvetica_neue_bold)),
+        fontWeight = FontWeight.Normal,
+        lineHeight = 19.sp
     ),
 
 
@@ -21,7 +28,7 @@ val typography = androidx.compose.material3.Typography(
         fontSize = 22.sp,
         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
         fontWeight = FontWeight.Normal,
-        lineHeight = 20.sp
+        lineHeight = 22.sp
     ),
     labelMedium = TextStyle(
         fontSize = 19.sp,
@@ -37,8 +44,8 @@ val typography = androidx.compose.material3.Typography(
     ),
     headlineSmall = TextStyle(
         fontSize = 18.sp,
-        fontFamily = FontFamily(Font(R.font.helvetica_neue_bold)),
-        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
+        fontWeight = FontWeight.Normal,
         lineHeight = 28.sp
     )
     /* Other default text styles to override

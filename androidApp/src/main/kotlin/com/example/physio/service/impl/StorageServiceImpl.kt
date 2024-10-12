@@ -1,5 +1,6 @@
 package com.example.physio.service.impl
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
 import com.example.physio.models.Exercise
@@ -8,7 +9,9 @@ import com.example.physio.models.User
 import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -20,24 +23,40 @@ class StorageServiceImpl @Inject constructor(
 
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private var cachedEquipmentList: List<Pair<String, String>>? = null
+    private var cachedConditionsList: List<Pair<String, String>>? = null
+    private var cachedExercisesList: List<Pair<String, String>>? = null
+    private var cachedExercisePackages: List<ExercisePackage>? = null
+    private var cacheExpiryTime = 7 * 24 * 60 * 60 * 1000
+
+    init {
+        firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+    }
 
     override suspend fun createUser(user: User) {
         try {
-        firestore.collection(USERS_COLLECTION)
-            .document(auth.currentUserId)
-            .set(user)
-            .await()
+            firestore.collection(USERS_COLLECTION)
+                .document(auth.currentUserId)
+                .set(user)
+                .await()
 
-        userPreferences.setUser(user.uid, user.name, user.lastname, user.licenseNumber, user.userType)
-        Log.d(STORAGE_SERVICE_TAG, "createUser: $user")
+            userPreferences.setUser(
+                user.uid,
+                user.name,
+                user.lastname,
+                user.licenseNumber,
+                user.userType
+            )
+            Log.d(STORAGE_SERVICE_TAG, "createUser: $user")
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error creating user:", e)
+            Log.e(STORAGE_SERVICE_TAG, "createUser:Error creating user:", e)
         }
     }
 
     override suspend fun getUsersList(): List<User> {
         val userList = mutableListOf<User>()
-
         try {
             val querySnapshot = firestore.collection(USERS_COLLECTION)
                 .get()
@@ -57,9 +76,8 @@ class StorageServiceImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error getting users: ", e)
+            Log.e(STORAGE_SERVICE_TAG, "getUsersList:Error getting users: ", e)
         }
-
         return userList
     }
 
@@ -75,59 +93,85 @@ class StorageServiceImpl @Inject constructor(
         } else null
 
         if (cachedUser != null && cachedUser.uid.isNotEmpty()) {
-            Log.d(STORAGE_SERVICE_TAG, "returned cached user: $cachedUser")
+            Log.d(STORAGE_SERVICE_TAG, "Returned cached user: $cachedUser")
             return cachedUser
         }
 
-        val documentSnapshot = firestore.collection(USERS_COLLECTION)
-            .document(userId)
-            .get()
-            .await()
+        return try {
+            val documentSnapshot = firestore.collection(USERS_COLLECTION)
+                .document(userId)
+                .get()
+                .await()
 
-        return documentSnapshot.toObject(User::class.java)?.also {
-            if (userId == auth.currentUserId) {
-                userPreferences.setUser(it.uid, it.name, it.lastname, it.licenseNumber, it.userType)
-                Log.d(STORAGE_SERVICE_TAG, "user set to shared preferences: $it")
+            val fetchedUser = documentSnapshot.toObject(User::class.java)?.also {
+                if (userId == auth.currentUserId) {
+                    userPreferences.setUser(
+                        it.uid,
+                        it.name,
+                        it.lastname,
+                        it.licenseNumber,
+                        it.userType
+                    )
+                    Log.d(STORAGE_SERVICE_TAG, "User set to shared preferences: $it")
+                }
             }
+            fetchedUser
+        } catch (e: Exception) {
+            Log.e(STORAGE_SERVICE_TAG, "Error getting user info", e)
+            null
         }
     }
 
     override suspend fun getEquipmentList(): List<Pair<String, String>> {
-        return try {
-            val querySnapshot = firestore.collection(EQUIPMENT_COLLECTION)
-                .get()
-                .await()
+        if (cachedEquipmentList != null && !isCacheExpired(cachedEquipmentListTimestamp)) {
+            Log.d(STORAGE_SERVICE_TAG, "Returning cached equipment list")
+            return cachedEquipmentList!!
+        } else {
 
-            Log.d(STORAGE_SERVICE_TAG, "Equipment list loaded, item count: ${querySnapshot.documents.size}")
+            return try {
+                val documentSnapshot = firestore.collection(SUMMARY_COLLECTION)
+                    .document("equipment")
+                    .get()
+                    .await()
 
-            querySnapshot.documents.map { document ->
-                Pair(
-                    document.id,
-                    document.getString("name") ?: ""
-                )
+                val equipmentList =
+                    documentSnapshot.get("equipment") as? List<Map<String, String>> ?: emptyList()
+
+                val result = equipmentList.map { item ->
+                    Pair(item["id"] ?: "", item["name"] ?: "")
+                }
+
+                cachedEquipmentList = result
+                cachedEquipmentListTimestamp = System.currentTimeMillis()
+                Log.d(STORAGE_SERVICE_TAG, "Equipment list loaded, item count: ${result.size}")
+
+                result
+            } catch (e: Exception) {
+                Log.e(STORAGE_SERVICE_TAG, "Error getting equipment", e)
+                emptyList()
             }
-        } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error getting equipment", e)
-            emptyList()
         }
     }
 
     override suspend fun getPackagesList(): List<Pair<String, String>> {
         return try {
-            val querySnapshot = firestore.collection(EXERCISE_PACKAGE_SUMMARY)
+            val documentSnapshot = firestore.collection(SUMMARY_COLLECTION)
+                .document("packages")
                 .get()
                 .await()
 
-            Log.d(STORAGE_SERVICE_TAG, "Packages list loaded, item count: ${querySnapshot.documents.size}")
+            val packagesList =
+                documentSnapshot.get("packages") as? List<Map<String, String>> ?: emptyList()
+            Log.d(STORAGE_SERVICE_TAG, "Packages list loaded, item count: ${packagesList.size}")
 
-            querySnapshot.documents.map { document ->
+            packagesList.map { exercisePackage ->
                 Pair(
-                    document.id,
-                    document.getString("name") ?: ""
+                    exercisePackage["id"] ?: "",
+                    exercisePackage["name"] ?: ""
                 )
             }
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error getting equipment", e)
+            Log.e(STORAGE_SERVICE_TAG, "Error getting packages", e)
             emptyList()
         }
     }
@@ -135,34 +179,35 @@ class StorageServiceImpl @Inject constructor(
     override suspend fun updateExercise(exercise: Exercise, mediaUris: List<Uri>?) {
         try {
             val updatedMediaUrls = if (!mediaUris.isNullOrEmpty()) {
-                uploadFilesToFirebase(mediaUris)
+                uploadFilesToFirebase(mediaUris, path = exercise.id)
             } else {
                 exercise.mediaUrls
             }
 
-            val updatedExercise = exercise.copy(mediaUrls = updatedMediaUrls, uid = auth.currentUserId)
-
-            firestore.collection(EXERCISES_COLLECTION)
-                .document(exercise.id)
-                .set(updatedExercise)
-                .await()
-
-            val exerciseSummary = mapOf(
-                "id" to exercise.id,
-                "title" to exercise.title
-            )
-
-            firestore.collection(EXERCISE_SUMMARY)
-                .document(exercise.id)
-                .set(exerciseSummary)
-                .await()
-
+            val updatedExercise =
+                exercise.copy(mediaUrls = updatedMediaUrls, uid = auth.currentUserId)
+            val exerciseRef = firestore.collection(EXERCISES_COLLECTION).document(exercise.id)
+            exerciseRef.set(updatedExercise).await()
             Log.d(STORAGE_SERVICE_TAG, "Exercise updated with ID: ${exercise.id}")
+
+            val exerciseSummaryEntry = mapOf("id" to exercise.id, "title" to exercise.title)
+            val exercisesDocument =
+                firestore.collection(SUMMARY_COLLECTION).document("exercises").get().await()
+            val existingExercises =
+                exercisesDocument.get("exercises") as? List<Map<String, String>> ?: emptyList()
+            val updatedExercises =
+                existingExercises.filterNot { it["id"] == exercise.id } + exerciseSummaryEntry
+
+            firestore.collection(SUMMARY_COLLECTION)
+                .document("exercises")
+                .set(mapOf("exercises" to updatedExercises))
+                .await()
+
+
         } catch (e: Exception) {
             Log.e(STORAGE_SERVICE_TAG, "Error updating exercise", e)
         }
     }
-
 
     override suspend fun deleteExercise(exerciseId: String) {
         try {
@@ -183,9 +228,10 @@ class StorageServiceImpl @Inject constructor(
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     override suspend fun createExerciseWithMedia(exercise: Exercise, mediaUris: List<Uri>) {
         try {
-            val mediaUrls = uploadFilesToFirebase(mediaUris)
+            val mediaUrls = uploadFilesToFirebase(mediaUris, path = exercise.id)
             val exerciseWithMedia = exercise.copy(mediaUrls = mediaUrls)
 
             val documentReference = firestore.collection(EXERCISES_COLLECTION)
@@ -197,23 +243,21 @@ class StorageServiceImpl @Inject constructor(
 
             firestore.collection(EXERCISES_COLLECTION)
                 .document(generatedId)
-                .update("id",generatedId,"uid", auth.currentUserId)
+                .update("id", generatedId, "uid", auth.currentUserId)
                 .await()
 
-            val exerciseSummary = mapOf(
-                "id" to generatedId,
-                "title" to exercise.title
-            )
+            val exerciseSummaryEntry = mapOf("id" to generatedId, "title" to exercise.title)
 
-            firestore.collection(EXERCISE_SUMMARY)
-                .document(generatedId)
-                .set(exerciseSummary)
+            firestore.collection(SUMMARY_COLLECTION)
+                .document("exercises")
+                .update("exercises", FieldValue.arrayUnion(exerciseSummaryEntry))
                 .await()
 
         } catch (e: Exception) {
             Log.e(STORAGE_SERVICE_TAG, "Error creating exercise with media", e)
         }
     }
+
 
     override suspend fun getEquipmentIdsForExercises(exerciseIds: List<String>): Map<String, List<String>> {
         val exerciseEquipmentMap = mutableMapOf<String, List<String>>()
@@ -231,7 +275,10 @@ class StorageServiceImpl @Inject constructor(
                         val uniqueEquipmentIds = equipmentIds.toSet().toList()
                         exerciseEquipmentMap[exerciseId] = uniqueEquipmentIds
                     } else {
-                        Log.w(STORAGE_SERVICE_TAG, "No equipmentId found for exercise with ID: $exerciseId")
+                        Log.w(
+                            STORAGE_SERVICE_TAG,
+                            "No equipmentId found for exercise with ID: $exerciseId"
+                        )
                     }
                 } else {
                     Log.w(STORAGE_SERVICE_TAG, "No exercise found with ID: $exerciseId")
@@ -243,7 +290,7 @@ class StorageServiceImpl @Inject constructor(
         return exerciseEquipmentMap
     }
 
-    override suspend fun uploadFilesToFirebase(uris: List<Uri>): List<String> {
+    override suspend fun uploadFilesToFirebase(uris: List<Uri>, path: String): List<String> {
 
         val uploadedUrls = mutableListOf<String>()
 
@@ -253,7 +300,7 @@ class StorageServiceImpl @Inject constructor(
             if (uriString.startsWith("https://")) {
                 uploadedUrls.add(uriString)
             } else {
-                val storageRef = storage.reference.child("uploads/${uri.lastPathSegment}")
+                val storageRef = storage.reference.child("${path}/${uri.lastPathSegment}")
                 val uploadTask = storageRef.putFile(uri).await()
                 val downloadUrl = storageRef.downloadUrl.await()
                 uploadedUrls.add(downloadUrl.toString())
@@ -262,7 +309,6 @@ class StorageServiceImpl @Inject constructor(
 
         return uploadedUrls
     }
-
 
     override suspend fun createExercisePackage(exercisePackage: ExercisePackage) {
         try {
@@ -278,21 +324,27 @@ class StorageServiceImpl @Inject constructor(
                 .update("id", generatedId, "uid", auth.currentUserId)
                 .await()
 
-            val exercisePackageSummary = mapOf(
+            val exercisePackageSummaryEntry = mapOf(
                 "id" to generatedId,
                 "name" to exercisePackage.name
             )
 
-            firestore.collection(EXERCISE_PACKAGE_SUMMARY)
-                .document(generatedId)
-                .set(exercisePackageSummary)
+            val packagesDocument =
+                firestore.collection(SUMMARY_COLLECTION).document("packages").get().await()
+            val existingPackages =
+                packagesDocument.get("packages") as? List<Map<String, String>> ?: emptyList()
+            val updatedPackages = existingPackages + exercisePackageSummaryEntry
+
+            firestore.collection(SUMMARY_COLLECTION)
+                .document("packages")
+                .set(mapOf("packages" to updatedPackages))
                 .await()
+
 
         } catch (e: Exception) {
             Log.e(STORAGE_SERVICE_TAG, "Error creating exercise package", e)
         }
     }
-
 
     override suspend fun updateExercisePackage(exercisePackage: ExercisePackage) {
         try {
@@ -303,14 +355,21 @@ class StorageServiceImpl @Inject constructor(
                 .set(updatedExercisePackage)
                 .await()
 
-            val exercisePackageSummary = mapOf(
+            val exercisePackageSummaryEntry = mapOf(
                 "id" to updatedExercisePackage.id,
                 "name" to updatedExercisePackage.name
             )
 
-            firestore.collection(EXERCISE_PACKAGE_SUMMARY)
-                .document(updatedExercisePackage.id)
-                .set(exercisePackageSummary)
+            val packagesDocument =
+                firestore.collection(SUMMARY_COLLECTION).document("packages").get().await()
+            val existingPackages =
+                packagesDocument.get("packages") as? List<Map<String, String>> ?: emptyList()
+            val updatedPackages =
+                existingPackages.filterNot { it["id"] == updatedExercisePackage.id } + exercisePackageSummaryEntry
+
+            firestore.collection(SUMMARY_COLLECTION)
+                .document("packages")
+                .set(mapOf("packages" to updatedPackages))
                 .await()
 
             Log.d(STORAGE_SERVICE_TAG, "ExercisePackage updated: ${updatedExercisePackage.id}")
@@ -319,7 +378,6 @@ class StorageServiceImpl @Inject constructor(
             Log.e(STORAGE_SERVICE_TAG, "Error updating exercise package", e)
         }
     }
-
 
     override suspend fun deleteExercisePackage(exercisePackageId: String) {
         try {
@@ -383,30 +441,38 @@ class StorageServiceImpl @Inject constructor(
     }
 
     override suspend fun getExercises(): List<Pair<String, String>> {
+        if (cachedExercisesList != null && !isCacheExpired(cachedExercisesListTimestamp)) {
+            Log.d(STORAGE_SERVICE_TAG, "getExercises: Returning cached exercises list")
+            return cachedExercisesList!!
+        }
         return try {
-            val querySnapshot = firestore.collection("Exercise_summary")
-                .get()
-                .await()
+            val exercisesDocument =
+                firestore.collection(SUMMARY_COLLECTION).document("exercises").get().await()
 
-            Log.d(STORAGE_SERVICE_TAG, "Exercises list loaded, item count: ${querySnapshot.documents.size}")
+            val exercisesList = exercisesDocument.get("exercises") as? List<Map<String, String>>
+                ?: emptyList()
+            Log.d(
+                STORAGE_SERVICE_TAG,
+                "getExercises: Exercises list loaded, item count: ${exercisesList.size}"
+            )
 
-            querySnapshot.documents.mapNotNull { doc ->
-                val id = doc.getString("id")
-                val title = doc.getString("title")
+            val result = exercisesList.mapNotNull { entry ->
+                val id = entry["id"]
+                val title = entry["title"]
                 if (id != null && title != null) {
                     id to title
                 } else {
                     null
                 }
             }
-
+            cachedExercisesList = result
+            cachedExercisesListTimestamp = System.currentTimeMillis()
+            result
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error getting exercises", e)
+            Log.e(STORAGE_SERVICE_TAG, "getExercises: Error getting exercises", e)
             emptyList()
         }
     }
-
-
 
     override suspend fun getExercisePackage(exercisePackageId: String): ExercisePackage? {
         return try {
@@ -423,63 +489,110 @@ class StorageServiceImpl @Inject constructor(
     }
 
     override suspend fun getExercisePackages(): List<ExercisePackage> {
+        if (cachedExercisePackages != null && !isCacheExpired(cachedExercisePackagesTimestamp)) {
+            Log.d(
+                STORAGE_SERVICE_TAG,
+                "getExercisePackages:Returning cached exercise packages list"
+            )
+            return cachedExercisePackages!!
+        }
+
         return try {
             val querySnapshot = firestore.collection(EXERCISE_PACKAGES_COLLECTION)
                 .get()
                 .await()
 
-            val exercisePackages = mutableListOf<ExercisePackage>()
-            for (doc in querySnapshot.documents) {
-                val detailsDoc = firestore.collection(EXERCISE_PACKAGES_COLLECTION)
-                    .document(doc.id)
-                    .collection("details")
-                    .document(doc.id)
-                    .get()
-                    .await()
-
-                val id = detailsDoc.getString("id") ?: continue
-                val name = detailsDoc.getString("name") ?: continue
-                exercisePackages.add(ExercisePackage(id = id, name = name))
+            val exercisePackagesList = querySnapshot.documents.mapNotNull { doc ->
+                doc.toObject(ExercisePackage::class.java)?.let {
+                    ExercisePackage(
+                        id = it.id,
+                        name = it.name,
+                        uid = it.uid,
+                        description = it.description,
+                        conditionIds = it.conditionIds,
+                        equipmentIds = it.equipmentIds
+                    )
+                }
             }
-            exercisePackages
+
+            cachedExercisePackages = exercisePackagesList
+            cachedExercisePackagesTimestamp = System.currentTimeMillis()
+            exercisePackagesList
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error getting exercise packages", e)
+            Log.e(STORAGE_SERVICE_TAG, "getExercisePackages:Error getting exercise packages", e)
             emptyList()
         }
     }
 
     override suspend fun getConditionsList(): List<Pair<String, String>> {
+        if (cachedConditionsList != null && !isCacheExpired(cachedConditionsListTimestamp)) {
+            Log.d(STORAGE_SERVICE_TAG, "Returning cached conditions list")
+            return cachedConditionsList!!
+        }
+
         return try {
-            val querySnapshot = firestore.collection(CONDITIONS_COLLECTION)
+            val documentSnapshot = firestore.collection(SUMMARY_COLLECTION)
+                .document("conditions")
                 .get()
                 .await()
 
-            Log.d(STORAGE_SERVICE_TAG, "Conditions list loaded, item count: ${querySnapshot.documents.size}")
+            val conditionsList =
+                documentSnapshot.get("conditions") as? List<Map<String, String>> ?: emptyList()
 
-            querySnapshot.documents.mapNotNull { document ->
-                val id = document.id
-                val name = document.getString("name") ?: ""
-                if (name.isNotEmpty()) {
-                    Pair(id, name)
-                } else {
-                    null
-                }
+            val result = conditionsList.map { item ->
+                Pair(item["id"] ?: "", item["name"] ?: "")
             }
+
+            cachedConditionsList = result
+            cachedConditionsListTimestamp = System.currentTimeMillis()
+            Log.d(STORAGE_SERVICE_TAG, "Conditions list loaded, item count: ${result.size}")
+            result
         } catch (e: Exception) {
             Log.e(STORAGE_SERVICE_TAG, "Error getting conditions", e)
             emptyList()
         }
     }
 
+    override suspend fun findMatchingExercisePackages(
+        conditionIds: List<String>,
+        equipmentIds: List<String>
+    ): List<Triple<String, String, String>> {
+        return try {
+            val allPackages = getExercisePackages()
+
+            allPackages.forEach { pkg ->
+                Log.d(
+                    STORAGE_SERVICE_TAG,
+                    "findMatchingExercisePackages: Package: ID = ${pkg.id}, desc: ${pkg.description}, Conditions = ${pkg.conditionIds}, Equipment = ${pkg.equipmentIds}"
+                )
+            }
+
+            val matchingPackages = allPackages.filter { exercisePackage ->
+                exercisePackage.conditionIds.containsAll(conditionIds) &&
+                        exercisePackage.equipmentIds.containsAll(equipmentIds)
+            }.map { Triple(it.id, it.name, it.description) }
+
+            matchingPackages
+        } catch (e: Exception) {
+            Log.e(STORAGE_SERVICE_TAG, "Error finding matching exercise packages", e)
+            emptyList()
+        }
+    }
+
+    private fun isCacheExpired(timestamp: Long): Boolean {
+        return System.currentTimeMillis() - timestamp > cacheExpiryTime
+    }
+
     companion object {
         private const val USERS_COLLECTION = "users"
         private const val STORAGE_SERVICE_TAG = "StorageService"
         private const val EXERCISES_COLLECTION = "exercises"
-        private const val EQUIPMENT_COLLECTION = "equipment"
-        private const val CONDITIONS_COLLECTION = "conditions"
+        private const val SUMMARY_COLLECTION = "summaries"
         private const val EXERCISE_PACKAGES_COLLECTION = "exercise_packages"
-        private const val EXERCISE_PACKAGE_SUMMARY = "exercise_package_summary"
-        private const val EXERCISE_SUMMARY = "Exercise_summary"
-    }
 
+        private var cachedExercisesListTimestamp: Long = 0
+        private var cachedExercisePackagesTimestamp: Long = 0
+        private var cachedEquipmentListTimestamp: Long = 0
+        private var cachedConditionsListTimestamp: Long = 0
+    }
 }

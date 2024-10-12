@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.physio.screens.sign_in.HeaderView
+import com.example.physio.screens.sign_in.components.HeaderView
 import com.example.physio.screens.wizards.CreatorWizardViewModel
 import com.example.physio.ui.colorPrimary
 import com.example.physio.ui.ghost_white
@@ -44,11 +44,11 @@ fun ExerciseWizardScreen(
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
 
-    LaunchedEffect(viewModel.wizardMessage) {
-        viewModel.wizardMessage.collect { message ->
+    LaunchedEffect(viewModel.message) {
+        viewModel.message.collect { message ->
             message?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                viewModel.clearLoginMessage()
+                viewModel.clearMessage()
             }
         }
     }
@@ -76,7 +76,6 @@ fun ExerciseWizardScreen(
             CircularProgressIndicator()
         }
     } else {
-
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (header, wizardForm, navigationButtons) = createRefs()
 

@@ -70,7 +70,13 @@ fun FavoritesScreen(
 
                 if (userPreferences.getUserType() == 1) {
                     FloatingActionButton(
-                        onClick = { viewModel.onAddExerciseClick { route -> navController.navigate(route) } },
+                        onClick = {
+                            viewModel.onAddExerciseClick { route ->
+                                navController.navigate(
+                                    route
+                                )
+                            }
+                        },
                         containerColor = colorPrimary,
                         contentColor = ghost_white,
                         shape = RoundedCornerShape(16.dp),

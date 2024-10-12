@@ -11,7 +11,7 @@ import javax.inject.Inject
 class FavoritesViewModel @Inject constructor(
     private val accountService: AccountService,
     private val storageService: StorageService,
-): PhysioAppViewModel() {
+) : PhysioAppViewModel() {
 
     fun onAddExerciseClick(navigate: (String) -> Unit) {
         //navigate(Screens.ExerciseEditor.route)

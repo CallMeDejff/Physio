@@ -21,11 +21,21 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
         }
 
         composable(route = AuthScreen.SignIn.route) {
-            LoginScreen(openAndPopUp = { route, popUp -> navigateAndPopUp(navController, route, popUp) })
+            LoginScreen(
+                openAndPopUp = { route, popUp ->
+                    navigateAndPopUp(navController, route, popUp)
+                },
+            )
         }
 
         composable(route = AuthScreen.SignUp.route) {
-            SignUpScreen(openAndPopUp = { route, popUp -> navigateAndPopUp(navController, route, popUp) })
+            SignUpScreen(openAndPopUp = { route, popUp ->
+                navigateAndPopUp(
+                    navController,
+                    route,
+                    popUp
+                )
+            })
         }
 
         composable(route = AuthScreen.Dashboard.route) {

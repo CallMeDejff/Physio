@@ -49,8 +49,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.physio.R
-import com.example.physio.screens.sign_in.HeaderView
-import com.example.physio.screens.sign_in.LabeledTextField
+import com.example.physio.screens.sign_in.components.HeaderView
+import com.example.physio.screens.sign_in.components.LabeledTextField
 import com.example.physio.ui.PhysioTheme
 import com.example.physio.ui.colorPrimary
 import com.example.physio.ui.dark_gray

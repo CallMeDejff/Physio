@@ -12,10 +12,12 @@ class ProfileViewModel @Inject constructor(
     private var userPreferences: UserPreferences
 ) : PhysioAppViewModel() {
 
-    fun onLogoutClick(){
-        launchCatching {
-            accountService.signOut()
-            userPreferences.clearData()
-        }
+    fun onLogoutClick() {
+        launchCatching(
+            tag = "ProfileViewModel",
+            block = {
+                accountService.signOut()
+                userPreferences.clearData()
+            })
     }
 }

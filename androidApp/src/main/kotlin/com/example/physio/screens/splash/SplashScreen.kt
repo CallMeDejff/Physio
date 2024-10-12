@@ -20,25 +20,25 @@ private const val SPLASH_TIMEOUT = 1000L
 
 @Composable
 fun SplashScreen(
-  openAndPopUp: (String, String) -> Unit,
-  modifier: Modifier = Modifier,
-  viewModel: SplashViewModel = hiltViewModel()
+    openAndPopUp: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
-  Column(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .background(color = MaterialTheme.colorScheme.background)
-        .verticalScroll(rememberScrollState()),
-    verticalArrangement = Arrangement.Center,
-    horizontalAlignment = Alignment.CenterHorizontally
-  ) {
-      CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
-  }
+    Column(
+        modifier =
+        modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(color = MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+    }
 
-  LaunchedEffect(true) {
-    delay(SPLASH_TIMEOUT)
-    viewModel.onAppStart(openAndPopUp)
-  }
+    LaunchedEffect(true) {
+        delay(SPLASH_TIMEOUT)
+        viewModel.onAppStart(openAndPopUp)
+    }
 }

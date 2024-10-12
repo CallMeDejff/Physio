@@ -1,8 +1,9 @@
-package com.example.physio.screens.wizards
+package com.example.physio.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -29,10 +30,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.colorSecondary
-import com.example.physio.ui.gray
-import com.example.physio.ui.typography
 import kotlinx.coroutines.delay
 
 @Composable
@@ -84,6 +81,7 @@ fun AutoComplete(
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions.Default,
+            shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,

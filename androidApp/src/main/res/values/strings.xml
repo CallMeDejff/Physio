@@ -1,42 +1,5 @@
 <resources>
-    <string name="app_name">Physio</string>
-    <string name="tab_myfavorite">Ulubione</string>
-    <string name="tab_lookFor">Szukaj</string>
-    <string name="tab_settings">Ustawienia</string>
-    <string name="large_text"> large text</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title">Tytuł</string>
-    <string name="choose_equipment">Wybierz sprzęt</string>
-    <string name="choose_disease">Wybierz schorzenie</string>
-    <string name="adress_email">E-mail</string>
-    <string name="old_password">Stare hasło</string>
-    <string name="new_password">Nowe hasło</string>
-    <string name="confirm_new_password">Potwierdź nowe hasło</string>
-    <string name="save_changes">Zapisz</string>
-    <string name="go_back">Powrót</string>
-    <string name="new_email">Nowy e-mail</string>
-    <string name="first_name">Imię</string>
-    <string name="last_name">Nazwisko</string>
-    <string name="add_to_favourites">Ulubione</string>
-    <string name="password">Hasło</string>
-    <string name="create_account">Utwórz konto</string>
-    <string name="login">Zaloguj</string>
-    <string name="remember">Zapamiętaj mnie</string>
-    <string name="repeat_password">Powtórz hasło</string>
-    <string name="confirm_physio">Jestem fizjoterapeutą zarejestrowanym w KIF</string>
-    <string name="work_number">Numer zawodowy</string>
-    <string name="choose_hour">Wybierz godzinę</string>
-    <string name="confirm_hour">Ustaw godzinę</string>
-    <string name="accept">Akceptuj</string>
-    <string name="change_password">Zmień hasło</string>
-    <string name="change_data">Zmień dane</string>
-    <string name="reminders">Przypomnienia</string>
-    <string name="favourites">Tutaj pojawiają się Twoje ulubione ćwiczenia:</string>
-    <string name="app_version">Wersja aplikacji:</string>
-    <string name="logout">Wyloguj</string>
-    <string name="edit">Edytuj</string>
-    <string name="delete">Usuń</string>
+    <string name="web_client_id">318365160423-5121ndqeq7sfgu5719ks6mvmg4qm32r8.apps.googleusercontent.com</string>
 
     <string name="error_login_custom_token">The custom token format is incorrect. Please check the documentation.</string>
     <string name="error_login_custom_token_mismatch">The custom token corresponds to a different audience.</string>

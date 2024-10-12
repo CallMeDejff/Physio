@@ -23,8 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -41,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.physio.R
-import com.example.physio.screens.sign_in.HeaderView
+import com.example.physio.screens.sign_in.components.HeaderView
 import com.example.physio.ui.PhysioTheme
 import com.example.physio.ui.colorPrimary
 import com.example.physio.ui.colorSecondary
@@ -56,13 +54,12 @@ fun CreatorWizardScreen(
     viewModel: CreatorWizardViewModel
 ) {
     val context = LocalContext.current
-    val showProgress by viewModel.showProgress.collectAsState()
 
-    LaunchedEffect(viewModel.wizardMessage) {
-        viewModel.wizardMessage.collect { message ->
+    LaunchedEffect(viewModel.message) {
+        viewModel.message.collect { message ->
             message?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                viewModel.clearLoginMessage()
+                viewModel.clearMessage()
             }
         }
     }
@@ -91,7 +88,6 @@ fun CreatorWizardScreen(
                 }
         ) {
             CreatorWizardForm(
-                showProgress,
                 navigate,
                 popBackStack
             )
@@ -122,16 +118,17 @@ fun CreatorWizardScreen(
 
 @Composable
 fun CreatorWizardForm(
-    showProgress: Boolean,
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
     viewModel: CreatorWizardViewModel = hiltViewModel()
 ) {
     val (selectedButton, setSelectedButton) = remember { mutableStateOf<ButtonType?>(null) }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(30.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(30.dp)
+    ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
@@ -205,26 +202,45 @@ fun AdditionalButtons(
     navigate: (String) -> Unit,
     viewModel: CreatorWizardViewModel = hiltViewModel()
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 30.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
         when (selectedButton) {
             ButtonType.EXERCISE -> {
-                ActionButton(Icons.Default.AddCircleOutline, "Dodaj ćwiczenie") { viewModel.onNewExerciseClick(navigate) }
+                ActionButton(
+                    Icons.Default.AddCircleOutline,
+                    "Dodaj ćwiczenie"
+                ) { viewModel.onNewExerciseClick(navigate) }
                 Spacer(modifier = Modifier.height(10.dp))
-                ActionButton(Icons.Default.EditNote, "Edytuj ćwiczenie") { viewModel.onEditExerciseClick(navigate) }
+                ActionButton(
+                    Icons.Default.EditNote,
+                    "Edytuj ćwiczenie"
+                ) { viewModel.onEditExerciseClick(navigate) }
             }
+
             ButtonType.PACKAGE -> {
-                ActionButton(Icons.Default.AddCircleOutline, "Dodaj pakiet ćwiczeń") { viewModel.onNewPackageClick(navigate) }
+                ActionButton(
+                    Icons.Default.AddCircleOutline,
+                    "Dodaj pakiet ćwiczeń"
+                ) { viewModel.onNewPackageClick(navigate) }
                 Spacer(modifier = Modifier.height(10.dp))
-                ActionButton(Icons.Default.EditNote, "Edytuj pakiet ćwiczeń") { viewModel.onEditPackageWizardClick(navigate) }
+                ActionButton(
+                    Icons.Default.EditNote,
+                    "Edytuj pakiet ćwiczeń"
+                ) { viewModel.onEditPackageWizardClick(navigate) }
             }
         }
     }
 }
 
 @Composable
-fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+fun ActionButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+) {
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -233,7 +249,12 @@ fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: S
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
     ) {
-        Icon(imageVector = icon, contentDescription = label, tint = colorPrimary, modifier = Modifier.size(24.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = colorPrimary,
+            modifier = Modifier.size(24.dp)
+        )
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = label, color = colorPrimary, style = typography.labelLarge)
     }

@@ -25,9 +25,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.example.physio.screens.wizards.AutoCompleteDetailed
 import com.example.physio.screens.wizards.CreatorWizardViewModel
 import com.example.physio.screens.wizards.exerciseWizard.TextEditorView
+import com.example.physio.ui.AutoCompleteDetailed
 import com.example.physio.ui.colorPrimary
 import com.example.physio.ui.gray
 import com.example.physio.ui.typography
@@ -49,174 +49,182 @@ fun PackageDetailsForm(
     val selectedConditions by viewModel.selectedConditions.collectAsState()
     val description by viewModel.exerciseDescription.collectAsState()
 
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 120.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 120.dp),
-            contentAlignment = Alignment.TopCenter
+                .padding(horizontal = 16.dp, vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    if (isEditor) {
+            item {
+                if (isEditor) {
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Edytor istniejącego ")
+
+                            withStyle(style = SpanStyle(color = colorPrimary)) {
+                                append("pakietu ćwiczeń")
+                            }
+                        },
+                        style = typography.bodyLarge,
+                    )
+                } else {
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Kreator nowego ")
+
+                            withStyle(style = SpanStyle(color = colorPrimary)) {
+                                append("pakietu ćwiczeń")
+                            }
+                        },
+                        style = typography.bodyLarge,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TextField(
+                    value = viewModel.packageName.collectAsState().value ?: "",
+                    onValueChange = { newName -> viewModel.updatePackageName(newName) },
+                    label = {
                         Text(
-                            text = buildAnnotatedString {
-                                append("Edytor istniejącego ")
-
-                                withStyle(style = SpanStyle(color = colorPrimary)) {
-                                    append("pakietu ćwiczeń")
-                                }
-                            },
-                            style = typography.bodyLarge,
+                            "Nazwa pakietu ćwiczeń",
+                            style = typography.labelLarge,
+                            color = Color.Black,
+                            modifier = Modifier.align(
+                                Alignment.Center
+                            )
                         )
-                    } else {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Kreator nowego ")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = colorPrimary,
+                        unfocusedIndicatorColor = gray,
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions.Default
+                )
 
-                                withStyle(style = SpanStyle(color = colorPrimary)) {
-                                    append("pakietu ćwiczeń")
-                                }
-                            },
-                            style = typography.bodyLarge,
-                        )
-                    }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+            item {
+                Text(
+                    text = "Wybierz ćwiczenia na rozgrzewkę",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
 
-                    TextField(
-                        value = viewModel.packageName.collectAsState().value ?: "",
-                        onValueChange = { newName -> viewModel.updatePackageName(newName) },
-                        label = { Text("Nazwa pakietu ćwiczeń", style = typography.labelLarge, color = Color.Black, modifier = Modifier.align(
-                            Alignment.Center)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = colorPrimary,
-                            unfocusedIndicatorColor = gray,
-                        ),
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions.Default
+                Box(
+                    modifier = Modifier
+                        .heightIn(200.dp, 300.dp)
+                ) {
+                    AutoCompleteDetailed(
+                        itemList = exercisesList,
+                        selectedItems = selectedWarmUp,
+                        onToggleItem = { equipmentId ->
+                            viewModel.toggleWarmUp(equipmentId)
+                        }
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                item {
-                    Text(
-                        text = "Wybierz ćwiczenia na rozgrzewkę",
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(top = 8.dp)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item {
+                Text(
+                    text = "Wybierz ćwiczenia w ramach pakietu ćwiczeń",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .heightIn(200.dp, 300.dp)
+                ) {
+                    AutoCompleteDetailed(
+                        itemList = exercisesList,
+                        selectedItems = selectedExercises,
+                        onToggleItem = { exerciseId ->
+                            viewModel.toggleExercises(exerciseId, true)
+                        }
                     )
-
-                    Box(
-                        modifier = Modifier
-                            .heightIn(200.dp, 300.dp)
-                    ) {
-                        AutoCompleteDetailed(
-                            itemList = exercisesList,
-                            selectedItems = selectedWarmUp,
-                            onToggleItem = { equipmentId ->
-                                viewModel.toggleWarmUp(equipmentId)
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                item {
-                    Text(
-                        text = "Wybierz ćwiczenia w ramach pakietu ćwiczeń",
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .heightIn(200.dp, 300.dp)
-                    ) {
-                        AutoCompleteDetailed(
-                            itemList = exercisesList,
-                            selectedItems = selectedExercises,
-                            onToggleItem = { exerciseId ->
-                                viewModel.toggleExercises(exerciseId, true)
-                            }
-                        )
-                    }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+            item {
+                Text(
+                    text = "Wybierz schorzenia przypisane do tego pakietu ćwiczeń",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .heightIn(200.dp, 300.dp)
+                ) {
+                    AutoCompleteDetailed(
+                        itemList = conditionsList,
+                        selectedItems = selectedConditions,
+                        onToggleItem = { conditionId ->
+                            viewModel.toggleCondition(conditionId, true)
+                        }
+                    )
                 }
 
-                item {
-                    Text(
-                        text = "Wybierz schorzenia przypisane do tego pakietu ćwiczeń",
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(top = 8.dp)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item {
+                Text(
+                    text = "Uzupełnij opis",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(200.dp, 600.dp)
+                        .padding(vertical = 2.dp)
+                ) {
+                    TextEditorView(
+                        initialDescription = description ?: "",
+                        viewModel = viewModel
                     )
-                    Box(
-                        modifier = Modifier
-                            .heightIn(200.dp, 300.dp)
-                    ) {
-                        AutoCompleteDetailed(
-                            itemList = conditionsList,
-                            selectedItems = selectedConditions,
-                            onToggleItem = { conditionId ->
-                                viewModel.toggleCondition(conditionId, true)
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                item {
-                    Text(
-                        text = "Uzupełnij opis",
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(200.dp, 600.dp)
-                            .padding(vertical = 2.dp)
-                    ) {
-                        TextEditorView(
-                            initialDescription = description ?: "",
-                            viewModel = viewModel
-                        )
-                    }
-                }
-
-                item {
-                    Text(
-                        text = "Przypisz ćwiczenia pacjentowi",
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .heightIn(200.dp, 300.dp)
-                    ) {
-                        AutoCompleteDetailed(
-                            userList = usersList,
-                            selectedItems = selectedUsers,
-                            onToggleItem = { userId ->
-                                viewModel.toggleUser(userId)
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(60.dp))
                 }
             }
 
+            item {
+                Text(
+                    text = "Przypisz ćwiczenia pacjentowi",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .heightIn(200.dp, 300.dp)
+                ) {
+                    AutoCompleteDetailed(
+                        userList = usersList,
+                        selectedItems = selectedUsers,
+                        onToggleItem = { userId ->
+                            viewModel.toggleUser(userId)
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(60.dp))
+            }
         }
+
     }
+}

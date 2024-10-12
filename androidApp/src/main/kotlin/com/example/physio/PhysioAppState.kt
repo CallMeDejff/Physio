@@ -1,32 +1,30 @@
 package com.example.physio
 
-import androidx.compose.runtime.Stable
 import androidx.navigation.NavHostController
-import javax.inject.Inject
 
 
-    fun popUp(navController: NavHostController) {
-        navController.popBackStack()
+fun popUp(navController: NavHostController) {
+    navController.popBackStack()
+}
+
+fun navigate(navController: NavHostController, route: String) {
+    navController.navigate(route) {
+        launchSingleTop = true
+        restoreState = true
     }
+}
 
-    fun navigate(navController: NavHostController, route: String) {
-        navController.navigate(route) {
-            launchSingleTop = true
-            restoreState = true
-        }
+fun navigateAndPopUp(navController: NavHostController, route: String, popUp: String) {
+    navController.navigate(route) {
+        launchSingleTop = true
+        popUpTo(popUp) { inclusive = true }
     }
+}
 
-    fun navigateAndPopUp(navController: NavHostController, route: String, popUp: String) {
-        navController.navigate(route) {
-            launchSingleTop = true
-            popUpTo(popUp) { inclusive = true }
-        }
+fun clearAndNavigate(navController: NavHostController, route: String) {
+    navController.navigate(route) {
+        launchSingleTop = true
+        popUpTo(0) { inclusive = true }
     }
-
-    fun clearAndNavigate(navController: NavHostController, route: String) {
-        navController.navigate(route) {
-            launchSingleTop = true
-            popUpTo(0) { inclusive = true }
-        }
-    }
+}
 

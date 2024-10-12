@@ -1,7 +1,5 @@
 package com.example.physio.models
 
-import android.net.Uri
-
 data class ExerciseData(
     val uid: String = "",
     val id: String = "",

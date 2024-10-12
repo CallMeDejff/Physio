@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import javax.inject.Inject
 
-class UserPreferences @Inject constructor(context: Context){
+class UserPreferences @Inject constructor(context: Context) {
 
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
@@ -38,7 +38,7 @@ class UserPreferences @Inject constructor(context: Context){
         return sharedPreferences.getInt(USER_TYPE, 0)
     }
 
-    fun setUser(uid: String, name: String, lastname: String, licenseNumber: Int, userType:Int) {
+    fun setUser(uid: String, name: String, lastname: String, licenseNumber: Int, userType: Int) {
         with(sharedPreferences.edit()) {
             putString(USER_UID_KEY, uid)
             putString(USER_NAME_KEY, name)

@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.physio.ui.PhysioBarTheme
 import com.example.physio.ui.colorPrimary
@@ -27,7 +26,7 @@ import com.example.physio.ui.typography
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel
 ) {
     PhysioBarTheme {
         Surface(
@@ -40,7 +39,7 @@ fun ProfileScreen(
                     .padding(15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
-            )  {
+            ) {
                 Text(
                     "Profile Screen",
                     style = MaterialTheme.typography.titleLarge,

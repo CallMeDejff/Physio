@@ -11,6 +11,11 @@ interface StorageService {
     suspend fun createExercisePackage(exercisePackage: ExercisePackage)
     suspend fun deleteExercisePackage(exercisePackageId: String)
     suspend fun deleteExercise(exerciseId: String)
+    suspend fun findMatchingExercisePackages(
+        conditionIds: List<String>,
+        equipmentIds: List<String>
+    ): List<Triple<String, String, String>>
+
     suspend fun getUserInfo(userId: String): User?
     suspend fun getExercisePackage(exercisePackageId: String): ExercisePackage?
     suspend fun getExercisePackages(): List<ExercisePackage>
@@ -24,8 +29,5 @@ interface StorageService {
     suspend fun getUsersList(): List<User>
     suspend fun updateExercise(exercise: Exercise, mediaUris: List<Uri>?)
     suspend fun updateExercisePackage(exercisePackage: ExercisePackage)
-    suspend fun uploadFilesToFirebase(uris: List<Uri>): List<String>
-    //suspend fun uploadSingleFileToFirebase(uri: Uri): String
-    //suspend fun updateNote(user: User)
-    //suspend fun deleteNote(noteId: String)
+    suspend fun uploadFilesToFirebase(uris: List<Uri>, path: String): List<String>
 }

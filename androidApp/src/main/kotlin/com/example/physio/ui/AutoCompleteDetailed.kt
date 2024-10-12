@@ -1,4 +1,4 @@
-package com.example.physio.screens.wizards
+package com.example.physio.ui
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -33,9 +33,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.physio.models.User
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.gray
-import com.example.physio.ui.typography
 import kotlinx.coroutines.delay
 
 @Composable
@@ -110,6 +107,7 @@ fun AutoCompleteDetailed(
                         itemList.sortedBy { it.second }
                     }.take(5)
                 }
+
                 userList.isNotEmpty() -> {
                     if (category.isNotEmpty()) {
                         userList.filter {
@@ -121,6 +119,7 @@ fun AutoCompleteDetailed(
                         userList.sortedBy { it.name }
                     }.take(5)
                 }
+
                 else -> emptyList()
             }
 
@@ -171,7 +170,6 @@ fun AutoCompleteDetailed(
         }
     }
 }
-
 
 
 @Composable

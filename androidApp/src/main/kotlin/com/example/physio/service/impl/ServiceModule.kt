@@ -3,6 +3,7 @@ package com.example.physio.service.impl
 import android.content.Context
 import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.StorageSampleDataService
 import com.example.physio.service.services.StorageService
 import dagger.Binds
 import dagger.Module
@@ -20,6 +21,9 @@ abstract class ServiceModule {
 
     @Binds
     abstract fun provideStorageService(impl: StorageServiceImpl): StorageService
+
+    @Binds
+    abstract fun provideSampleStorageDataService(impl: StorageSampleImpl): StorageSampleDataService
 
 }
 

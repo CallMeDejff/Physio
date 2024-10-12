@@ -17,7 +17,7 @@ import javax.inject.Inject
 class SignUpViewModel @Inject constructor(
     private val accountService: AccountService,
     private val storageService: StorageService
-): PhysioAppViewModel() {
+) : PhysioAppViewModel() {
 
     var name: String = ""
     var lastname: String = ""
@@ -59,10 +59,6 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    fun updateUserType(userType: Int) {
-        this.userType = userType
-    }
-
     private fun dataValidation(): Result<Unit> {
         val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
         return when {
@@ -71,9 +67,13 @@ class SignUpViewModel @Inject constructor(
                 Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Email address missing")
                 Result.failure(Exception("Email address missing"))
             }
+
             !email.matches(emailPattern.toRegex()) -> {
                 _signupMessage.update { "Sprawdź czy na pewno podałeś prawdziwy adres email" }
-                Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Email address pattern mismatch")
+                Log.e(
+                    SIGNUP_VIEWMODEL_TAG,
+                    "dataValidation:failure - Email address pattern mismatch"
+                )
                 Result.failure(Exception("Email address pattern mismatch"))
             }
 
@@ -121,36 +121,41 @@ class SignUpViewModel @Inject constructor(
     }
 
     private fun callUserSignUp(openAndPopUp: (String, String) -> Unit) {
-        launchCatching {
-            val resultSignUp = accountService.signUp(email, password)
-            if (resultSignUp.isSuccess) {
+        launchCatching(
+            tag = SIGNUP_VIEWMODEL_TAG,
+            errorMessage = "Ups! Tworzenie konta nie powiodło się.",
+            onError = { message -> _message.emit(message) },
+            block = {
+                val resultSignUp = accountService.signUp(email, password)
+                if (resultSignUp.isSuccess) {
+                    Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
+                    val userId = accountService.currentUserId
 
-                Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
-                val userId = accountService.currentUserId
+                    val userType = if (licenseNumber == 0) {
+                        0
+                    } else {
+                        1
+                    }
+                    val newUser = User(userId, name, lastname, email, licenseNumber, userType)
+                    Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
 
-                val userType = if (licenseNumber == 0) { 0 } else { 1 }
-                val newUser = User(userId, name, lastname, email, licenseNumber, userType)
-                Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
-
-                storageService.createUser(newUser)
-                Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
-                openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
-
-                //openAndPopUp(BottomBarScreen.Home.route, AuthScreen.SignUp.route)
-            } else {
-                Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:failed")
-                updateRepeatedPassword("")
-                updatePassword("")
-            }
-            _showProgress.update { false }
-        }
+                    storageService.createUser(newUser)
+                    Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
+                    openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
+                } else {
+                    Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:failed")
+                    updateRepeatedPassword("")
+                    updatePassword("")
+                }
+                _showProgress.update { false }
+            })
     }
 
     fun clearSignupMessage() {
         _signupMessage.update { null }
     }
 
-    companion object{
+    companion object {
         const val SIGNUP_VIEWMODEL_TAG = "SignUpViewModel"
     }
 }

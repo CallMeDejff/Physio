@@ -12,7 +12,20 @@
           "package_name": "com.example.physio"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "318365160423-5121ndqeq7sfgu5719ks6mvmg4qm32r8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.physio",
+            "certificate_hash": "a6e64dc79cd4bd44e87229f5ff74a9eeeab42734"
+          }
+        },
+        {
+          "client_id": "318365160423-8i1s6rdjihseu2ra5s2fr1i0mjjgetgj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAzOSh8szMKCGr9aaSMxABycTuRz2KmRz4"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "318365160423-8i1s6rdjihseu2ra5s2fr1i0mjjgetgj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
