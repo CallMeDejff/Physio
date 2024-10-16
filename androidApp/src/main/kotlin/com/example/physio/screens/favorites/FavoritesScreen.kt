@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.physio.service.UserPreferences
-import com.example.physio.ui.PhysioBarTheme
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.ghost_white
+import com.example.physio.ui.theme.PhysioBarTheme
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.ghost_white
 
 @Composable
 fun FavoritesScreen(

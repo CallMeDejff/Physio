@@ -1,4 +1,4 @@
-package com.example.physio.screens.exercise
+package com.example.physio.screens.exercise.components
 
 import android.text.Html
 import androidx.compose.foundation.layout.Box
@@ -15,7 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.physio.ui.typography
+import com.example.physio.screens.exercise.ExerciseViewModel
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun DescriptionView(

@@ -24,7 +24,6 @@ abstract class ServiceModule {
 
     @Binds
     abstract fun provideSampleStorageDataService(impl: StorageSampleImpl): StorageSampleDataService
-
 }
 
 @Module

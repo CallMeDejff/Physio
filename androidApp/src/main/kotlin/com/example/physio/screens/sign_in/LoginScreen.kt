@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.physio.screens.sign_in.components.HeaderView
-import com.example.physio.ui.PhysioTheme
-import com.example.physio.ui.ghost_white
+import com.example.physio.ui.theme.PhysioTheme
+import com.example.physio.ui.theme.ghost_white
 
 @Composable
 fun LoginScreen(
@@ -82,17 +82,13 @@ fun LoginScreen(
                         emailState = emailState,
                         passwordState = passwordState,
                         isLoading = isLoading.value,
+                        openAndPopUp = openAndPopUp,
                         onLoginClick = {
                             viewModel.updateEmail(emailState.value.text)
                             viewModel.updatePassword(passwordState.value.text)
                             viewModel.onSignInClick(openAndPopUp)
                         },
                         onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
-                        onSuccessfulProviderLogin = {
-                            viewModel.onSuccessfulProviderLogin(
-                                openAndPopUp
-                            )
-                        },
                         viewModel = viewModel,
                     )
                 }

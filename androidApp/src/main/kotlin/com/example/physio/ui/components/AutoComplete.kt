@@ -1,4 +1,4 @@
-package com.example.physio.ui
+package com.example.physio.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +30,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.colorSecondary
+import com.example.physio.ui.theme.gray
+import com.example.physio.ui.theme.typography
 import kotlinx.coroutines.delay
 
 @Composable

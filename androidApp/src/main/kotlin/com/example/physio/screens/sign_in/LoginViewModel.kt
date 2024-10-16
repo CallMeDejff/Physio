@@ -1,13 +1,16 @@
 package com.example.physio.screens.sign_in
 
 import android.util.Log
+import androidx.credentials.Credential
+import androidx.credentials.CustomCredential
 import androidx.lifecycle.viewModelScope
 import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
-import com.google.firebase.auth.FirebaseUser
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -50,6 +53,27 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onSignInWithGoogle(credential: Credential, openAndPopUp: (String, String) -> Unit) {
+        launchCatching(
+            tag = LOGIN_VIEW_MODEL_TAG,
+            errorMessage = "Logowanie za pomocą konta Google nie powiodło się",
+            onError = { message -> _message.emit(message) },
+            block = {
+                if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    val googleIdTokenCredential =
+                        GoogleIdTokenCredential.createFrom(credential.data)
+                    accountService.signInWithGoogle(googleIdTokenCredential.idToken)
+                    openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
+                } else {
+                    Log.e(
+                        LOGIN_VIEW_MODEL_TAG,
+                        "An error occured when logging in with Google account"
+                    )
+                }
+            }
+        )
+    }
+
     fun onSignInClick(openAndPopUp: (String, String) -> Unit) {
         val validationResult = dataValidation()
         if (validationResult.isSuccess) {
@@ -68,7 +92,7 @@ class LoginViewModel @Inject constructor(
                         )
 
                         if (currentUserId != null) {
-                            storageService.getUserInfo(currentUserId)
+                            accountService.getUserInfo(currentUserId)
                             _message.update { "Użytkownik zalogowany" }
                             openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                         } else {
@@ -81,18 +105,6 @@ class LoginViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    suspend fun updateUser(newUser: FirebaseUser?) {
-        accountService.updateCurrentUser(newUser)
-    }
-
-    suspend fun clearUser() {
-        accountService.clearCurrentUser()
-    }
-
-    fun onSuccessfulProviderLogin(openAndPopUp: (String, String) -> Unit) {
-        openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
     }
 
     fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {

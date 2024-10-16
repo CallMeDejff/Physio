@@ -10,6 +10,7 @@ import com.example.physio.models.User
 import com.example.physio.navigation.Graph
 import com.example.physio.navigation.WizardScreen
 import com.example.physio.screens.PhysioAppViewModel
+import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreatorWizardViewModel @Inject constructor(
-    private val storageService: StorageService
+    private val storageService: StorageService,
+    private val accountService: AccountService
 ) : PhysioAppViewModel() {
 
     private val _exerciseTitle = MutableStateFlow<String?>("")
@@ -97,7 +99,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                val users = storageService.getUsersList()
+                val users = accountService.getUsersList()
                 _usersList.value = users
                 Log.d(CREATOR_WIZARD_TAG, "Users list loaded, item count: ${_usersList.value.size}")
                 _isLoading.value = false

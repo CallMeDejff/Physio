@@ -1,4 +1,4 @@
-package com.example.physio.ui
+package com.example.physio.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes

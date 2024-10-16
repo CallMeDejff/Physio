@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Password
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -35,21 +34,22 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.physio.R
+import com.example.physio.screens.sign_in.components.FacebookSignIn
 import com.example.physio.screens.sign_in.components.GoogleSignIn
 import com.example.physio.screens.sign_in.components.LabeledTextField
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.dark_gray
-import com.example.physio.ui.typography
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.dark_gray
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun LoginForm(
     emailState: MutableState<TextFieldValue>,
     passwordState: MutableState<TextFieldValue>,
     isLoading: Boolean,
+    openAndPopUp: (String, String) -> Unit,
     viewModel: LoginViewModel,
     onLoginClick: () -> Unit,
     onSignUpClick: () -> Unit,
-    onSuccessfulProviderLogin: () -> Unit
 ) {
 
     Column(
@@ -144,27 +144,26 @@ fun LoginForm(
                         )
 
                     }
-                    Spacer(modifier = Modifier.height(30.dp))
-                    Button(
-                        onClick = onLoginClick,
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "lub zaloguj się za pomocą:",
+                        color = Color.Gray,
+                        fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
+                        fontSize = 18.sp,
                         modifier = Modifier
-                            .padding(top = 6.dp)
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
-                    ) {
+                            .align(Alignment.CenterHorizontally)
+                    )
 
-                        Text(
-                            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-                            text = "Logowanie FaceBook",
-                            color = Color.White,
-                            style = typography.labelLarge
-                        )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    }
+                    FacebookSignIn()
+
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    GoogleSignIn(viewModel, onSuccessfulProviderLogin)
+                    GoogleSignIn { credential ->
+                        viewModel.onSignInWithGoogle(credential, openAndPopUp)
+                    }
 
                 }
             }

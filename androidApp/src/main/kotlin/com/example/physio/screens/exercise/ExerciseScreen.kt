@@ -33,10 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
+import com.example.physio.screens.exercise.components.DescriptionView
+import com.example.physio.screens.exercise.components.PreviewScreen
 import com.example.physio.screens.sign_in.components.HeaderView
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.ghost_white
-import com.example.physio.ui.typography
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.ghost_white
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun ExerciseScreen(
@@ -61,7 +63,7 @@ fun ExerciseScreen(
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(color = colorPrimary)
         }
     } else {
         if (selectedMediaUrl != null) {

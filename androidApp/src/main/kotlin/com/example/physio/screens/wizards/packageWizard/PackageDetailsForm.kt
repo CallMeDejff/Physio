@@ -26,11 +26,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.wizards.CreatorWizardViewModel
-import com.example.physio.screens.wizards.exerciseWizard.TextEditorView
-import com.example.physio.ui.AutoCompleteDetailed
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.gray
-import com.example.physio.ui.typography
+import com.example.physio.screens.wizards.components.TextEditorView
+import com.example.physio.ui.components.AutoCompleteDetailed
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.gray
+import com.example.physio.ui.theme.typography
 
 @SuppressLint("SuspiciousIndentation")
 @Composable

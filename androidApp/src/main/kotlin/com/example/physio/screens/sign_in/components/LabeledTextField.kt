@@ -19,10 +19,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.gray
-import com.example.physio.ui.light_gray
-import com.example.physio.ui.typography
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.gray
+import com.example.physio.ui.theme.light_gray
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun LabeledTextField(

@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.physio.screens.sign_in.components.HeaderView
 import com.example.physio.screens.wizards.CreatorWizardViewModel
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.ghost_white
-import com.example.physio.ui.typography
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.ghost_white
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun ExerciseWizardScreen(

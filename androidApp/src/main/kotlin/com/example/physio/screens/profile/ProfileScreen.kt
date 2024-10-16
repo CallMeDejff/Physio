@@ -19,9 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.physio.ui.PhysioBarTheme
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.typography
+import com.example.physio.ui.theme.PhysioBarTheme
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun ProfileScreen(

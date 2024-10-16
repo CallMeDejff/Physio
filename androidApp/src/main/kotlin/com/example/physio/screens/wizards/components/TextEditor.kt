@@ -1,4 +1,4 @@
-package com.example.physio.screens.wizards.exerciseWizard
+package com.example.physio.screens.wizards.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,7 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.wizards.CreatorWizardViewModel
-import com.example.physio.ui.colorPrimary
+import com.example.physio.ui.theme.colorPrimary
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor

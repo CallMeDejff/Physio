@@ -1,4 +1,4 @@
-package com.example.physio.ui
+package com.example.physio.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +33,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.physio.models.User
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.gray
+import com.example.physio.ui.theme.typography
 import kotlinx.coroutines.delay
 
 @Composable

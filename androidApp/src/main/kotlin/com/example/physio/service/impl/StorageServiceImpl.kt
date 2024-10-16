@@ -17,8 +17,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class StorageServiceImpl @Inject constructor(
-    private val auth: AccountService,
-    private var userPreferences: UserPreferences
+    private val auth: AccountService
 ) : StorageService {
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -33,93 +32,6 @@ class StorageServiceImpl @Inject constructor(
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
             .build()
-    }
-
-    override suspend fun createUser(user: User) {
-        try {
-            firestore.collection(USERS_COLLECTION)
-                .document(auth.currentUserId)
-                .set(user)
-                .await()
-
-            userPreferences.setUser(
-                user.uid,
-                user.name,
-                user.lastname,
-                user.licenseNumber,
-                user.userType
-            )
-            Log.d(STORAGE_SERVICE_TAG, "createUser: $user")
-        } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "createUser:Error creating user:", e)
-        }
-    }
-
-    override suspend fun getUsersList(): List<User> {
-        val userList = mutableListOf<User>()
-        try {
-            val querySnapshot = firestore.collection(USERS_COLLECTION)
-                .get()
-                .await()
-
-            for (document in querySnapshot.documents) {
-                val user = document.toObject(User::class.java)
-                user?.let {
-                    userList.add(
-                        User(
-                            uid = it.uid,
-                            name = it.name,
-                            lastname = it.lastname,
-                            email = it.email
-                        )
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "getUsersList:Error getting users: ", e)
-        }
-        return userList
-    }
-
-    override suspend fun getUserInfo(userId: String): User? {
-        val cachedUser = if (userId == auth.currentUserId) {
-            User(
-                uid = userPreferences.getUserUid(),
-                name = userPreferences.getUserName(),
-                lastname = userPreferences.getUserLastname(),
-                licenseNumber = userPreferences.getUserLicenseNumber(),
-                userType = userPreferences.getUserType()
-            )
-        } else null
-
-        if (cachedUser != null && cachedUser.uid.isNotEmpty()) {
-            Log.d(STORAGE_SERVICE_TAG, "Returned cached user: $cachedUser")
-            return cachedUser
-        }
-
-        return try {
-            val documentSnapshot = firestore.collection(USERS_COLLECTION)
-                .document(userId)
-                .get()
-                .await()
-
-            val fetchedUser = documentSnapshot.toObject(User::class.java)?.also {
-                if (userId == auth.currentUserId) {
-                    userPreferences.setUser(
-                        it.uid,
-                        it.name,
-                        it.lastname,
-                        it.licenseNumber,
-                        it.userType
-                    )
-                    Log.d(STORAGE_SERVICE_TAG, "User set to shared preferences: $it")
-                }
-            }
-            fetchedUser
-        } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error getting user info", e)
-            null
-        }
     }
 
     override suspend fun getEquipmentList(): List<Pair<String, String>> {
@@ -584,7 +496,6 @@ class StorageServiceImpl @Inject constructor(
     }
 
     companion object {
-        private const val USERS_COLLECTION = "users"
         private const val STORAGE_SERVICE_TAG = "StorageService"
         private const val EXERCISES_COLLECTION = "exercises"
         private const val SUMMARY_COLLECTION = "summaries"

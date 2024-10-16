@@ -139,7 +139,7 @@ class SignUpViewModel @Inject constructor(
                     val newUser = User(userId, name, lastname, email, licenseNumber, userType)
                     Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
 
-                    storageService.createUser(newUser)
+                    accountService.createUser(newUser)
                     Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
                     openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
                 } else {

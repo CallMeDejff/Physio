@@ -43,13 +43,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.physio.screens.exercise.PreviewScreen
-import com.example.physio.screens.wizards.ActionButton
+import com.example.physio.screens.exercise.components.PreviewScreen
 import com.example.physio.screens.wizards.CreatorWizardViewModel
-import com.example.physio.ui.AutoCompleteDetailed
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.gray
-import com.example.physio.ui.typography
+import com.example.physio.screens.wizards.components.ActionButton
+import com.example.physio.screens.wizards.components.TextEditorView
+import com.example.physio.ui.components.AutoCompleteDetailed
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.gray
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun ExerciseDetailsForm(
@@ -61,8 +62,6 @@ fun ExerciseDetailsForm(
     val context = LocalContext.current
     val selectedEquipment by viewModel.selectedEquipment.collectAsState()
     val equipmentList by viewModel.equipmentList.collectAsState()
-    val selectedConditions by viewModel.selectedConditions.collectAsState()
-    val conditionsList by viewModel.conditionsList.collectAsState()
     val selectedMediaUris by viewModel.selectedMediaUris.collectAsState()
     val description by viewModel.exerciseDescription.collectAsState()
 

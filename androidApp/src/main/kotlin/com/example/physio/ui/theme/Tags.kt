@@ -1,4 +1,4 @@
-package com.example.physio.ui
+package com.example.physio.ui.theme
 
 enum class Emoji(val symbol: String) {
     SMILE("😊"),

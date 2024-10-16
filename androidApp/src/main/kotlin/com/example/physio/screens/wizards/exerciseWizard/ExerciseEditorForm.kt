@@ -18,9 +18,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.wizards.CreatorWizardViewModel
-import com.example.physio.ui.AutoComplete
-import com.example.physio.ui.colorPrimary
-import com.example.physio.ui.typography
+import com.example.physio.ui.components.AutoComplete
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.typography
 
 @Composable
 fun ExerciseEditorForm(

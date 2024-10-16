@@ -1,4 +1,4 @@
-package com.example.physio.ui
+package com.example.physio.ui.theme
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font

@@ -1,20 +1,15 @@
 package com.example.physio.service.impl
 
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import com.example.physio.R
-import com.example.physio.core.Constants.DISPLAY_NAME
-import com.example.physio.core.Constants.EMAIL
 import com.example.physio.models.User
-import com.example.physio.service.authErrors
+import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,9 +17,10 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AccountServiceImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    private var userPreferences: UserPreferences
 ) : AccountService {
 
+    private val firestore = FirebaseFirestore.getInstance()
     private val _currentUser = MutableStateFlow<User?>(null)
     override val currentUser: Flow<User?> = _currentUser.asStateFlow()
 
@@ -39,12 +35,88 @@ class AccountServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateCurrentUser(newUser: FirebaseUser?) {
-        _currentUser.value = newUser?.let { User(it.uid, it.displayName.toString()) }
+    override suspend fun getUsersList(): List<User> {
+        val userList = mutableListOf<User>()
+        try {
+            val querySnapshot = firestore.collection(USERS_COLLECTION)
+                .get()
+                .await()
+
+            for (document in querySnapshot.documents) {
+                val user = document.toObject(User::class.java)
+                user?.let {
+                    userList.add(
+                        User(
+                            uid = it.uid,
+                            name = it.name,
+                            lastname = it.lastname,
+                            email = it.email
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(ACCOUNT_SERVICE_TAG, "getUsersList:Error getting users: ", e)
+        }
+        return userList
     }
 
-    override suspend fun clearCurrentUser() {
-        _currentUser.value = null
+    override suspend fun getUserInfo(userId: String): User? {
+        val cachedUser = if (userId == currentUserId) {
+            User(
+                uid = userPreferences.getUserUid(),
+                name = userPreferences.getUserName(),
+                lastname = userPreferences.getUserLastname(),
+                licenseNumber = userPreferences.getUserLicenseNumber(),
+                userType = userPreferences.getUserType()
+            )
+        } else null
+
+        if (cachedUser != null && cachedUser.uid.isNotEmpty()) {
+            Log.d(ACCOUNT_SERVICE_TAG, "Returned cached user: $cachedUser")
+            return cachedUser
+        }
+
+        return try {
+            val documentSnapshot = firestore.collection(USERS_COLLECTION)
+                .document(userId)
+                .get()
+                .await()
+
+            val fetchedUser = documentSnapshot.toObject(User::class.java)?.also {
+                if (userId == currentUserId) {
+                    userPreferences.setUser(
+                        it.uid,
+                        it.name,
+                        it.lastname,
+                        it.licenseNumber,
+                        it.userType
+                    )
+                    Log.d(ACCOUNT_SERVICE_TAG, "User set to shared preferences: $it")
+                }
+            }
+            fetchedUser
+        } catch (e: Exception) {
+            Log.e(ACCOUNT_SERVICE_TAG, "Error getting user info", e)
+            null
+        }
+    }
+
+    override suspend fun createUser(user: User) {
+        try {
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
+            userDocRef.set(user).await()
+            userPreferences.setUser(
+                user.uid,
+                user.name,
+                user.lastname,
+                user.licenseNumber,
+                user.userType
+            )
+            Log.d(ACCOUNT_SERVICE_TAG, "createUser: $user")
+        } catch (e: Exception) {
+            Log.e(ACCOUNT_SERVICE_TAG, "createUser: Error creating user:", e)
+        }
     }
 
     override fun hasUser(): Boolean {
@@ -62,24 +134,36 @@ class AccountServiceImpl @Inject constructor(
 
                 Result.success(Unit)
             } else {
-                Log.e("AccountService", "signInWithEmailAndPassword:failure - no user returned")
+                Log.e(ACCOUNT_SERVICE_TAG, "signInWithEmailAndPassword:failure - no user returned")
                 Result.failure(Exception("Logowanie nie powiodło się"))
             }
         } catch (e: FirebaseNetworkException) {
-            Log.e("AccountService", "signInWithEmailAndPassword:failure", e)
-            Toast.makeText(
-                context,
-                context.getString(R.string.error_network_error),
-                Toast.LENGTH_LONG
-            ).show()
+            Log.e(ACCOUNT_SERVICE_TAG, "signInWithEmailAndPassword:failure", e)
             Result.failure(e)
         } catch (e: FirebaseAuthException) {
-            Log.e("AccountService", "signInWithEmailAndPassword:failure", e)
-            val errorCode = e.errorCode
-            val errorMessage = authErrors[errorCode] ?: R.string.error_login_default_error
-            Toast.makeText(context, context.getString(errorMessage), Toast.LENGTH_LONG).show()
+            Log.e(ACCOUNT_SERVICE_TAG, "signInWithEmailAndPassword:failure", e)
             Result.failure(e)
         }
+    }
+
+    override suspend fun signInWithGoogle(idToken: String) {
+        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+        Firebase.auth.signInWithCredential(firebaseCredential)
+
+        val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
+        val documentSnapshot = userDocRef.get().await()
+
+        if (documentSnapshot.exists()) {
+            Log.d(ACCOUNT_SERVICE_TAG, "createUser: User already exists.")
+            return
+        }
+
+        val newUser = User(
+            uid = Firebase.auth.currentUser?.uid ?: "",
+            name = Firebase.auth.currentUser?.displayName ?: "",
+            email = Firebase.auth.currentUser?.email ?: "",
+        )
+        createUser(newUser)
     }
 
     override suspend fun signUp(email: String, password: String): Result<Unit> {
@@ -88,36 +172,20 @@ class AccountServiceImpl @Inject constructor(
             if (signUpResult.user != null) {
                 Firebase.auth.signInWithEmailAndPassword(email, password).await()
                 Log.d(
-                    "AccountService",
+                    ACCOUNT_SERVICE_TAG,
                     "createUserWithEmail:success:${Firebase.auth.currentUser?.uid}"
                 )
                 Result.success(Unit)
             } else {
-                Log.e("AccountService", "createUserWithEmail:failure - no user returned")
+                Log.e(ACCOUNT_SERVICE_TAG, "createUserWithEmail:failure - no user returned")
                 Result.failure(Exception("Rejestracja nie powiodła się"))
             }
         } catch (e: FirebaseNetworkException) {
-            Log.e("AccountService", "signUp:failure", e)
-            Toast.makeText(
-                context,
-                context.getString(R.string.error_network_error),
-                Toast.LENGTH_LONG
-            ).show()
+            Log.e(ACCOUNT_SERVICE_TAG, "signUp:failure", e)
             Result.failure(e)
         } catch (e: FirebaseAuthException) {
-            Log.e("AccountService", "createUserWithEmail:failure", e)
-            val errorCode = e.errorCode
-            val errorMessage = authErrors[errorCode] ?: R.string.error_login_default_error
-            Toast.makeText(context, context.getString(errorMessage), Toast.LENGTH_LONG).show()
-
+            Log.e(ACCOUNT_SERVICE_TAG, "createUserWithEmail:failure", e)
             Result.failure(e)
-        }
-    }
-
-    private suspend fun addUserToFirestore() {
-        Firebase.auth.currentUser?.apply {
-            val user = toUser()
-            Result.success(Unit)
         }
     }
 
@@ -128,9 +196,10 @@ class AccountServiceImpl @Inject constructor(
     override suspend fun deleteAccount() {
         Firebase.auth.currentUser!!.delete().await()
     }
-}
 
-fun FirebaseUser.toUser() = mapOf(
-    DISPLAY_NAME to displayName,
-    EMAIL to email,
-)
+    companion object {
+        private const val USERS_COLLECTION = "users"
+        private const val ACCOUNT_SERVICE_TAG = "AccountService"
+
+    }
+}
