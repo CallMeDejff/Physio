@@ -14,12 +14,16 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 @Composable
-fun MediaView(mediaUrls: List<String>, onMediaClick: (String) -> Unit) {
+fun MediaView(
+    mediaUrls: List<String>,
+    mediaType: String,
+    onMediaClick: (String) -> Unit
+) {
     if (mediaUrls.isNotEmpty()) {
         val mediaUrl = mediaUrls.first()
 
-        when {
-            mediaUrl.contains("image") -> {
+        when (mediaType) {
+            "image" -> {
                 AsyncImage(
                     model = mediaUrl,
                     contentDescription = null,
@@ -31,7 +35,7 @@ fun MediaView(mediaUrls: List<String>, onMediaClick: (String) -> Unit) {
                 )
             }
 
-            mediaUrl.contains("video") -> {
+            "video" -> {
                 VideoThumbnail(mediaUrl = mediaUrl, onMediaClick = onMediaClick)
             }
 

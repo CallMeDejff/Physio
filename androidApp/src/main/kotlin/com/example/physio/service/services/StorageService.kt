@@ -3,14 +3,17 @@ package com.example.physio.service.services
 import android.net.Uri
 import com.example.physio.models.Exercise
 import com.example.physio.models.ExercisePackage
-import com.example.physio.models.User
 
 interface StorageService {
     suspend fun createExerciseWithMedia(exercise: Exercise, mediaUris: List<Uri>)
     suspend fun createExercisePackage(exercisePackage: ExercisePackage)
-    suspend fun deleteExercisePackage(exercisePackageId: String)
-    suspend fun deleteExercise(exerciseId: String)
-    suspend fun findMatchingExercisePackages(conditionIds: List<String>, equipmentIds: List<String>): List<Triple<String, String, String>>
+    suspend fun deleteExercisePackage(exercisePackage: ExercisePackage)
+    suspend fun deleteExercise(exercise: Exercise)
+    suspend fun findMatchingExercisePackages(
+        conditionIds: List<String>,
+        equipmentIds: List<String>
+    ): List<Triple<String, String, String>>
+
     suspend fun getExercisePackage(exercisePackageId: String): ExercisePackage?
     suspend fun getExercisePackages(): List<ExercisePackage>
     suspend fun getEquipmentList(): List<Pair<String, String>>

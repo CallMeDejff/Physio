@@ -2,7 +2,8 @@ package com.example.physio.screens.search
 
 import android.util.Log
 import com.example.physio.screens.PhysioAppViewModel
-import com.example.physio.service.services.StorageService
+import com.example.physio.service.services.ExercisePackageService
+import com.example.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +12,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val storageService: StorageService
+    //private val storageService: StorageService,
+    private val listService: ListService,
+    private val exercisePackageService: ExercisePackageService
 ) : PhysioAppViewModel() {
 
     private val _isLoadingResults = MutableStateFlow(false)
@@ -39,7 +42,7 @@ class SearchViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                _equipmentList.value = storageService.getEquipmentList()
+                _equipmentList.value = listService.getEquipments()
                 Log.d(
                     SEARCH_VIEW_MODEL_TAG,
                     "loadEquipmentList:Equipment list loaded, item count: ${_equipmentList.value.size}"
@@ -56,7 +59,7 @@ class SearchViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                _conditionsList.value = storageService.getConditionsList()
+                _conditionsList.value = listService.getConditions()
                 Log.d(
                     SEARCH_VIEW_MODEL_TAG,
                     "loadConditionList:Conditions list loaded, item count: ${_conditionsList.value.size}"
@@ -87,7 +90,7 @@ class SearchViewModel @Inject constructor(
                 )
 
                 val matchingPackages =
-                    storageService.findMatchingExercisePackages(conditionIds, equipmentIds)
+                    exercisePackageService.findMatchingExercisePackages(conditionIds, equipmentIds)
 
                 if (matchingPackages.isNotEmpty()) {
                     _matchingPackages.value = matchingPackages
@@ -114,10 +117,6 @@ class SearchViewModel @Inject constructor(
                 _isLoadingResults.value = false
             }
         )
-    }
-
-    fun navigateToExercisePackage(exerciseId: String) {
-        //navigate(SearchScreen.ExerciseView.createRoute(exerciseId))
     }
 
     fun toggleEquipment(equipmentId: String) {

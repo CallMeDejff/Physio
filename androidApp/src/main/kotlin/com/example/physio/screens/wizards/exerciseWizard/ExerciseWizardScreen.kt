@@ -132,9 +132,9 @@ fun ExerciseWizardScreen(
                         if (isEditor) {
                             viewModel.onEditExerciseContinueClick(navigate)
                         } else if (isEditorNextStep) {
-                            viewModel.onUpdateExerciseClick(navigate)
+                            viewModel.onUpdateExerciseClick(context, navigate)
                         } else {
-                            viewModel.onCreateExerciseClick(navigate)
+                            viewModel.onCreateExerciseClick(context, navigate)
                         }
                     },
                     modifier = Modifier.weight(2f),
@@ -165,7 +165,6 @@ fun ExerciseWizardScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(1.dp))
         }
     }

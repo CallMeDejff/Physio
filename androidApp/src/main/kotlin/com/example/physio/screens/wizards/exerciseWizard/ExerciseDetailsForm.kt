@@ -2,6 +2,7 @@ package com.example.physio.screens.wizards.exerciseWizard
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +21,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.PermMedia
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -46,6 +50,7 @@ import coil.compose.AsyncImage
 import com.example.physio.screens.exercise.components.PreviewScreen
 import com.example.physio.screens.wizards.CreatorWizardViewModel
 import com.example.physio.screens.wizards.components.ActionButton
+import com.example.physio.screens.wizards.components.CustomAlertDialog
 import com.example.physio.screens.wizards.components.TextEditorView
 import com.example.physio.ui.components.AutoCompleteDetailed
 import com.example.physio.ui.theme.colorPrimary
@@ -64,15 +69,17 @@ fun ExerciseDetailsForm(
     val equipmentList by viewModel.equipmentList.collectAsState()
     val selectedMediaUris by viewModel.selectedMediaUris.collectAsState()
     val description by viewModel.exerciseDescription.collectAsState()
+    val mediaType by viewModel.mediaType.collectAsState()
 
-    val mediaPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris: List<Uri> ->
-        if (uris.isNotEmpty()) {
-            viewModel.addSelectedMedia(context, uris.first())
+    val pickMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.addSelectedMedia(context, uri)
         }
     }
 
+    var showDialog by remember { mutableStateOf(false) }
     var previewMediaUri by remember { mutableStateOf<Uri?>(null) }
     var showPreviewDialog by remember { mutableStateOf(false) }
 
@@ -171,7 +178,7 @@ fun ExerciseDetailsForm(
                     ActionButton(
                         icon = Icons.Outlined.PermMedia,
                         label = "Dodaj multimedia",
-                        onClick = { mediaPickerLauncher.launch("video/*, image/*") },
+                        onClick = { pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -219,15 +226,54 @@ fun ExerciseDetailsForm(
                         }
                     }
                 }
+            }
+            item {
+                if (isEditorNextStep) {
+                    Button(
+                        onClick = { showDialog = true },
+                        modifier = Modifier,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.DeleteOutline,
+                            contentDescription = "Delete exercise",
+                            tint = Color.Red
+                        )
+                        Text(
+                            text = "Usuń ćwiczenie",
+                            color = Color.Red,
+                            style = typography.labelLarge,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+
+                    if (showDialog) {
+                        CustomAlertDialog(
+                            title = "Usuwanie ćwiczenia",
+                            icon = Icons.Outlined.DeleteOutline,
+                            message = "Czy na pewno chcesz usunąć to ćwiczenie? Pamiętaj, że usunąć możesz jedynie, które zostały utworzone przez Ciebie.",
+                            onConfirm = { viewModel.deleteExercise(navigate) },
+                            onDismiss = { showDialog = false }
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(60.dp))
             }
         }
 
-        if (showPreviewDialog) {
-            PreviewScreen(mediaUrl = previewMediaUri.toString(), onDismiss = {
-                showPreviewDialog = false
-                previewMediaUri = null
-            })
+        if (isEditorNextStep) {
+            if (showPreviewDialog) {
+                PreviewScreen(
+                    mediaUrl = previewMediaUri.toString(),
+                    mediaType = mediaType.toString(),
+                    onDismiss = {
+                        showPreviewDialog = false
+                        previewMediaUri = null
+                    })
+            }
         }
     }
 }

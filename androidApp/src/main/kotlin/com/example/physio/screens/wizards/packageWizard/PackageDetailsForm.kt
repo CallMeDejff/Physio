@@ -9,14 +9,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,12 +36,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.components.CustomAlertDialog
 import com.example.physio.screens.wizards.components.TextEditorView
 import com.example.physio.ui.components.AutoCompleteDetailed
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.gray
 import com.example.physio.ui.theme.typography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun PackageDetailsForm(
@@ -48,6 +60,8 @@ fun PackageDetailsForm(
     val selectedWarmUp by viewModel.selectedWarmUp.collectAsState()
     val selectedConditions by viewModel.selectedConditions.collectAsState()
     val description by viewModel.exerciseDescription.collectAsState()
+
+    var showDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -221,7 +235,41 @@ fun PackageDetailsForm(
                         }
                     )
                 }
+            }
 
+            item {
+                if (isEditor) {
+                    Button(
+                        onClick = { showDialog = true },
+                        modifier = Modifier,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.DeleteOutline,
+                            contentDescription = "Delete package",
+                            tint = Color.Red
+                        )
+                        Text(
+                            text = "Usuń pakiet",
+                            color = Color.Red,
+                            style = typography.labelLarge,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+
+                    if (showDialog) {
+                        CustomAlertDialog(
+                            title = "Usuwanie pakietu ćwiczeń",
+                            icon = Icons.Outlined.DeleteOutline,
+                            message = "Czy na pewno chcesz usunąć ten pakiet ćwiczeń? Pamiętaj, że usunąć możesz jedynie pakiety, które nie są przypisane do żadnych pacjentów i zostały stworzone przez Ciebie.",
+                            onConfirm = { viewModel.deletePackage(navigate) },
+                            onDismiss = { showDialog = false }
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(60.dp))
             }
         }

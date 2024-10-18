@@ -6,7 +6,6 @@ import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
-import com.example.physio.service.services.StorageService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val accountService: AccountService,
-    private val storageService: StorageService
+    //private val storageService: StorageService
 ) : PhysioAppViewModel() {
 
     var name: String = ""
@@ -130,13 +129,21 @@ class SignUpViewModel @Inject constructor(
                 if (resultSignUp.isSuccess) {
                     Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
                     val userId = accountService.currentUserId
+                    Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success:currentUserId:$userId")
 
                     val userType = if (licenseNumber == 0) {
                         0
                     } else {
                         1
                     }
-                    val newUser = User(userId, name, lastname, email, licenseNumber, userType)
+                    val newUser = User(
+                        uid = userId,
+                        name = name,
+                        lastname = lastname,
+                        email = email,
+                        licenseNumber = licenseNumber,
+                        userType = userType
+                    )
                     Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
 
                     accountService.createUser(newUser)

@@ -2,18 +2,25 @@ package com.example.physio.screens.exercise
 
 import android.util.Log
 import com.example.physio.models.Exercise
+import com.example.physio.models.FavoritePackageResult
 import com.example.physio.screens.PhysioAppViewModel
-import com.example.physio.service.services.StorageService
+import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.ExercisePackageService
+import com.example.physio.service.services.ExerciseService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
-    private val storageService: StorageService,
+    private val accountService: AccountService,
+    //private val storageService: StorageService,
+    private val exerciseService: ExerciseService,
+    private val exercisePackageService: ExercisePackageService
 ) : PhysioAppViewModel() {
 
     private val _packageName = MutableStateFlow<String?>("")
@@ -21,6 +28,9 @@ class ExerciseViewModel @Inject constructor(
 
     private val _packageId = MutableStateFlow<String?>("")
     val packageId: StateFlow<String?> = _packageId
+
+    private val _packageAuthor = MutableStateFlow<String?>("")
+    val packageAuthor: StateFlow<String?> = _packageAuthor
 
     private val _packageDescription = MutableStateFlow<String?>("")
     val packageDescription: StateFlow<String?> = _packageDescription
@@ -49,7 +59,7 @@ class ExerciseViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             tag = EXERCISE_VIEW_MODEL,
             block = {
-                val exercisePackage = storageService.getExercisePackage(exercisePackageId)
+                val exercisePackage = exercisePackageService.getExercisePackage(exercisePackageId)
 
                 Log.d(
                     EXERCISE_VIEW_MODEL,
@@ -67,7 +77,7 @@ class ExerciseViewModel @Inject constructor(
                 }
                 val exercises = try {
                     _exercisesList.value.map { exerciseId ->
-                        async { storageService.getExercise(exerciseId) }
+                        async { exerciseService.getExercise(exerciseId) }
                     }.awaitAll().filterNotNull()
                 } catch (e: Exception) {
                     Log.e(EXERCISE_VIEW_MODEL, "Error fetching exercises", e)
@@ -76,7 +86,7 @@ class ExerciseViewModel @Inject constructor(
 
                 val warmups = try {
                     _warmUpList.value.map { exerciseId ->
-                        async { storageService.getExercise(exerciseId) }
+                        async { exerciseService.getExercise(exerciseId) }
                     }.awaitAll().filterNotNull()
                 } catch (e: Exception) {
                     Log.e(EXERCISE_VIEW_MODEL, "Error fetching warmups", e)
@@ -87,6 +97,31 @@ class ExerciseViewModel @Inject constructor(
 
                 Log.d(EXERCISE_VIEW_MODEL, "Fetched exercises: $exercises")
                 Log.d(EXERCISE_VIEW_MODEL, "Fetched warmups: $warmups")
+            }
+        )
+    }
+
+    fun togglePackageFavoriteStatus(packageId: String) {
+        launchCatching(
+            tag = EXERCISE_VIEW_MODEL,
+            onError = { message -> _message.emit(message) },
+            block = {
+                when (val result = accountService.toggleFavoritePackage(packageId)) {
+                    is FavoritePackageResult.Added -> {
+                        Log.d("ViewModel", "Package ${result.packageId} added to favorites")
+                        _message.update { "Pakiet dodany do ulubionych" }
+                    }
+
+                    is FavoritePackageResult.Removed -> {
+                        Log.d("ViewModel", "Package ${result.packageId} removed from favorites")
+                        _message.update { "Pakiet usunięty z ulubionych" }
+                    }
+
+                    is FavoritePackageResult.Failure -> {
+                        Log.e("ViewModel", "Error: ${result.error.message}")
+                        _message.update { "Wystąpił błąd przy dodawaniu do ulubionych" }
+                    }
+                }
             }
         )
     }

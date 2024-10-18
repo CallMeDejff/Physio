@@ -26,7 +26,7 @@ import com.example.physio.ui.theme.typography
 @Composable
 fun ExerciseCard(
     exercise: Exercise,
-    onMediaClick: (String) -> Unit
+    onMediaClick: (String, String) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -41,7 +41,12 @@ fun ExerciseCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            MediaView(mediaUrls = exercise.mediaUrls, onMediaClick = onMediaClick)
+            MediaView(
+                mediaUrls = exercise.mediaUrls,
+                mediaType = exercise.mediaType,
+                onMediaClick = { mediaUrl ->
+                    onMediaClick(mediaUrl, exercise.mediaType)
+                })
 
             Spacer(modifier = Modifier.height(8.dp))
 

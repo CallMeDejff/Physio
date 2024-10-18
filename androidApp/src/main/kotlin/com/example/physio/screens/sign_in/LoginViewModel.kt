@@ -8,7 +8,6 @@ import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
-import com.example.physio.service.services.StorageService
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val accountService: AccountService,
-    private val storageService: StorageService
+    //private val storageService: StorageService
 ) : PhysioAppViewModel() {
 
     private var email: String = ""
@@ -90,15 +89,7 @@ class LoginViewModel @Inject constructor(
                             LOGIN_VIEW_MODEL_TAG,
                             "onSignInClick: logged in user id: $currentUserId"
                         )
-
-                        if (currentUserId != null) {
-                            accountService.getUserInfo(currentUserId)
-                            _message.update { "Użytkownik zalogowany" }
-                            openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
-                        } else {
-                            Log.e(LOGIN_VIEW_MODEL_TAG, "onSignInClick: userId is null after login")
-                            _message.update { "Nie udało się pobrać danych użytkownika" }
-                        }
+                        openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                     } else {
                         _message.update { "Logowanie nie powiodło się" }
                     }

@@ -7,5 +7,6 @@ data class Exercise(
     val title: String = "",
     val description: String = "",
     val equipmentIds: List<String> = emptyList(),
-    val mediaUrls: List<String> = emptyList()
+    val mediaUrls: List<String> = emptyList(),
+    val mediaType: String = "",
 )

@@ -5,8 +5,6 @@ import android.net.Uri
 import android.util.Log
 import com.example.physio.models.Exercise
 import com.example.physio.models.ExercisePackage
-import com.example.physio.models.User
-import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.StorageService
 import com.google.firebase.firestore.FieldValue
@@ -121,29 +119,101 @@ class StorageServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteExercise(exerciseId: String) {
+    override suspend fun deleteExercise(exercise: Exercise) {
+        Log.d(
+            STORAGE_SERVICE_TAG,
+            "deleteExercise: Deleting exercise with ID: ${exercise.id}, mediaUrls: ${exercise.mediaUrls}"
+        )
+        val documentId = exercise.id
         try {
+            deleteExerciseMedia(exercise)
+
             firestore.collection(EXERCISES_COLLECTION)
-                .document(exerciseId)
+                .document(documentId)
                 .delete()
                 .await()
 
-            firestore.collection(EXERCISES_COLLECTION)
-                .document(exerciseId)
-                .collection("details").document(exerciseId)
-                .delete()
-                .await()
+            Log.d(STORAGE_SERVICE_TAG, "Exercise deleted with ID: $documentId")
+            updateExerciseSummary(documentId)
+            removeExerciseReferencesFromPackages(documentId)
 
-            Log.d(STORAGE_SERVICE_TAG, "Exercise deleted with id: $exerciseId")
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error deleting exercise", e)
+            Log.e(STORAGE_SERVICE_TAG, "Error deleting exercise with ID: $documentId", e)
+        }
+    }
+
+    private suspend fun deleteExerciseMedia(exercise: Exercise) {
+        Log.d(
+            STORAGE_SERVICE_TAG,
+            "deleteExerciseMedia: Deleting exercise with ID: ${exercise.id}, mediaUrls: ${exercise.mediaUrls}"
+        )
+        exercise.mediaUrls.forEach { mediaUrl ->
+            try {
+                val storagePath = getStoragePathFromUrl(mediaUrl)
+                val storageRef = storage.reference.child(storagePath)
+                storageRef.delete().await()
+                Log.d(STORAGE_SERVICE_TAG, "Deleted media file: $mediaUrl")
+            } catch (e: Exception) {
+                Log.e(STORAGE_SERVICE_TAG, "Error deleting media file: $mediaUrl", e)
+            }
+        }
+    }
+
+    private fun getStoragePathFromUrl(mediaUrl: String): String {
+        val apiUrlPrefix = "https://firebasestorage.googleapis.com/v0/b/"
+        if (mediaUrl.startsWith(apiUrlPrefix)) {
+            val decodedUrl = Uri.decode(mediaUrl)
+            return decodedUrl.substringAfter("/o/").substringBefore("?")
+        } else {
+            val storageUrl = storage.reference.toString()
+            val decodedUrl = Uri.decode(mediaUrl)
+            return decodedUrl.removePrefix("$storageUrl/")
+                .substringBefore("?")
+        }
+    }
+
+    private suspend fun updateExerciseSummary(exerciseId: String) {
+        val exercisesDocument = firestore.collection(SUMMARY_COLLECTION)
+            .document("exercises")
+            .get()
+            .await()
+
+        val existingExercises =
+            exercisesDocument.get("exercises") as? List<Map<String, String>> ?: emptyList()
+        val updatedExercises = existingExercises.filterNot { it["id"] == exerciseId }
+
+        firestore.collection(SUMMARY_COLLECTION)
+            .document("exercises")
+            .set(mapOf("exercises" to updatedExercises))
+            .await()
+
+        Log.d(STORAGE_SERVICE_TAG, "Exercise summary updated after deletion.")
+    }
+
+    private suspend fun removeExerciseReferencesFromPackages(exerciseId: String) {
+        val packages = firestore.collection(EXERCISE_PACKAGES_COLLECTION).get().await()
+        for (packageDoc in packages) {
+            val exercisePackage = packageDoc.toObject(ExercisePackage::class.java)
+            val updatedExerciseIds = exercisePackage.exerciseIds.filterNot { it == exerciseId }
+
+            if (updatedExerciseIds.size != exercisePackage.exerciseIds.size) {
+                firestore.collection(EXERCISE_PACKAGES_COLLECTION)
+                    .document(packageDoc.id)
+                    .update("exerciseIds", updatedExerciseIds)
+                    .await()
+
+                Log.d(
+                    STORAGE_SERVICE_TAG,
+                    "Removed exercise reference from package ID: ${packageDoc.id}"
+                )
+            }
         }
     }
 
     @SuppressLint("SuspiciousIndentation")
     override suspend fun createExerciseWithMedia(exercise: Exercise, mediaUris: List<Uri>) {
         try {
-            val mediaUrls = uploadFilesToFirebase(mediaUris, path = exercise.id)
+            val mediaUrls = uploadFilesToFirebase(mediaUris, path = auth.currentUserId)
             val exerciseWithMedia = exercise.copy(mediaUrls = mediaUrls)
 
             val documentReference = firestore.collection(EXERCISES_COLLECTION)
@@ -203,7 +273,6 @@ class StorageServiceImpl @Inject constructor(
     }
 
     override suspend fun uploadFilesToFirebase(uris: List<Uri>, path: String): List<String> {
-
         val uploadedUrls = mutableListOf<String>()
 
         uris.forEach { uri ->
@@ -218,7 +287,6 @@ class StorageServiceImpl @Inject constructor(
                 uploadedUrls.add(downloadUrl.toString())
             }
         }
-
         return uploadedUrls
     }
 
@@ -291,24 +359,39 @@ class StorageServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteExercisePackage(exercisePackageId: String) {
+    override suspend fun deleteExercisePackage(exercisePackage: ExercisePackage) {
+        val documentId = exercisePackage.id
         try {
             firestore.collection(EXERCISE_PACKAGES_COLLECTION)
-                .document(exercisePackageId)
+                .document(documentId)
                 .delete()
                 .await()
 
-            firestore.collection(EXERCISE_PACKAGES_COLLECTION)
-                .document(exercisePackageId)
-                .collection("details").document(exercisePackageId)
-                .delete()
+
+            Log.d(STORAGE_SERVICE_TAG, "ExercisePackage deleted with ID: $documentId")
+
+            val packagesDocument = firestore.collection(SUMMARY_COLLECTION)
+                .document("packages")
+                .get()
                 .await()
 
-            Log.d(STORAGE_SERVICE_TAG, "ExercisePackage deleted with id: $exercisePackageId")
+            val existingPackages =
+                packagesDocument.get("packages") as? List<Map<String, String>> ?: emptyList()
+
+            val updatedPackages = existingPackages.filter { it["id"] != documentId }
+
+            firestore.collection(SUMMARY_COLLECTION)
+                .document("packages")
+                .set(mapOf("packages" to updatedPackages))
+                .await()
+
+            Log.d(STORAGE_SERVICE_TAG, "Package summary updated after deletion.")
+
         } catch (e: Exception) {
-            Log.e(STORAGE_SERVICE_TAG, "Error deleting exercise package", e)
+            Log.e(STORAGE_SERVICE_TAG, "Error deleting exercise package with ID: $documentId", e)
         }
     }
+
 
     override suspend fun getExercise(exerciseId: String): Exercise? {
         return try {

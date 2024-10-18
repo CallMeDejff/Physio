@@ -1,5 +1,6 @@
 package com.example.physio.service.services
 
+import com.example.physio.models.FavoritePackageResult
 import com.example.physio.models.User
 import kotlinx.coroutines.flow.Flow
 
@@ -13,6 +14,7 @@ interface AccountService {
     suspend fun signIn(email: String, password: String): Result<Unit>
     suspend fun signInWithGoogle(idToken: String)
     suspend fun signUp(email: String, password: String): Result<Unit>
+    suspend fun toggleFavoritePackage(packageId: String): FavoritePackageResult
     suspend fun signOut()
     suspend fun deleteAccount()
 }

@@ -21,7 +21,11 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 
 @Composable
-fun PreviewScreen(mediaUrl: String, onDismiss: () -> Unit) {
+fun PreviewScreen(
+    mediaUrl: String,
+    mediaType: String,
+    onDismiss: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -30,8 +34,8 @@ fun PreviewScreen(mediaUrl: String, onDismiss: () -> Unit) {
             .clickable { onDismiss() },
         contentAlignment = Alignment.Center
     ) {
-        when {
-            mediaUrl.contains("image") -> {
+        when (mediaType) {
+            "image" -> {
                 AsyncImage(
                     model = mediaUrl,
                     contentDescription = null,
@@ -40,7 +44,7 @@ fun PreviewScreen(mediaUrl: String, onDismiss: () -> Unit) {
                 )
             }
 
-            mediaUrl.contains("video") -> {
+            "video" -> {
                 VideoPlayer(mediaUrl = mediaUrl, context = LocalContext.current)
             }
 

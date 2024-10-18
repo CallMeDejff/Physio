@@ -14,9 +14,6 @@ class FavoritesViewModel @Inject constructor(
 ) : PhysioAppViewModel() {
 
     fun onAddExerciseClick(navigate: (String) -> Unit) {
-        //navigate(Screens.ExerciseEditor.route)
-        //navigate(Screens.ExerciseWizard.route)
         navigate(WizardScreen.CreatorWizard.route)
     }
-
 }

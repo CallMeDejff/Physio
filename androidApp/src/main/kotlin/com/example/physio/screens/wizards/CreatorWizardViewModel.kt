@@ -11,7 +11,9 @@ import com.example.physio.navigation.Graph
 import com.example.physio.navigation.WizardScreen
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
-import com.example.physio.service.services.StorageService
+import com.example.physio.service.services.ExercisePackageService
+import com.example.physio.service.services.ExerciseService
+import com.example.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +22,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreatorWizardViewModel @Inject constructor(
-    private val storageService: StorageService,
-    private val accountService: AccountService
+    //private val storageService: StorageService,
+    private val accountService: AccountService,
+    private val exerciseService: ExerciseService,
+    private val exercisePackageService: ExercisePackageService,
+    private val listService: ListService
 ) : PhysioAppViewModel() {
 
     private val _exerciseTitle = MutableStateFlow<String?>("")
@@ -75,6 +80,34 @@ class CreatorWizardViewModel @Inject constructor(
     private val _selectedPackages = MutableStateFlow<Set<String>>(emptySet())
     val selectedPackages: StateFlow<Set<String>> = _selectedPackages
 
+    private val _packageAuthor = MutableStateFlow<String?>("")
+    val packageAuthor: StateFlow<String?> = _packageAuthor
+
+    private val _exerciseAuthor = MutableStateFlow<String?>("")
+    val exerciseAuthor: StateFlow<String?> = _exerciseAuthor
+
+    private val _mediaType = MutableStateFlow<String?>("")
+    val mediaType: StateFlow<String?> = _mediaType
+
+    private fun setMediaType(context: Context, uris: List<Uri>) {
+        uris.forEach { uri ->
+            val mimeType = context.contentResolver.getType(uri)
+            Log.d(CREATOR_WIZARD_TAG, "URI: $uri, MIME Type: $mimeType")
+
+            when {
+                mimeType?.startsWith("image/") == true -> {
+                    _mediaType.value = "image"
+                    return
+                }
+
+                mimeType?.startsWith("video/") == true -> {
+                    _mediaType.value = "video"
+                    return
+                }
+            }
+        }
+    }
+
     fun loadEquipmentList() {
         launchCatching(
             tag = CREATOR_WIZARD_TAG,
@@ -82,7 +115,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                _equipmentList.value = storageService.getEquipmentList()
+                _equipmentList.value = listService.getEquipments()
                 Log.d(
                     CREATOR_WIZARD_TAG,
                     "Equipment list loaded, item count: ${_equipmentList.value.size}"
@@ -114,7 +147,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                _conditionsList.value = storageService.getConditionsList()
+                _conditionsList.value = listService.getConditions()
                 Log.d(
                     CREATOR_WIZARD_TAG,
                     "loadConditionList:Conditions list loaded, item count: ${_conditionsList.value.size}"
@@ -132,7 +165,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                _exercisesList.value = storageService.getExercises()
+                _exercisesList.value = listService.getExercises()
                 Log.d(
                     CREATOR_WIZARD_TAG,
                     "Exercises list loaded, item count: ${_exercisesList.value.size}"
@@ -149,7 +182,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.value = true
-                _packagesList.value = storageService.getPackagesList()
+                _packagesList.value = listService.getPackagesList()
                 Log.d(
                     CREATOR_WIZARD_TAG,
                     "Packages list loaded, item count: ${_packagesList.value.size}"
@@ -159,32 +192,12 @@ class CreatorWizardViewModel @Inject constructor(
             })
     }
 
-    fun toggleUser(userId: String) {
-        toggleItem(userId, _selectedUsers, "Users")
-    }
-
-
-    fun toggleEquipment(equipmentId: String) {
-        toggleItem(equipmentId, _selectedEquipment, "Equipment", CREATOR_WIZARD_TAG)
-    }
-
-    fun toggleCondition(conditionId: String, multipleSelection: Boolean) {
-        if (multipleSelection) toggleItem(conditionId, _selectedConditions, "Condition")
-        else toggleItem(conditionId, _selectedConditions, "Condition", CREATOR_WIZARD_TAG, false)
-    }
-
-    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) {
-        if (multipleSelection) toggleItem(exerciseId, _selectedExercises, "Exercise")
-        else toggleItem(exerciseId, _selectedExercises, "Exercise", CREATOR_WIZARD_TAG, false)
-    }
-
-    fun toggleWarmUp(exerciseId: String) {
-        toggleItem(exerciseId, _selectedWarmUp, "Warm Up", CREATOR_WIZARD_TAG)
-    }
-
-    fun togglePackage(packageId: String) {
-        toggleItem(packageId, _selectedPackages, "Package", CREATOR_WIZARD_TAG, false)
-    }
+    fun toggleUser(userId: String) = toggleItem(userId, _selectedUsers)
+    fun toggleEquipment(equipmentId: String) = toggleItem(equipmentId, _selectedEquipment)
+    fun toggleCondition(conditionId: String, multipleSelection: Boolean) = toggleItem(conditionId, _selectedConditions, multipleSelection)
+    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(exerciseId, _selectedExercises, multipleSelection)
+    fun toggleWarmUp(exerciseId: String) = toggleItem(exerciseId, _selectedWarmUp)
+    fun togglePackage(packageId: String) = toggleItem(packageId, _selectedPackages, false)
 
     fun updateExerciseTitle(title: String) {
         _exerciseTitle.value = title
@@ -216,6 +229,45 @@ class CreatorWizardViewModel @Inject constructor(
             currentList.toMutableList().apply {
                 remove(uri)
             }
+        }
+    }
+
+    fun deletePackage(navigate: (String) -> Unit) {
+        if (accountService.currentUserId == _packageAuthor.value.toString()) {
+            launchCatching(
+                tag = CREATOR_WIZARD_TAG,
+                errorMessage = "Nie udało się usunąć pakietu ćwiczeń.",
+                onError = { message -> _message.emit(message) },
+                block = {
+                    val deletedPackage = ExercisePackage(
+                        id = _packageId.value.toString()
+                    )
+                    exercisePackageService.deleteExercisePackage(deletedPackage)
+                }
+            )
+            navigate(WizardScreen.CreatorWizard.route)
+        } else {
+            _message.update { "Nie jesteś autorem tego pakietu" }
+        }
+    }
+
+    fun deleteExercise(navigate: (String) -> Unit) {
+        if (accountService.currentUserId == _exerciseAuthor.value.toString()) {
+            launchCatching(
+                tag = CREATOR_WIZARD_TAG,
+                errorMessage = "Nie udało się usunąć ćwiczenia.",
+                onError = { message -> _message.emit(message) },
+                block = {
+                    val deletedExercise = Exercise(
+                        id = _exerciseId.value.toString(),
+                        mediaUrls = _selectedMediaUris.value.map { it.toString() }
+                    )
+                    exerciseService.deleteExercise(deletedExercise)
+                }
+            )
+            navigate(WizardScreen.CreatorWizard.route)
+        } else {
+            _message.update { "Nie jesteś autorem tego pakietu" }
         }
     }
 
@@ -258,22 +310,18 @@ class CreatorWizardViewModel @Inject constructor(
                         CREATOR_WIZARD_TAG,
                         "Selected exercise ID from getExerciseDetails: $selectedExerciseId"
                     )
-                    val exerciseDetails = storageService.getExercise(selectedExerciseId)
+                    val exerciseDetails = exerciseService.getExercise(selectedExerciseId)
                     exerciseDetails?.let { exercise ->
                         _exerciseId.value = exercise.id
                         _exerciseTitle.value = exercise.title
+                        _exerciseAuthor.value = exercise.uid
                         _exerciseDescription.value = exercise.description
                         _selectedEquipment.value = exercise.equipmentIds.toSet()
                         _selectedMediaUris.value =
                             exercise.mediaUrls.map { Uri.parse(it.toString()) }
+                        _mediaType.value = exercise.mediaType
                     }
-
                     Log.d(CREATOR_WIZARD_TAG, "Exercise details loaded: $exerciseDetails")
-                    Log.d(
-                        CREATOR_WIZARD_TAG,
-                        "Exercise details loaded: ${_exerciseTitle.value}, ${exerciseDescription.value}, ${selectedEquipment.value}, ${selectedConditions.value}, ${selectedMediaUris.value}"
-                    )
-
                 } catch (e: Exception) {
                     _message.emit("Nie udało się pobrać szczegółów ćwiczenia.")
                     Log.e(CREATOR_WIZARD_TAG, "Error getting exercise details:", e)
@@ -295,7 +343,7 @@ class CreatorWizardViewModel @Inject constructor(
                     CREATOR_WIZARD_TAG,
                     "Selected package ID from getPackageDetails: $selectedPackageId"
                 )
-                val packageDetails = storageService.getPackage(selectedPackageId)
+                val packageDetails = exercisePackageService.getPackage(selectedPackageId)
                 packageDetails?.let { exercisePackage ->
                     _packageId.value = exercisePackage.id
                     _packageName.value = exercisePackage.name
@@ -304,11 +352,9 @@ class CreatorWizardViewModel @Inject constructor(
                     _selectedConditions.value = exercisePackage.conditionIds.toSet()
                     _selectedExercises.value = exercisePackage.exerciseIds.toSet()
                     _selectedWarmUp.value = exercisePackage.warmUpIds.toSet()
+                    _packageAuthor.value = exercisePackage.uid
                 }
-                Log.d(
-                    CREATOR_WIZARD_TAG,
-                    "Package details loaded: ${_packageName.value}, ${_exerciseDescription.value}, ${_selectedEquipment.value}, ${_selectedConditions.value}, ${_selectedExercises.value}, ${_selectedWarmUp.value}"
-                )
+                Log.d(CREATOR_WIZARD_TAG, "Package details loaded: ${packageDetails}}")
                 _isLoading.value = false
             })
     }
@@ -325,12 +371,14 @@ class CreatorWizardViewModel @Inject constructor(
         navigate(WizardScreen.EditExerciseDetailsScreen.route)
     }
 
-    fun onUpdateExerciseClick(navigate: (String) -> Unit) {
+    fun onUpdateExerciseClick(context: Context, navigate: (String) -> Unit) {
+        setMediaType(context = context, uris = _selectedMediaUris.value)
         val exercise = Exercise(
             id = _exerciseId.value.toString(),
             title = _exerciseTitle.value.toString(),
             equipmentIds = _selectedEquipment.value.toList(),
             mediaUrls = _selectedMediaUris.value.map { it.toString() },
+            mediaType = _mediaType.value.toString(),
             description = _exerciseDescription.value.toString()
         )
         Log.d(CREATOR_WIZARD_TAG, "Edited exercise data: $exercise")
@@ -340,28 +388,28 @@ class CreatorWizardViewModel @Inject constructor(
             errorMessage = "Nie udało się zaktualizować ćwiczenia.",
             onError = { message -> _message.emit(message) },
             block = {
-                storageService.updateExercise(exercise, _selectedMediaUris.value)
+                exerciseService.updateExercise(exercise, _selectedMediaUris.value)
             })
         navigate(WizardScreen.CreatorWizard.route)
         _message.update { "ćwiczenie zaktualizowane" }
     }
 
-
-    fun onCreateExerciseClick(navigate: (String) -> Unit) {
+    fun onCreateExerciseClick(context: Context, navigate: (String) -> Unit) {
+        setMediaType(context = context, uris = _selectedMediaUris.value)
         val exercise = Exercise(
             title = _exerciseTitle.value.toString(),
             equipmentIds = _selectedEquipment.value.toList(),
             mediaUrls = _selectedMediaUris.value.map { it.toString() },
+            mediaType = _mediaType.value.toString(),
             description = _exerciseDescription.value.toString()
         )
         Log.d(CREATOR_WIZARD_TAG, "Exercise data: $exercise")
-
         launchCatching(
             tag = CREATOR_WIZARD_TAG,
             errorMessage = "Nie udało się utworzyć ćwiczenia.",
             onError = { message -> _message.emit(message) },
             block = {
-                storageService.createExerciseWithMedia(exercise, _selectedMediaUris.value)
+                exerciseService.createExerciseWithMedia(exercise, _selectedMediaUris.value)
             })
         navigate(WizardScreen.CreatorWizard.route)
         _message.update { "ćwiczenie utworzone" }
@@ -380,7 +428,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 val equipmentFromExercises =
-                    storageService.getEquipmentIdsForExercises(combinedExercises)
+                    exerciseService.getEquipmentIdsForExercises(combinedExercises)
 
                 val newPackage = ExercisePackage(
                     name = _packageName.value.toString(),
@@ -391,7 +439,7 @@ class CreatorWizardViewModel @Inject constructor(
                     conditionIds = _selectedConditions.value.toList()
                 )
                 Log.d(CREATOR_WIZARD_TAG, "Package data: $newPackage")
-                storageService.createExercisePackage(newPackage)
+                exercisePackageService.createExercisePackage(newPackage)
             })
         navigate(WizardScreen.CreatorWizard.route)
         _message.update { "Pakiet ćwiczeń utworzony" }
@@ -410,7 +458,7 @@ class CreatorWizardViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 val equipmentFromExercises =
-                    storageService.getEquipmentIdsForExercises(combinedExercises)
+                    exerciseService.getEquipmentIdsForExercises(combinedExercises)
 
                 val editedPackage = ExercisePackage(
                     id = _packageId.value.toString(),
@@ -422,7 +470,7 @@ class CreatorWizardViewModel @Inject constructor(
                     conditionIds = _selectedConditions.value.toList()
                 )
                 Log.d(CREATOR_WIZARD_TAG, "Edited package data: $editedPackage")
-                storageService.updateExercisePackage(editedPackage)
+                exercisePackageService.updateExercisePackage(editedPackage)
             })
         navigate(WizardScreen.CreatorWizard.route)
         _message.update { "Pakiet ćwiczeń zaktualizowany" }

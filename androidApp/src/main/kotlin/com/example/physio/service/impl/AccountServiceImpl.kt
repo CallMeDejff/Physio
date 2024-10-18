@@ -1,6 +1,7 @@
 package com.example.physio.service.impl
 
 import android.util.Log
+import com.example.physio.models.FavoritePackageResult
 import com.example.physio.models.User
 import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
@@ -62,40 +63,30 @@ class AccountServiceImpl @Inject constructor(
     }
 
     override suspend fun getUserInfo(userId: String): User? {
-        val cachedUser = if (userId == currentUserId) {
-            User(
-                uid = userPreferences.getUserUid(),
-                name = userPreferences.getUserName(),
-                lastname = userPreferences.getUserLastname(),
-                licenseNumber = userPreferences.getUserLicenseNumber(),
-                userType = userPreferences.getUserType()
-            )
-        } else null
-
-        if (cachedUser != null && cachedUser.uid.isNotEmpty()) {
-            Log.d(ACCOUNT_SERVICE_TAG, "Returned cached user: $cachedUser")
-            return cachedUser
-        }
-
         return try {
             val documentSnapshot = firestore.collection(USERS_COLLECTION)
                 .document(userId)
                 .get()
                 .await()
 
-            val fetchedUser = documentSnapshot.toObject(User::class.java)?.also {
-                if (userId == currentUserId) {
-                    userPreferences.setUser(
-                        it.uid,
-                        it.name,
-                        it.lastname,
-                        it.licenseNumber,
-                        it.userType
-                    )
-                    Log.d(ACCOUNT_SERVICE_TAG, "User set to shared preferences: $it")
+            if (documentSnapshot.exists()) {
+                val fetchedUser = documentSnapshot.toObject(User::class.java)?.also {
+                    if (userId == currentUserId) {
+                        userPreferences.setUser(
+                            it.uid,
+                            it.name,
+                            it.lastname,
+                            it.licenseNumber,
+                            it.userType
+                        )
+                        Log.d(ACCOUNT_SERVICE_TAG, "User set to shared preferences: $it")
+                    }
                 }
+                fetchedUser
+            } else {
+                Log.e(ACCOUNT_SERVICE_TAG, "Document for userId $userId does not exist")
+                null
             }
-            fetchedUser
         } catch (e: Exception) {
             Log.e(ACCOUNT_SERVICE_TAG, "Error getting user info", e)
             null
@@ -104,7 +95,7 @@ class AccountServiceImpl @Inject constructor(
 
     override suspend fun createUser(user: User) {
         try {
-            val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(user.uid)
             userDocRef.set(user).await()
             userPreferences.setUser(
                 user.uid,
@@ -128,11 +119,23 @@ class AccountServiceImpl @Inject constructor(
             val signInResult = Firebase.auth.signInWithEmailAndPassword(email, password).await()
             if (signInResult.user != null) {
                 val userId = signInResult.user?.uid
-                Log.d("AccountService", "signInWithEmailAndPassword:success:$userId")
+                Log.d(ACCOUNT_SERVICE_TAG, "signInWithEmailAndPassword:success:$userId")
 
                 currentUserId = userId ?: ""
 
-                Result.success(Unit)
+                Log.d(
+                    ACCOUNT_SERVICE_TAG,
+                    "signInWithEmailAndPassword:Fetching user info for userId: $currentUserId"
+                )
+
+                val userInfo = getUserInfo(currentUserId)
+                if (userInfo != null) {
+                    Log.d(ACCOUNT_SERVICE_TAG, "Fetched user info: $userInfo")
+                    Result.success(Unit)
+                } else {
+                    Log.e(ACCOUNT_SERVICE_TAG, "Failed to fetch user info")
+                    Result.failure(Exception("Nie udało się pobrać informacji o użytkowniku"))
+                }
             } else {
                 Log.e(ACCOUNT_SERVICE_TAG, "signInWithEmailAndPassword:failure - no user returned")
                 Result.failure(Exception("Logowanie nie powiodło się"))
@@ -145,6 +148,7 @@ class AccountServiceImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
 
     override suspend fun signInWithGoogle(idToken: String) {
         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
@@ -188,6 +192,42 @@ class AccountServiceImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun toggleFavoritePackage(packageId: String): FavoritePackageResult {
+        return try {
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
+
+            val result = firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(userDocRef)
+                val user = snapshot.toObject(User::class.java)
+
+                user?.let {
+                    val updatedFavorites = it.favoritePackages.toMutableList()
+
+                    return@runTransaction if (updatedFavorites.contains(packageId)) {
+                        updatedFavorites.remove(packageId)
+                        transaction.update(userDocRef, "favoritePackages", updatedFavorites)
+                        Log.d(ACCOUNT_SERVICE_TAG, "$packageId removed from favorites.")
+                        FavoritePackageResult.Removed(packageId)
+                    } else {
+                        updatedFavorites.add(packageId)
+                        transaction.update(userDocRef, "favoritePackages", updatedFavorites)
+                        Log.d(ACCOUNT_SERVICE_TAG, "$packageId added to favorites.")
+                        FavoritePackageResult.Added(packageId)
+                    }
+                } ?: throw Exception("User document not found")
+            }.await()
+            result
+        } catch (e: Exception) {
+            Log.e(
+                ACCOUNT_SERVICE_TAG,
+                "toggleFavoritePackage: Error toggling packageId: $packageId",
+                e
+            )
+            FavoritePackageResult.Failure(e)
+        }
+    }
+
 
     override suspend fun signOut() {
         Firebase.auth.signOut()

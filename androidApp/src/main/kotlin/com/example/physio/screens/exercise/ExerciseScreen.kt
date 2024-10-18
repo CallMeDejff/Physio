@@ -1,5 +1,6 @@
 package com.example.physio.screens.exercise
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,10 +31,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.physio.screens.exercise.components.DescriptionView
+import com.example.physio.screens.exercise.components.ExercisesView
 import com.example.physio.screens.exercise.components.PreviewScreen
 import com.example.physio.screens.sign_in.components.HeaderView
 import com.example.physio.ui.theme.colorPrimary
@@ -47,13 +50,25 @@ fun ExerciseScreen(
     viewModel: ExerciseViewModel,
     packageId: String?
 ) {
+    val context = LocalContext.current
     var selectedMediaUrl by remember { mutableStateOf<String?>(null) }
+    var selectedMediaType by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(viewModel.message) {
+        viewModel.message.collect { message ->
+            message?.let {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.clearMessage()
+            }
+        }
+    }
 
     if (packageId != null) {
         LaunchedEffect(packageId) {
             viewModel.getExercisePackage(packageId)
         }
     }
+
     val isLoading by viewModel.isLoading.collectAsState()
 
     if (isLoading) {
@@ -67,8 +82,11 @@ fun ExerciseScreen(
         }
     } else {
         if (selectedMediaUrl != null) {
-            PreviewScreen(mediaUrl = selectedMediaUrl!!) {
-                selectedMediaUrl = null
+            if (selectedMediaUrl != null && selectedMediaType != null) {
+                PreviewScreen(mediaUrl = selectedMediaUrl!!, mediaType = selectedMediaType!!) {
+                    selectedMediaUrl = null
+                    selectedMediaType = null
+                }
             }
         } else {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -105,7 +123,10 @@ fun ExerciseScreen(
                             ExercisesView(
                                 viewModel = viewModel,
                                 Modifier.heightIn(300.dp, 400.dp),
-                                onMediaClick = { mediaUrl -> selectedMediaUrl = mediaUrl }
+                                onMediaClick = { mediaUrl, mediaType ->
+                                    selectedMediaUrl = mediaUrl
+                                    selectedMediaType = mediaType
+                                }
                             )
                         }
                     }
@@ -136,7 +157,7 @@ fun ExerciseScreen(
                     Spacer(modifier = Modifier.size(8.dp))
 
                     Button(
-                        onClick = { viewModel.onGoBackClick(popBackStack) },
+                        onClick = { viewModel.togglePackageFavoriteStatus(packageId.toString()) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
