@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.physio.ui.icons.Person_celebrate
 import com.example.physio.ui.icons.Self_improvement
@@ -21,64 +22,52 @@ import com.example.physio.ui.theme.colorSecondary
 import com.example.physio.ui.theme.typography
 
 @Composable
-fun MenuButtons(selectedTab: ButtonType, onTabSelected: (ButtonType) -> Unit) {
+fun MenuButtons(
+    buttons: List<ButtonItem>,
+    selectedTab: ButtonType,
+    onTabSelected: (ButtonType) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Button(
-            onClick = { onTabSelected(ButtonType.WARMUP) },
-            modifier = Modifier
-                .border(
-                    width = 2.dp,
-                    color = colorSecondary,
-                    shape = RoundedCornerShape(16.dp)
-                ),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (selectedTab == ButtonType.WARMUP) colorPrimary else Color.White
-            )
-        ) {
-            Icon(
-                imageVector = Person_celebrate,
-                contentDescription = "warmup button",
-                tint = if (selectedTab == ButtonType.WARMUP) Color.White else colorPrimary
-            )
-            Text(
-                text = "Rozgrzewka",
-                color = if (selectedTab == ButtonType.WARMUP) Color.White else colorPrimary,
-                style = typography.labelLarge,
-                modifier = Modifier.padding(4.dp)
-            )
-        }
-        Button(
-            onClick = { onTabSelected(ButtonType.EXERCISE) },
-            modifier = Modifier
-                .border(
-                    width = 2.dp,
-                    color = colorPrimary,
-                    shape = RoundedCornerShape(16.dp)
-                ),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (selectedTab == ButtonType.EXERCISE) colorPrimary else Color.White,
-            )
-        ) {
-            Icon(
-                imageVector = Self_improvement,
-                contentDescription = "exercise button",
-                tint = if (selectedTab == ButtonType.EXERCISE) Color.White else colorPrimary
-            )
-            Text(
-                text = "Ćwiczenia",
-                color = if (selectedTab == ButtonType.EXERCISE) Color.White else colorPrimary,
-                style = typography.labelLarge,
-                modifier = Modifier.padding(4.dp)
-            )
+        buttons.forEach { button ->
+            Button(
+                onClick = { onTabSelected(button.type) },
+                modifier = Modifier
+                    .border(
+                        width = 2.dp,
+                        color = if (button.type == selectedTab) colorPrimary else button.borderColor,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (button.type == selectedTab) colorPrimary else Color.White
+                )
+            ) {
+                Icon(
+                    imageVector = button.icon,
+                    contentDescription = "${button.text} button",
+                    tint = if (selectedTab == button.type) Color.White else colorPrimary
+                )
+                Text(
+                    text = button.text,
+                    color = if (selectedTab == button.type) Color.White else colorPrimary,
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(4.dp)
+                )
+            }
         }
     }
 }
 
+data class ButtonItem(
+    val type: ButtonType,
+    val text: String,
+    val icon: ImageVector,
+    val borderColor: Color
+)
+
 enum class ButtonType {
-    WARMUP, EXERCISE
+    WARMUP, EXERCISE, FAVORITES, ASSIGNED
 }

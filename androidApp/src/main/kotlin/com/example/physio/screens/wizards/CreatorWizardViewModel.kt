@@ -192,24 +192,18 @@ class CreatorWizardViewModel @Inject constructor(
             })
     }
 
-    fun toggleUser(userId: String) = toggleItem(userId, _selectedUsers)
-    fun toggleEquipment(equipmentId: String) = toggleItem(equipmentId, _selectedEquipment)
-    fun toggleCondition(conditionId: String, multipleSelection: Boolean) = toggleItem(conditionId, _selectedConditions, multipleSelection)
-    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(exerciseId, _selectedExercises, multipleSelection)
-    fun toggleWarmUp(exerciseId: String) = toggleItem(exerciseId, _selectedWarmUp)
-    fun togglePackage(packageId: String) = toggleItem(packageId, _selectedPackages, false)
+    fun toggleUser(userId: String) = toggleItem(userId, _selectedUsers, itemType = "User")
+    fun toggleEquipment(equipmentId: String) = toggleItem(equipmentId, _selectedEquipment, itemType = "Equipment")
+    fun toggleCondition(conditionId: String, multipleSelection: Boolean) = toggleItem(conditionId, _selectedConditions, allowMultipleSelection = multipleSelection, itemType = "Condition")
+    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(exerciseId, _selectedExercises, allowMultipleSelection = multipleSelection, itemType = "Exercise")
+    fun toggleWarmUp(exerciseId: String) = toggleItem(exerciseId, _selectedWarmUp, itemType = "WarmUp")
+    fun togglePackage(packageId: String) = toggleItem(packageId, _selectedPackages, allowMultipleSelection = false, itemType = "Package")
 
-    fun updateExerciseTitle(title: String) {
-        _exerciseTitle.value = title
-    }
+    fun updateExerciseTitle(title: String) { _exerciseTitle.value = title }
 
-    fun updatePackageName(packageName: String) {
-        _packageName.value = packageName
-    }
+    fun updatePackageName(packageName: String) { _packageName.value = packageName }
 
-    fun updateExerciseDescription(description: String) {
-        _exerciseDescription.value = description
-    }
+    fun updateExerciseDescription(description: String) { _exerciseDescription.value = description }
 
     fun addSelectedMedia(context: Context, uri: Uri) {
         if (isVideoUri(context, uri)) {
@@ -359,17 +353,11 @@ class CreatorWizardViewModel @Inject constructor(
             })
     }
 
-    fun onNewExerciseClick(navigate: (String) -> Unit) {
-        navigate(WizardScreen.CreateExerciseDetailsScreen.route)
-    }
+    fun onNewExerciseClick(navigate: (String) -> Unit) { navigate(WizardScreen.CreateExerciseDetailsScreen.route) }
 
-    fun onEditExerciseClick(navigate: (String) -> Unit) {
-        navigate(WizardScreen.EditExerciseScreen.route)
-    }
+    fun onEditExerciseClick(navigate: (String) -> Unit) { navigate(WizardScreen.EditExerciseScreen.route) }
 
-    fun onEditExerciseContinueClick(navigate: (String) -> Unit) {
-        navigate(WizardScreen.EditExerciseDetailsScreen.route)
-    }
+    fun onEditExerciseContinueClick(navigate: (String) -> Unit) { navigate(WizardScreen.EditExerciseDetailsScreen.route) }
 
     fun onUpdateExerciseClick(context: Context, navigate: (String) -> Unit) {
         setMediaType(context = context, uris = _selectedMediaUris.value)
@@ -476,18 +464,11 @@ class CreatorWizardViewModel @Inject constructor(
         _message.update { "Pakiet ćwiczeń zaktualizowany" }
     }
 
-    fun onEditPackageContinueClick(navigate: (String) -> Unit) {
-        navigate(WizardScreen.EditPackageDetails.route)
-    }
+    fun onEditPackageContinueClick(navigate: (String) -> Unit) { navigate(WizardScreen.EditPackageDetails.route) }
 
+    fun onGoBackClick(popBackStack: () -> Unit) { popBackStack() }
 
-    fun onGoBackClick(popBackStack: () -> Unit) {
-        popBackStack()
-    }
-
-    fun onExitWizardClick(navigate: (String) -> Unit) {
-        navigate(Graph.HOME)
-    }
+    fun onExitWizardClick(navigate: (String) -> Unit) { navigate(Graph.HOME) }
 
     companion object {
         private const val CREATOR_WIZARD_TAG = "CreatorWizardViewModel"

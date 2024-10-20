@@ -18,6 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.exercise.ExerciseViewModel
+import com.example.physio.ui.icons.Person_celebrate
+import com.example.physio.ui.icons.Self_improvement
+import com.example.physio.ui.theme.colorPrimary
+import com.example.physio.ui.theme.colorSecondary
 
 @Composable
 fun ExercisesView(
@@ -39,9 +43,26 @@ fun ExercisesView(
         Column(
             Modifier.fillMaxSize()
         ) {
-            MenuButtons(selectedTab) { newSelection ->
-                selectedTab = newSelection
-            }
+            val buttons = listOf(
+                ButtonItem(
+                    type = ButtonType.WARMUP,
+                    text = "Rozgrzewka",
+                    icon = Person_celebrate,
+                    borderColor = colorSecondary
+                ),
+                ButtonItem(
+                    type = ButtonType.EXERCISE,
+                    text = "Ćwiczenia",
+                    icon = Self_improvement,
+                    borderColor = colorPrimary
+                ),
+            )
+
+            MenuButtons(
+                buttons = buttons,
+                selectedTab = selectedTab,
+                onTabSelected = { newTab -> selectedTab = newTab }
+            )
 
             LazyRow(
                 modifier = Modifier

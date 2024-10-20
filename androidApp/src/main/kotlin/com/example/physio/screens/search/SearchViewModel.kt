@@ -120,11 +120,11 @@ class SearchViewModel @Inject constructor(
     }
 
     fun toggleEquipment(equipmentId: String) {
-        toggleItem(equipmentId, _selectedEquipment, "Equipment", SEARCH_VIEW_MODEL_TAG)
+        toggleItem(equipmentId, _selectedEquipment, true,"Equipment", SEARCH_VIEW_MODEL_TAG)
     }
 
     fun toggleCondition(conditionId: String) {
-        toggleItem(conditionId, _selectedConditions, "Condition", SEARCH_VIEW_MODEL_TAG)
+        toggleItem(conditionId, _selectedConditions, true, "Condition", SEARCH_VIEW_MODEL_TAG)
     }
 
     companion object {

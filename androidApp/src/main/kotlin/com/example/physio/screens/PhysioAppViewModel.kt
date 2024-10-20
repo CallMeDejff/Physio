@@ -49,9 +49,9 @@ open class PhysioAppViewModel : ViewModel() {
     fun toggleItem(
         itemId: String,
         selectedItemsFlow: MutableStateFlow<Set<String>>,
-        itemType: String,
-        tag: String = "",
-        allowMultipleSelection: Boolean = true
+        allowMultipleSelection: Boolean = true,
+        itemType: String = "Item",
+        tag: String = ""
     ) {
         selectedItemsFlow.update { selectedItems ->
             val newSet = if (allowMultipleSelection) {

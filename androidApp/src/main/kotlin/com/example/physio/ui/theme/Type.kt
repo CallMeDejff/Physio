@@ -16,6 +16,13 @@ val typography = androidx.compose.material3.Typography(
         letterSpacing = 0.5.sp
     ),
 
+    headlineLarge = TextStyle(
+        fontSize = 24.sp,
+        fontFamily = FontFamily(Font(R.font.helvetica_neue_bold)),
+        fontWeight = FontWeight.Normal,
+        lineHeight = 22.sp
+    ),
+
     headlineMedium = TextStyle(
         fontSize = 19.sp,
         fontFamily = FontFamily(Font(R.font.helvetica_neue_bold)),

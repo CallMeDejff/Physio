@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,98 +80,108 @@ fun SearchScreen(
             CircularProgressIndicator()
         }
     } else {
-        Column(
-            modifier = modifier
+        Surface(
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 60.dp)
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(8.dp)
         ) {
-
-
-            Text(
-                text = buildAnnotatedString {
-                    append("Znajdź swój ")
-                    withStyle(style = SpanStyle(color = colorPrimary)) {
-                        append("pakiet ćwiczeń.")
-                    }
-                },
-                style = typography.headlineMedium,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            AutoComplete(
-                itemList = equipmentList,
-                selectedItems = selectedEquipment,
-                onToggleItem = { equipmentId -> viewModel.toggleEquipment(equipmentId) }
-            )
-
-            AutoComplete(
-                itemList = conditionsList,
-                selectedItems = selectedCondition,
-                onToggleItem = { conditionId -> viewModel.toggleCondition(conditionId) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { viewModel.searchForMatchingPackages() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(16.dp)),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(bottom = 60.dp, top = 16.dp)
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (isLoadingResults) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "search button",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Szukaj", color = Color.White, style = typography.labelLarge)
-                }
-            }
+                Text(
+                    text = buildAnnotatedString {
+                        append("Znajdź swój ")
+                        withStyle(style = SpanStyle(color = colorPrimary)) {
+                            append("pakiet ćwiczeń.")
+                        }
+                    },
+                    style = typography.headlineLarge,
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (matchingPackages.isNotEmpty()) {
-                    items(matchingPackages) { (id, name, description) ->
-                        ExercisePackageCard(
-                            id = id,
-                            name = name,
-                            description = description,
-                            onClick = { packageId ->
-                                navigate("exercise_screen/${packageId}")
-                            }
+                AutoComplete(
+                    itemList = equipmentList,
+                    selectedItems = selectedEquipment,
+                    onToggleItem = { equipmentId -> viewModel.toggleEquipment(equipmentId) }
+                )
+
+                AutoComplete(
+                    itemList = conditionsList,
+                    selectedItems = selectedCondition,
+                    onToggleItem = { conditionId -> viewModel.toggleCondition(conditionId) }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { viewModel.searchForMatchingPackages() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 2.dp,
+                            color = colorPrimary,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+                ) {
+                    if (isLoadingResults) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White
                         )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "search button",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Szukaj", color = Color.White, style = typography.labelLarge)
                     }
-                } else {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Brak wyników",
-                                style = typography.labelMedium,
-                                color = Color.Gray
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (matchingPackages.isNotEmpty()) {
+                        items(matchingPackages) { (id, name, description) ->
+                            ExercisePackageCard(
+                                id = id,
+                                name = name,
+                                description = description,
+                                onClick = { packageId ->
+                                    navigate("exercise_screen/${packageId}")
+                                }
                             )
+                        }
+                    } else {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Brak wyników",
+                                    style = typography.labelMedium,
+                                    color = Color.Gray
+                                )
+                            }
                         }
                     }
                 }
             }
-
         }
     }
 }
