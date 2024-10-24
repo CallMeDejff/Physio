@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.physio.models.Exercise
+import com.example.physio.ui.theme.PurpleGrey80
+import com.example.physio.ui.theme.colorTertiary
 import com.example.physio.ui.theme.typography
 
 @Composable
@@ -32,10 +34,10 @@ fun ExerciseCard(
 
     Card(
         shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colorTertiary),
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .width(300.dp)
-            //.fillMaxHeight()
             .wrapContentSize(Alignment.TopStart),
     ) {
         Column(

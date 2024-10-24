@@ -23,6 +23,7 @@ import com.example.physio.R
 import com.example.physio.screens.wizards.components.AdditionalButtons
 import com.example.physio.screens.wizards.components.ButtonType
 import com.example.physio.screens.wizards.components.SelectionButton
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
 import com.example.physio.ui.theme.colorPrimary
 
 @Composable

@@ -16,7 +16,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.components.AutoComplete
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.typography
@@ -25,7 +26,7 @@ import com.example.physio.ui.theme.typography
 fun PackageEditorForm(
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
-    viewModel: CreatorWizardViewModel,
+    viewModel: PackageCreatorViewModel,
 ) {
     val selectedPackage by viewModel.selectedPackages.collectAsState()
     val packagesList by viewModel.packagesList.collectAsState()

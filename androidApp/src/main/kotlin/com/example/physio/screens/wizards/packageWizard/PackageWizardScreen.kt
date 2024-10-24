@@ -1,5 +1,6 @@
 package com.example.physio.screens.wizards.packageWizard
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.physio.screens.sign_in.components.HeaderView
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.ghost_white
 import com.example.physio.ui.theme.typography
@@ -37,7 +39,8 @@ fun PackageWizardScreen(
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreatorWizardViewModel,
+    viewModel: PackageCreatorViewModel,
+    assignToPerson: Boolean = false,
     isEditor: Boolean = false,
     isEditorNextStep: Boolean = false
 ) {
@@ -54,17 +57,23 @@ fun PackageWizardScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (isEditor) {
-            viewModel.loadPackagesList()
-        } else if (isEditorNextStep) {
-            viewModel.getPackageDetails()
-            viewModel.loadExercisesList()
-            viewModel.loadConditionList()
-            viewModel.loadUsersList()
-        } else {
-            viewModel.loadExercisesList()
-            viewModel.loadConditionList()
-            viewModel.loadUsersList()
+        when {
+            isEditor -> viewModel.loadPackagesList()
+            assignToPerson -> {
+                viewModel.loadUsersList()
+                viewModel.loadPackagesList()
+            }
+            isEditorNextStep -> {
+                viewModel.getPackageDetails()
+                viewModel.loadExercises()
+                viewModel.loadCondition()
+                viewModel.loadUsersList()
+            }
+            else -> {
+                viewModel.loadExercises()
+                viewModel.loadCondition()
+                viewModel.loadUsersList()
+            }
         }
     }
 
@@ -102,26 +111,11 @@ fun PackageWizardScreen(
                         bottom.linkTo(navigationButtons.top)
                     }
             ) {
-                if (isEditor) {
-                    PackageEditorForm(
-                        navigate,
-                        popBackStack,
-                        viewModel = viewModel
-                    )
-                } else if (isEditorNextStep) {
-                    PackageDetailsForm(
-                        navigate,
-                        popBackStack,
-                        viewModel = viewModel,
-                        isEditor = true,
-                    )
-                } else {
-                    PackageDetailsForm(
-                        navigate,
-                        popBackStack,
-                        viewModel = viewModel,
-                        isEditor = false
-                    )
+                when {
+                    assignToPerson -> PackageAssigningForm(navigate, popBackStack, viewModel)
+                    isEditor -> PackageEditorForm(navigate, popBackStack, viewModel)
+                    isEditorNextStep -> PackageDetailsForm(navigate, popBackStack, viewModel, isEditor = true)
+                    else -> PackageDetailsForm(navigate, popBackStack, viewModel, isEditor = false)
                 }
             }
 
@@ -135,9 +129,12 @@ fun PackageWizardScreen(
             ) {
                 Button(
                     onClick = {
-                        if (isEditor) viewModel.onEditPackageContinueClick(navigate) else if (isEditorNextStep) viewModel.onEditPackageClick(
-                            navigate
-                        ) else viewModel.onCreatePackageClick(navigate)
+                        when {
+                            assignToPerson -> viewModel.onAssignPackageClick(navigate)
+                            isEditor -> viewModel.onEditPackageContinueClick(navigate)
+                            isEditorNextStep -> viewModel.onEditPackageClick(navigate)
+                            else -> viewModel.onCreatePackageClick(navigate)
+                        }
                     },
                     modifier = Modifier
                         .weight(2f),
@@ -145,7 +142,7 @@ fun PackageWizardScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
                 ) {
                     Text(
-                        text = if (isEditor || isEditorNextStep) "Edytuj" else "Utwórz",
+                        text = if (assignToPerson) "Przypisz" else if (isEditor || isEditorNextStep) "Edytuj" else "Utwórz",
                         color = Color.White,
                         style = typography.labelLarge,
                         modifier = Modifier.padding(8.dp)
@@ -170,7 +167,6 @@ fun PackageWizardScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(1.dp))
         }
     }

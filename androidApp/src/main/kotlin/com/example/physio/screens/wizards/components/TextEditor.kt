@@ -50,7 +50,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.DescriptionUpdatable
+import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.theme.colorPrimary
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
@@ -59,7 +61,7 @@ import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 @Composable
 fun TextEditorView(
     initialDescription: String,
-    viewModel: CreatorWizardViewModel
+    viewModel: DescriptionUpdatable
 ) {
     val state = rememberRichTextState()
     val titleSize = MaterialTheme.typography.displaySmall.fontSize
@@ -92,7 +94,7 @@ fun TextEditorView(
                 onCenterAlignClick = { state.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center)) },
                 onExportClick = {
                     val description = state.toHtml()
-                    viewModel.updateExerciseDescription(description)
+                    viewModel.updateDescription(description)
 
                 }
             )

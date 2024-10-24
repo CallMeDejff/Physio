@@ -2,7 +2,7 @@ package com.example.physio.screens.exercise
 
 import android.util.Log
 import com.example.physio.models.Exercise
-import com.example.physio.models.FavoritePackageResult
+import com.example.physio.models.StorageResult
 import com.example.physio.screens.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.ExercisePackageService
@@ -107,17 +107,17 @@ class ExerciseViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 when (val result = accountService.toggleFavoritePackage(packageId)) {
-                    is FavoritePackageResult.Added -> {
+                    is StorageResult.Added -> {
                         Log.d("ViewModel", "Package ${result.packageId} added to favorites")
                         _message.update { "Pakiet dodany do ulubionych" }
                     }
 
-                    is FavoritePackageResult.Removed -> {
+                    is StorageResult.Removed -> {
                         Log.d("ViewModel", "Package ${result.packageId} removed from favorites")
                         _message.update { "Pakiet usunięty z ulubionych" }
                     }
 
-                    is FavoritePackageResult.Failure -> {
+                    is StorageResult.Failure -> {
                         Log.e("ViewModel", "Error: ${result.error.message}")
                         _message.update { "Wystąpił błąd przy dodawaniu do ulubionych" }
                     }

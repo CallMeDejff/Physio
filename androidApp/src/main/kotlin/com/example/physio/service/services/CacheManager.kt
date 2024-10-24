@@ -1,6 +1,7 @@
 package com.example.physio.service.services
 
 import com.example.physio.models.ExercisePackage
+import com.example.physio.models.UserPackages
 
 interface CacheManager {
     fun getCachedExercisesList(): List<Pair<String, String>>?
@@ -11,4 +12,6 @@ interface CacheManager {
     fun setCachedConditionsList(conditionsList: List<Pair<String, String>>)
     fun getCachedEquipmentsList(): List<Pair<String, String>>?
     fun setCachedEquipmentsList(equipmentsList: List<Pair<String, String>>)
+    fun getCachedUserPackages(): UserPackages?
+    fun setCachedUserPackages(userPackages: UserPackages)
 }

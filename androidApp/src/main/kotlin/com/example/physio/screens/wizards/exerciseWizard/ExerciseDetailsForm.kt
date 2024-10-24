@@ -48,10 +48,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.physio.screens.exercise.components.PreviewScreen
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
 import com.example.physio.screens.wizards.components.ActionButton
 import com.example.physio.screens.wizards.components.CustomAlertDialog
 import com.example.physio.screens.wizards.components.TextEditorView
+import com.example.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.example.physio.ui.components.AutoCompleteDetailed
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.gray
@@ -61,7 +62,7 @@ import com.example.physio.ui.theme.typography
 fun ExerciseDetailsForm(
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
-    viewModel: CreatorWizardViewModel,
+    viewModel: ExerciseCreatorViewModel,
     isEditorNextStep: Boolean
 ) {
     val context = LocalContext.current

@@ -2,6 +2,7 @@ package com.example.physio.screens.wizards.packageWizard
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,10 +36,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
 import com.example.physio.screens.wizards.components.CustomAlertDialog
 import com.example.physio.screens.wizards.components.TextEditorView
+import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.components.AutoCompleteDetailed
+import com.example.physio.ui.icons.Clinical_notes
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.gray
 import com.example.physio.ui.theme.typography
@@ -49,17 +52,15 @@ import com.example.physio.ui.theme.typography
 fun PackageDetailsForm(
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
-    viewModel: CreatorWizardViewModel,
+    viewModel: PackageCreatorViewModel,
     isEditor: Boolean = false
 ) {
     val exercisesList by viewModel.exercisesList.collectAsState()
-    val usersList by viewModel.usersList.collectAsState()
     val conditionsList by viewModel.conditionsList.collectAsState()
     val selectedExercises by viewModel.selectedExercises.collectAsState()
-    val selectedUsers by viewModel.selectedUsers.collectAsState()
     val selectedWarmUp by viewModel.selectedWarmUp.collectAsState()
     val selectedConditions by viewModel.selectedConditions.collectAsState()
-    val description by viewModel.exerciseDescription.collectAsState()
+    val description by viewModel.packageDescription.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -214,26 +215,9 @@ fun PackageDetailsForm(
                         initialDescription = description ?: "",
                         viewModel = viewModel
                     )
-                }
-            }
 
-            item {
-                Text(
-                    text = "Przypisz ćwiczenia pacjentowi",
-                    style = typography.labelLarge,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Box(
-                    modifier = Modifier
-                        .heightIn(200.dp, 300.dp)
-                ) {
-                    AutoCompleteDetailed(
-                        userList = usersList,
-                        selectedItems = selectedUsers,
-                        onToggleItem = { userId ->
-                            viewModel.toggleUser(userId)
-                        }
-                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+
                 }
             }
 

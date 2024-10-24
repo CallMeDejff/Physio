@@ -58,10 +58,7 @@ fun FavoritesScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val isLoading by viewModel.isLoading.collectAsState()
-    var selectedTab by remember { mutableStateOf(ButtonType.ASSIGNED) }
     val categories by viewModel.fetchedCategories.collectAsState()
-
-    val favorites by viewModel.fetchedFavorites.collectAsState()
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->
@@ -73,6 +70,7 @@ fun FavoritesScreen(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.fetchUserPackages()
         viewModel.fetchCategories()
     }
 
@@ -128,11 +126,16 @@ fun FavoritesScreen(
                                 items(categories) { category ->
                                     CategoryCard(
                                         title = category.title,
-                                        content = category.content
+                                        icon = category.icon,
+                                        exercisePackages = category.exercisePackages,
+                                        onExerciseClick = { packageId ->
+                                            navController.navigate("exercise_screen/${packageId}")
+                                        }
                                     )
                                 }
                             }
                         }
+
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
@@ -169,3 +172,4 @@ fun FavoritesScreen(
         }
     }
 }
+

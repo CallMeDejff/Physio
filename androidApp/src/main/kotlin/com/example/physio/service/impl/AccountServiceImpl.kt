@@ -1,7 +1,7 @@
 package com.example.physio.service.impl
 
 import android.util.Log
-import com.example.physio.models.FavoritePackageResult
+import com.example.physio.models.StorageResult
 import com.example.physio.models.User
 import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
@@ -193,7 +193,7 @@ class AccountServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun toggleFavoritePackage(packageId: String): FavoritePackageResult {
+    override suspend fun toggleFavoritePackage(packageId: String): StorageResult {
         return try {
             val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
 
@@ -208,12 +208,12 @@ class AccountServiceImpl @Inject constructor(
                         updatedFavorites.remove(packageId)
                         transaction.update(userDocRef, "favoritePackages", updatedFavorites)
                         Log.d(ACCOUNT_SERVICE_TAG, "$packageId removed from favorites.")
-                        FavoritePackageResult.Removed(packageId)
+                        StorageResult.Removed(packageId)
                     } else {
                         updatedFavorites.add(packageId)
                         transaction.update(userDocRef, "favoritePackages", updatedFavorites)
                         Log.d(ACCOUNT_SERVICE_TAG, "$packageId added to favorites.")
-                        FavoritePackageResult.Added(packageId)
+                        StorageResult.Added(packageId)
                     }
                 } ?: throw Exception("User document not found")
             }.await()
@@ -224,10 +224,9 @@ class AccountServiceImpl @Inject constructor(
                 "toggleFavoritePackage: Error toggling packageId: $packageId",
                 e
             )
-            FavoritePackageResult.Failure(e)
+            StorageResult.Failure(e)
         }
     }
-
 
     override suspend fun signOut() {
         Firebase.auth.signOut()
@@ -240,6 +239,5 @@ class AccountServiceImpl @Inject constructor(
     companion object {
         private const val USERS_COLLECTION = "users"
         private const val ACCOUNT_SERVICE_TAG = "AccountService"
-
     }
 }

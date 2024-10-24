@@ -52,6 +52,7 @@ sealed class WizardScreen(val route: String) {
     object CreatePackage : WizardScreen(route = "wizards/create_package")
     object EditPackage : WizardScreen(route = "wizards/edit_package")
     object EditPackageDetails : WizardScreen(route = "wizards/edit_package/details")
+    object AssignPackage: WizardScreen(route = "wizards/assign_package")
 }
 
 sealed class AuthScreen(val route: String) {

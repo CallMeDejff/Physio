@@ -64,9 +64,7 @@ class SearchViewModel @Inject constructor(
                     SEARCH_VIEW_MODEL_TAG,
                     "loadConditionList:Conditions list loaded, item count: ${_conditionsList.value.size}"
                 )
-
                 _isLoading.value = false
-
             })
     }
 
@@ -101,7 +99,6 @@ class SearchViewModel @Inject constructor(
                             "searchForMatchingPackages: Found package: ID = $id, Name = $name, Description = $description"
                         )
                     }
-
                     Log.d(
                         SEARCH_VIEW_MODEL_TAG,
                         "searchForMatchingPackages: Packages found: ${matchingPackages.size}"

@@ -12,7 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
+import com.example.physio.ui.icons.Clinical_notes
 
 @Composable
 fun AdditionalButtons(
@@ -31,7 +32,9 @@ fun AdditionalButtons(
                     Icons.Default.AddCircleOutline,
                     "Dodaj ćwiczenie"
                 ) { viewModel.onNewExerciseClick(navigate) }
+
                 Spacer(modifier = Modifier.height(10.dp))
+
                 ActionButton(
                     Icons.Default.EditNote,
                     "Edytuj ćwiczenie"
@@ -43,11 +46,20 @@ fun AdditionalButtons(
                     Icons.Default.AddCircleOutline,
                     "Dodaj pakiet ćwiczeń"
                 ) { viewModel.onNewPackageClick(navigate) }
+
                 Spacer(modifier = Modifier.height(10.dp))
+
                 ActionButton(
                     Icons.Default.EditNote,
                     "Edytuj pakiet ćwiczeń"
                 ) { viewModel.onEditPackageWizardClick(navigate) }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                ActionButton(
+                    Clinical_notes,
+                    "Przypisz pakiet pacjentowi"
+                ) { viewModel.onAssignPackageClick(navigate) }
             }
         }
     }

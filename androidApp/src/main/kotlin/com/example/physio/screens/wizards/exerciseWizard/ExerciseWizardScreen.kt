@@ -27,7 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.physio.screens.sign_in.components.HeaderView
-import com.example.physio.screens.wizards.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
+import com.example.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.ghost_white
 import com.example.physio.ui.theme.typography
@@ -37,7 +38,7 @@ fun ExerciseWizardScreen(
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreatorWizardViewModel,
+    viewModel: ExerciseCreatorViewModel,
     isEditor: Boolean = false,
     isEditorNextStep: Boolean = false
 ) {
@@ -57,12 +58,12 @@ fun ExerciseWizardScreen(
         if (isEditorNextStep) {
             viewModel.getExerciseDetails()
             viewModel.loadEquipmentList()
-            viewModel.loadConditionList()
+            viewModel.loadCondition()
         } else if (isEditor) {
-            viewModel.loadExercisesList()
+            viewModel.loadExercises()
         } else {
             viewModel.loadEquipmentList()
-            viewModel.loadConditionList()
+            viewModel.loadCondition()
         }
     }
 
