@@ -1,4 +1,4 @@
-package com.example.physio.screens
+package com.example.physio.core
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

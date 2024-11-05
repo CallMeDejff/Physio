@@ -1,14 +1,10 @@
 package com.example.physio.screens.favorites.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -24,8 +20,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.example.physio.models.ExercisePackage
 import com.example.physio.screens.search.components.ExercisePackageCard
-import com.example.physio.ui.theme.PurpleGrey40
-import com.example.physio.ui.theme.PurpleGrey80
 import com.example.physio.ui.theme.typography
 
 @Composable
@@ -50,10 +44,10 @@ fun CategoryCard(
             modifier = Modifier.padding(16.dp)
         ) {
             item {
-                Row (
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(6.dp)
-                ){
+                ) {
                     Icon(imageVector = icon, contentDescription = "category icon")
                     Text(
                         text = title,
@@ -68,6 +62,7 @@ fun CategoryCard(
                     id = exercisePackage.id,
                     name = exercisePackage.name,
                     description = exercisePackage.description,
+                    expandable = false,
                     onClick = onExerciseClick
                 )
             }

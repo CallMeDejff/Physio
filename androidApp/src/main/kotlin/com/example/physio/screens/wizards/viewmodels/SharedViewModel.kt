@@ -1,9 +1,7 @@
 package com.example.physio.screens.wizards.viewmodels
 
 import android.util.Log
-import com.example.physio.models.User
-import com.example.physio.screens.PhysioAppViewModel
-import com.example.physio.service.services.AccountService
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.ListService
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -21,7 +19,10 @@ abstract class SharedViewModel : PhysioAppViewModel() {
             block = {
                 _isLoading.value = true
                 _conditionsList.value = listService.getConditions()
-                Log.d(tag, "loadConditionList: Conditions list loaded, item count: ${_conditionsList.value.size}")
+                Log.d(
+                    tag,
+                    "loadConditionList: Conditions list loaded, item count: ${_conditionsList.value.size}"
+                )
                 _isLoading.value = false
             }
         )

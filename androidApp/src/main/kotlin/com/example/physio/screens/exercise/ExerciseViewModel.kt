@@ -3,7 +3,7 @@ package com.example.physio.screens.exercise
 import android.util.Log
 import com.example.physio.models.Exercise
 import com.example.physio.models.StorageResult
-import com.example.physio.screens.PhysioAppViewModel
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.ExercisePackageService
 import com.example.physio.service.services.ExerciseService
@@ -59,8 +59,8 @@ class ExerciseViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             tag = EXERCISE_VIEW_MODEL,
             block = {
+                _isLoading.update { true }
                 val exercisePackage = exercisePackageService.getExercisePackage(exercisePackageId)
-
                 Log.d(
                     EXERCISE_VIEW_MODEL,
                     "getExercisePackage: Received exercise package: $exercisePackage"
@@ -81,6 +81,7 @@ class ExerciseViewModel @Inject constructor(
                     }.awaitAll().filterNotNull()
                 } catch (e: Exception) {
                     Log.e(EXERCISE_VIEW_MODEL, "Error fetching exercises", e)
+                    _isLoading.update { false }
                     emptyList()
                 }
 
@@ -90,6 +91,7 @@ class ExerciseViewModel @Inject constructor(
                     }.awaitAll().filterNotNull()
                 } catch (e: Exception) {
                     Log.e(EXERCISE_VIEW_MODEL, "Error fetching warmups", e)
+                    _isLoading.update { false }
                     emptyList()
                 }
                 _fetchedWarmUps.value = warmups
@@ -97,6 +99,8 @@ class ExerciseViewModel @Inject constructor(
 
                 Log.d(EXERCISE_VIEW_MODEL, "Fetched exercises: $exercises")
                 Log.d(EXERCISE_VIEW_MODEL, "Fetched warmups: $warmups")
+
+                _isLoading.update { false }
             }
         )
     }

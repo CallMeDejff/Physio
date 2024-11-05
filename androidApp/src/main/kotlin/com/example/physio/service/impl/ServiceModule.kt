@@ -3,6 +3,7 @@ package com.example.physio.service.impl
 import android.content.Context
 import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.AuthenticationService
 import com.example.physio.service.services.CacheManager
 import com.example.physio.service.services.ExercisePackageService
 import com.example.physio.service.services.ExerciseService
@@ -23,6 +24,9 @@ import javax.inject.Singleton
 abstract class ServiceModule {
     @Binds
     abstract fun provideAccountService(impl: AccountServiceImpl): AccountService
+
+    @Binds
+    abstract fun provideAuthenticationService(impl: AuthenticationServiceImpl): AuthenticationService
 
     @Binds
     abstract fun provideStorageService(impl: StorageServiceImpl): StorageService

@@ -2,21 +2,13 @@ package com.example.physio.service
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import javax.inject.Inject
 
 class UserPreferences @Inject constructor(context: Context) {
 
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
-
-    companion object {
-        private const val USER_UID_KEY = "user_uid"
-        private const val USER_NAME_KEY = "user_name"
-        private const val USER_LASTNAME_KEY = "user_lastname"
-        private const val USER_LICENSE_NUMBER_KEY = "user_license_number"
-        private const val USER_TYPE = "user_type"
-
-    }
 
     fun getUserUid(): String {
         return sharedPreferences.getString(USER_UID_KEY, "") ?: ""
@@ -35,6 +27,7 @@ class UserPreferences @Inject constructor(context: Context) {
     }
 
     fun getUserType(): Int {
+        Log.d("SharedPreferences", "getUserType() called: ${sharedPreferences.getInt(USER_TYPE, 0)}")
         return sharedPreferences.getInt(USER_TYPE, 0)
     }
 
@@ -54,5 +47,14 @@ class UserPreferences @Inject constructor(context: Context) {
             clear()
             apply()
         }
+    }
+
+    companion object {
+        private const val USER_UID_KEY = "user_uid"
+        private const val USER_NAME_KEY = "user_name"
+        private const val USER_LASTNAME_KEY = "user_lastname"
+        private const val USER_LICENSE_NUMBER_KEY = "user_license_number"
+        private const val USER_TYPE = "user_type"
+
     }
 }

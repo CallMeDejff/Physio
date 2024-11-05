@@ -1,5 +1,6 @@
 package com.example.physio.screens.exercise
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -53,6 +54,7 @@ fun ExerciseScreen(
     val context = LocalContext.current
     var selectedMediaUrl by remember { mutableStateOf<String?>(null) }
     var selectedMediaType by remember { mutableStateOf<String?>(null) }
+    val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->
@@ -69,24 +71,18 @@ fun ExerciseScreen(
         }
     }
 
-    val isLoading by viewModel.isLoading.collectAsState()
-
-    if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = colorPrimary)
-        }
-    } else {
         if (selectedMediaUrl != null) {
-            if (selectedMediaUrl != null && selectedMediaType != null) {
-                PreviewScreen(mediaUrl = selectedMediaUrl!!, mediaType = selectedMediaType!!) {
-                    selectedMediaUrl = null
-                    selectedMediaType = null
-                }
+            if (selectedMediaType != null) {
+                Log.d("ExerciseScreen", "Media URL: $selectedMediaUrl")
+                PreviewScreen(
+                    mediaUrl = selectedMediaUrl!!,
+                    mediaType = selectedMediaType!!,
+                    isUrl = true,
+                    onDismiss = {
+                        selectedMediaUrl = null
+                        selectedMediaType = null
+                    },
+                )
             }
         } else {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -102,35 +98,49 @@ fun ExerciseScreen(
                     200, 0.7f
                 )
 
-                Card(
-                    shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-                    colors = CardDefaults.cardColors(containerColor = ghost_white),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(descriptionView) {
-                            top.linkTo(header.bottom)
-                            bottom.linkTo(navigationButtons.top)
-                        }
-                ) {
-                    LazyColumn(
-                        Modifier.fillMaxSize()
+                    Card(
+                        shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
+                        colors = CardDefaults.cardColors(containerColor = ghost_white),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .constrainAs(descriptionView) {
+                                top.linkTo(header.bottom)
+                                bottom.linkTo(navigationButtons.top)
+                            }
                     ) {
-                        item {
-                            DescriptionView(viewModel = viewModel)
-                        }
-
-                        item {
-                            ExercisesView(
-                                viewModel = viewModel,
-                                Modifier.heightIn(300.dp, 400.dp),
-                                onMediaClick = { mediaUrl, mediaType ->
-                                    selectedMediaUrl = mediaUrl
-                                    selectedMediaType = mediaType
+                        if (isLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = colorPrimary)
+                            }
+                        } else {
+                            LazyColumn(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = 120.dp)
+                            ) {
+                                item {
+                                    DescriptionView(viewModel = viewModel)
                                 }
-                            )
+
+                                item {
+                                    ExercisesView(
+                                        viewModel = viewModel,
+                                        Modifier.heightIn(300.dp, 400.dp),
+                                        onMediaClick = { mediaUrl, mediaType ->
+                                            selectedMediaUrl = mediaUrl
+                                            selectedMediaType = mediaType
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
-                }
+
 
                 Row(
                     modifier = Modifier
@@ -175,5 +185,5 @@ fun ExerciseScreen(
             }
         }
     }
-}
+
 

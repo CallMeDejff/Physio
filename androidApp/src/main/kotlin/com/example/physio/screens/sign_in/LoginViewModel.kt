@@ -3,36 +3,23 @@ package com.example.physio.screens.sign_in
 import android.util.Log
 import androidx.credentials.Credential
 import androidx.credentials.CustomCredential
-import androidx.lifecycle.viewModelScope
 import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
-import com.example.physio.screens.PhysioAppViewModel
-import com.example.physio.service.services.AccountService
+import com.example.physio.core.PhysioAppViewModel
+import com.example.physio.service.services.AuthenticationService
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val accountService: AccountService,
-    //private val storageService: StorageService
+    private val authenticationService: AuthenticationService
 ) : PhysioAppViewModel() {
 
     private var email: String = ""
     private var password: String = ""
-    val user = accountService.currentUser.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
-
-    fun setLoading(loading: Boolean) {
-        _isLoading.update { loading }
-    }
 
     private fun dataValidation(): Result<Unit> {
         return when {
@@ -58,16 +45,19 @@ class LoginViewModel @Inject constructor(
             errorMessage = "Logowanie za pomocą konta Google nie powiodło się",
             onError = { message -> _message.emit(message) },
             block = {
+                _isLoading.update { true }
                 if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     val googleIdTokenCredential =
                         GoogleIdTokenCredential.createFrom(credential.data)
-                    accountService.signInWithGoogle(googleIdTokenCredential.idToken)
+                    authenticationService.signInWithGoogle(googleIdTokenCredential.idToken)
+                    _isLoading.update { false }
                     openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                 } else {
                     Log.e(
                         LOGIN_VIEW_MODEL_TAG,
                         "An error occured when logging in with Google account"
                     )
+                    _isLoading.update { false }
                 }
             }
         )
@@ -82,16 +72,18 @@ class LoginViewModel @Inject constructor(
                 errorMessage = "Ups! Logowanie nie powiodło się.",
                 onError = { message -> _message.emit(message) },
                 block = {
-                    val signInResult = accountService.signIn(email, password)
+                    val signInResult = authenticationService.signIn(email, password)
                     if (signInResult.isSuccess) {
-                        val currentUserId = accountService.currentUserId
+                        val currentUserId = authenticationService.currentUserId
                         Log.i(
                             LOGIN_VIEW_MODEL_TAG,
                             "onSignInClick: logged in user id: $currentUserId"
                         )
+                        _isLoading.update { false }
                         openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                     } else {
                         _message.update { "Logowanie nie powiodło się" }
+                        _isLoading.update { false }
                     }
                 }
             )

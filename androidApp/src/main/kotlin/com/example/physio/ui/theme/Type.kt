@@ -11,7 +11,7 @@ val typography = androidx.compose.material3.Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
         fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
+        fontSize = 24.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.5.sp
     ),

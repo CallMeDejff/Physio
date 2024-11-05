@@ -1,4 +1,4 @@
-package com.example.physio
+package com.example.physio.core
 
 import androidx.navigation.NavHostController
 

@@ -1,9 +1,12 @@
 package com.example.physio.screens.wizards.exerciseWizard
 
+import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,16 +43,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.physio.screens.exercise.components.PreviewScreen
-import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
+import com.example.physio.screens.exercise.components.getThumbnailFromUri
+import com.example.physio.screens.exercise.components.getThumbnailFromUrl
 import com.example.physio.screens.wizards.components.ActionButton
 import com.example.physio.screens.wizards.components.CustomAlertDialog
 import com.example.physio.screens.wizards.components.TextEditorView
@@ -79,10 +86,30 @@ fun ExerciseDetailsForm(
             viewModel.addSelectedMedia(context, uri)
         }
     }
-
     var showDialog by remember { mutableStateOf(false) }
     var previewMediaUri by remember { mutableStateOf<Uri?>(null) }
     var showPreviewDialog by remember { mutableStateOf(false) }
+    var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(selectedMediaUris) {
+        if (selectedMediaUris.isNotEmpty()) {
+            val selectedMediaUri = selectedMediaUris.first()
+            thumbnail = if (isEditorNextStep) {
+                when (mediaType) {
+                    "image" -> null
+                    "video" -> getThumbnailFromUrl(context, selectedMediaUri)
+                    else -> null
+                }
+            } else {
+                val mimeType = context.contentResolver.getType(selectedMediaUri)
+                when {
+                    mimeType?.startsWith("image/") == true -> null
+                    mimeType?.startsWith("video/") == true -> getThumbnailFromUri(context, selectedMediaUri)
+                    else -> null
+                }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -98,9 +125,6 @@ fun ExerciseDetailsForm(
         ) {
 
             item {
-                val titleText =
-                    if (isEditorNextStep) "Edytuj tytuł ćwiczenia" else "Podaj tytuł ćwiczenia"
-
                 Text(
                     text = buildAnnotatedString {
                         append(if (isEditorNextStep) "Edytor istniejącego " else "Kreator nowego ")
@@ -112,15 +136,18 @@ fun ExerciseDetailsForm(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Text(text = titleText, style = typography.labelLarge)
             }
 
             item {
                 TextField(
                     value = viewModel.exerciseTitle.collectAsState().value ?: "",
                     onValueChange = { newTitle -> viewModel.updateExerciseTitle(newTitle) },
-                    label = { Text("Tytuł ćwiczenia", style = typography.labelMedium) },
+                    label = { Text(
+                        text = "Tytuł ćwiczenia",
+                        style = typography.labelMedium,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,)
+                            },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -129,6 +156,7 @@ fun ExerciseDetailsForm(
                         focusedContainerColor = Color.Transparent,
                         focusedIndicatorColor = colorPrimary,
                         unfocusedIndicatorColor = gray,
+                        focusedPlaceholderColor = colorPrimary,
                     ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions.Default
@@ -186,6 +214,7 @@ fun ExerciseDetailsForm(
             }
 
             item {
+                Log.d("ExerciseDetailsForm", "selectedMediaUris: $selectedMediaUris, isEditorNextStep: $isEditorNextStep")
                 if (selectedMediaUris.isNotEmpty()) {
                     val selectedMediaUri = selectedMediaUris.first()
 
@@ -198,36 +227,46 @@ fun ExerciseDetailsForm(
                                 showPreviewDialog = true
                             }
                     ) {
-                        AsyncImage(
-                            model = selectedMediaUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .background(
-                                    Color.Red.copy(alpha = 0.7f),
-                                    shape = CircleShape
-                                )
-                                .clickable {
-                                    viewModel.removeMediaUri(selectedMediaUri)
-                                }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Remove media",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .padding(4.dp)
+                        if (mediaType == "image" || thumbnail == null) {
+                            AsyncImage(
+                                model = selectedMediaUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
                             )
+                        } else if (thumbnail != null) {
+                            Image(
+                                bitmap = thumbnail!!.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .background(
+                                        Color.Red.copy(alpha = 0.7f),
+                                        shape = CircleShape
+                                    )
+                                    .clickable {
+                                        viewModel.removeMediaUri(selectedMediaUri)
+                                    }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Remove media",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .padding(4.dp)
+                                )
+                            }
                         }
                     }
                 }
-            }
+
             item {
                 if (isEditorNextStep) {
                     Button(
@@ -251,6 +290,7 @@ fun ExerciseDetailsForm(
                         )
                     }
 
+
                     if (showDialog) {
                         CustomAlertDialog(
                             title = "Usuwanie ćwiczenia",
@@ -273,7 +313,21 @@ fun ExerciseDetailsForm(
                     onDismiss = {
                         showPreviewDialog = false
                         previewMediaUri = null
-                    })
+                    },
+                    isUrl = true,
+                )
+            }
+        } else {
+            if (showPreviewDialog) {
+                PreviewScreen(
+                    mediaUrl = previewMediaUri.toString(),
+                    mediaType = mediaType.toString(),
+                    onDismiss = {
+                        showPreviewDialog = false
+                        previewMediaUri = null
+                    },
+                    isUrl = false
+                )
             }
         }
     }

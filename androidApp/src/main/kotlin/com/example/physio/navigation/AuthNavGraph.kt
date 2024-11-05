@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.physio.navigateAndPopUp
+import com.example.physio.core.navigateAndPopUp
 import com.example.physio.screens.sign_in.LoginScreen
 import com.example.physio.screens.sign_up.SignUpScreen
 import com.example.physio.screens.splash.SplashScreen
@@ -35,7 +35,9 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                     route,
                     popUp
                 )
-            })
+            },
+                navController = navController
+            )
         }
 
         composable(route = AuthScreen.Dashboard.route) {

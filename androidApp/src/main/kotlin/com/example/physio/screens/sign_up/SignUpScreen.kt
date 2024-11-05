@@ -1,6 +1,7 @@
 package com.example.physio.screens.sign_up
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,27 +14,27 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.example.physio.core.navigate
+import com.example.physio.navigation.AuthScreen
 import com.example.physio.screens.sign_in.components.HeaderView
-import com.example.physio.ui.theme.PhysioTheme
 import com.example.physio.ui.theme.ghost_white
 
 @Composable
 fun SignUpScreen(
     openAndPopUp: (String, String) -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val nameState = remember { mutableStateOf(TextFieldValue()) }
@@ -43,6 +44,11 @@ fun SignUpScreen(
     val licenseNumberState = remember { mutableStateOf(TextFieldValue()) }
     val showProgress = viewModel.showProgress.collectAsState()
 
+    BackHandler {
+        if (!navController.popBackStack()) {
+            navigate(navController, AuthScreen.SignIn.route)
+        }
+    }
 
     LaunchedEffect(viewModel.signupMessage) {
         viewModel.signupMessage.collect { message ->
@@ -110,13 +116,5 @@ fun SignUpScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSignupScreen() {
-    PhysioTheme {
-        SignUpScreen({ _, _ -> })
     }
 }

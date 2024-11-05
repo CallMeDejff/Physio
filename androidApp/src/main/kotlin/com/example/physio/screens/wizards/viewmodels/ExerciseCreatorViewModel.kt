@@ -19,7 +19,7 @@ import javax.inject.Inject
 class ExerciseCreatorViewModel @Inject constructor(
     private val exerciseService: ExerciseService,
     private val listService: ListService,
-    private val accountService: AccountService
+    private val authenticateService: AccountService
 ) : SharedViewModel(), DescriptionUpdatable {
 
     private val _exerciseTitle = MutableStateFlow<String?>("")
@@ -56,11 +56,19 @@ class ExerciseCreatorViewModel @Inject constructor(
     val conditionsList: StateFlow<List<Pair<String, String>>> = _conditionsList
 
     fun loadExercises() {
-        loadExercisesList(_exercisesList = _exercisesList, listService = listService,tag = EXERCISE_VIEWMODEL_TAG)
+        loadExercisesList(
+            _exercisesList = _exercisesList,
+            listService = listService,
+            tag = EXERCISE_VIEWMODEL_TAG
+        )
     }
 
     fun loadCondition() {
-        loadConditionList(_conditionsList = _conditionsList, listService = listService, tag = EXERCISE_VIEWMODEL_TAG)
+        loadConditionList(
+            _conditionsList = _conditionsList,
+            listService = listService,
+            tag = EXERCISE_VIEWMODEL_TAG
+        )
     }
 
     fun loadEquipmentList() {
@@ -71,7 +79,9 @@ class ExerciseCreatorViewModel @Inject constructor(
         )
     }
 
-    fun updateExerciseTitle(title: String) { _exerciseTitle.value = title }
+    fun updateExerciseTitle(title: String) {
+        _exerciseTitle.value = title
+    }
 
     fun addSelectedMedia(context: Context, uri: Uri) {
         if (isVideoUri(context, uri) && getVideoDuration(context, uri) > 60000) return
@@ -126,7 +136,7 @@ class ExerciseCreatorViewModel @Inject constructor(
     }
 
     fun deleteExercise(navigate: (String) -> Unit) {
-        if (accountService.currentUserId == _exerciseAuthor.value.toString()) {
+        if (authenticateService.currentUserId == _exerciseAuthor.value.toString()) {
             launchCatching(
                 tag = EXERCISE_VIEWMODEL_TAG,
                 errorMessage = "Nie udało się usunąć ćwiczenia.",
@@ -212,15 +222,27 @@ class ExerciseCreatorViewModel @Inject constructor(
         }
     }
 
-    override fun updateDescription(description: String) { _exerciseDescription.value = description }
+    override fun updateDescription(description: String) {
+        _exerciseDescription.value = description
+    }
 
-    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(exerciseId, _selectedExercises, allowMultipleSelection = multipleSelection, itemType = "Exercise")
+    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(
+        exerciseId,
+        _selectedExercises,
+        allowMultipleSelection = multipleSelection,
+        itemType = "Exercise"
+    )
 
-    fun toggleEquipment(equipmentId: String) = toggleItem(equipmentId, _selectedEquipment, itemType = "Equipment")
+    fun toggleEquipment(equipmentId: String) =
+        toggleItem(equipmentId, _selectedEquipment, itemType = "Equipment")
 
-    fun onEditExerciseContinueClick(navigate: (String) -> Unit) { navigate(WizardScreen.EditExerciseDetailsScreen.route) }
+    fun onEditExerciseContinueClick(navigate: (String) -> Unit) {
+        navigate(WizardScreen.EditExerciseDetailsScreen.route)
+    }
 
-    fun onGoBackClick(popBackStack: () -> Unit) { popBackStack() }
+    fun onGoBackClick(popBackStack: () -> Unit) {
+        popBackStack()
+    }
 
     companion object {
         private const val EXERCISE_VIEWMODEL_TAG = "ExerciseViewModel"

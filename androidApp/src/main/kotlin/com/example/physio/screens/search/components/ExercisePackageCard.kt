@@ -34,6 +34,7 @@ fun ExercisePackageCard(
     id: String,
     name: String,
     description: String,
+    expandable: Boolean = false,
     onClick: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -65,7 +66,8 @@ fun ExercisePackageCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 if (expanded) {
-                    val decodedDescription = Html.fromHtml(description, Html.FROM_HTML_MODE_LEGACY).toString()
+                    val decodedDescription =
+                        Html.fromHtml(description, Html.FROM_HTML_MODE_LEGACY).toString()
 
                     val limitedDescription = if (decodedDescription.length > 100) {
                         decodedDescription.take(100) + "..."
@@ -80,19 +82,21 @@ fun ExercisePackageCard(
                 }
             }
 
-            IconButton(
-                modifier = Modifier.weight(1f),
-                onClick = { expanded = !expanded }
-            ) {
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription =
-                    if (expanded) {
-                        "show less"
-                    } else {
-                        "show more"
-                    }
-                )
+            if (expandable) {
+                IconButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = { expanded = !expanded }
+                ) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription =
+                        if (expanded) {
+                            "show less"
+                        } else {
+                            "show more"
+                        }
+                    )
+                }
             }
         }
     }

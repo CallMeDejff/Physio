@@ -15,10 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.physio.ui.icons.Person_celebrate
-import com.example.physio.ui.icons.Self_improvement
 import com.example.physio.ui.theme.colorPrimary
-import com.example.physio.ui.theme.colorSecondary
 import com.example.physio.ui.theme.typography
 
 @Composable

@@ -1,7 +1,7 @@
 package com.example.physio.screens.search
 
 import android.util.Log
-import com.example.physio.screens.PhysioAppViewModel
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.ExercisePackageService
 import com.example.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +12,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    //private val storageService: StorageService,
     private val listService: ListService,
     private val exercisePackageService: ExercisePackageService
 ) : PhysioAppViewModel() {
@@ -117,7 +116,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun toggleEquipment(equipmentId: String) {
-        toggleItem(equipmentId, _selectedEquipment, true,"Equipment", SEARCH_VIEW_MODEL_TAG)
+        toggleItem(equipmentId, _selectedEquipment, true, "Equipment", SEARCH_VIEW_MODEL_TAG)
     }
 
     fun toggleCondition(conditionId: String) {

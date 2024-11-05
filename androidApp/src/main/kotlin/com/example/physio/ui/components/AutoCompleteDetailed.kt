@@ -1,5 +1,6 @@
 package com.example.physio.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -28,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -52,7 +56,7 @@ fun AutoCompleteDetailed(
 
     LaunchedEffect(category) {
         if (debounceState) {
-            delay(500)
+            delay(1000)
             expanded = category.isNotEmpty()
             debounceState = false
         }
@@ -99,6 +103,8 @@ fun AutoCompleteDetailed(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
+                .background(color = Color.White)
+
         ) {
             val filteredItems = when {
                 itemList.isNotEmpty() -> {
@@ -141,7 +147,8 @@ fun AutoCompleteDetailed(
                             style = typography.labelMedium,
                             color = colorPrimary
                         )
-                    }
+                    },
+                    modifier = Modifier.background(Color.Transparent),
                 )
             }
         }

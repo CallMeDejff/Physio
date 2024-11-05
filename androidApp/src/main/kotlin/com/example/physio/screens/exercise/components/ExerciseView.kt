@@ -41,7 +41,9 @@ fun ExercisesView(
         Text(text = "ćwiczenia niedostępne", modifier = Modifier.padding(16.dp))
     } else {
         Column(
-            Modifier.fillMaxSize()
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = 60.dp)
         ) {
             val buttons = listOf(
                 ButtonItem(

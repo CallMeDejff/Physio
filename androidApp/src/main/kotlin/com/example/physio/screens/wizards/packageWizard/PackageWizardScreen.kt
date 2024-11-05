@@ -1,6 +1,5 @@
 package com.example.physio.screens.wizards.packageWizard
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -28,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.physio.screens.sign_in.components.HeaderView
-import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
 import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.ghost_white
@@ -63,12 +61,14 @@ fun PackageWizardScreen(
                 viewModel.loadUsersList()
                 viewModel.loadPackagesList()
             }
+
             isEditorNextStep -> {
                 viewModel.getPackageDetails()
                 viewModel.loadExercises()
                 viewModel.loadCondition()
                 viewModel.loadUsersList()
             }
+
             else -> {
                 viewModel.loadExercises()
                 viewModel.loadCondition()
@@ -114,7 +114,13 @@ fun PackageWizardScreen(
                 when {
                     assignToPerson -> PackageAssigningForm(navigate, popBackStack, viewModel)
                     isEditor -> PackageEditorForm(navigate, popBackStack, viewModel)
-                    isEditorNextStep -> PackageDetailsForm(navigate, popBackStack, viewModel, isEditor = true)
+                    isEditorNextStep -> PackageDetailsForm(
+                        navigate,
+                        popBackStack,
+                        viewModel,
+                        isEditor = true
+                    )
+
                     else -> PackageDetailsForm(navigate, popBackStack, viewModel, isEditor = false)
                 }
             }

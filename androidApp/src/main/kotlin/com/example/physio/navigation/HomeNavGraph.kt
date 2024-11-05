@@ -5,6 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.physio.core.navigateAndPopUp
 import com.example.physio.screens.exercise.ExerciseScreen
 import com.example.physio.screens.exercise.ExerciseViewModel
 import com.example.physio.screens.favorites.FavoritesScreen
@@ -44,16 +45,19 @@ fun HomeNavGraph(navController: NavHostController) {
                 viewModel = viewModel
             )
         }
-        composable(route = BottomBarScreen.Profil.route) { backStackEntry ->
+        composable(route = BottomBarScreen.Profile.route) { backStackEntry ->
             val viewModel: ProfileViewModel = hiltViewModel(backStackEntry)
             ProfileScreen(
-                navController = navController,
+                openAndPopUp = { route, popUp ->
+                    navigateAndPopUp(navController, route, popUp) },
+                navigate = { popUp -> navController.navigate(popUp) },
                 viewModel = viewModel
             )
         }
 
+        authNavGraph(navController = navController)
         searchNavGraph(navController = navController)
         wizardsNavGraph(navController = navController)
-        //favoritesNavGraph(navController = navController)
+        profileNavGraph(navController = navController)
     }
 }

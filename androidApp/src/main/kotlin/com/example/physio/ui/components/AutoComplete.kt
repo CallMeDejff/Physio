@@ -1,5 +1,6 @@
 package com.example.physio.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -50,7 +51,7 @@ fun AutoComplete(
 
     LaunchedEffect(category) {
         if (debounceState) {
-            delay(500)
+            delay(1000)
             expanded = category.isNotEmpty()
             debounceState = false
         }
@@ -103,6 +104,7 @@ fun AutoComplete(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
+                .background(color = Color.White)
         ) {
             val filteredItems = if (category.isNotEmpty()) {
                 itemList.filter {

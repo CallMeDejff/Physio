@@ -8,14 +8,18 @@ import com.example.physio.models.UserSummary
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.CacheManager
 import com.example.physio.service.services.ExercisePackageService
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ExercisePackageServiceImpl @Inject constructor(
-    private val auth: AccountService,
     private val cacheManager: CacheManager
 ) : ExercisePackageService {
+
+    var currentUserId: String = ""
+        get() = Firebase.auth.currentUser?.uid.orEmpty()
 
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -62,7 +66,7 @@ class ExercisePackageServiceImpl @Inject constructor(
 
             firestore.collection(EXERCISE_PACKAGES_COLLECTION)
                 .document(generatedId)
-                .update("id", generatedId, "uid", auth.currentUserId)
+                .update("id", generatedId, "uid", currentUserId)
                 .await()
 
             val exercisePackageSummaryEntry = mapOf(
@@ -152,7 +156,7 @@ class ExercisePackageServiceImpl @Inject constructor(
 
     override suspend fun updateExercisePackage(exercisePackage: ExercisePackage) {
         try {
-            val updatedExercisePackage = exercisePackage.copy(uid = auth.currentUserId)
+            val updatedExercisePackage = exercisePackage.copy(uid = currentUserId)
 
             firestore.collection(EXERCISE_PACKAGES_COLLECTION)
                 .document(updatedExercisePackage.id)
@@ -211,7 +215,7 @@ class ExercisePackageServiceImpl @Inject constructor(
 
     override suspend fun getUserExercisePackages(): UserPackages {
         return cacheManager.getCachedUserPackages() ?: try {
-            val userDocRef = firestore.collection(USERS_COLLECTION).document(auth.currentUserId)
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
             val documentSnapshot = userDocRef.get().await()
             val user = documentSnapshot.toObject(User::class.java)
 

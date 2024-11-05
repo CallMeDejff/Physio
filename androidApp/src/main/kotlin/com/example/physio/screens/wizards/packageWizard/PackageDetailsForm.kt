@@ -2,7 +2,6 @@ package com.example.physio.screens.wizards.packageWizard
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,14 +33,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.example.physio.screens.wizards.viewmodels.CreatorWizardViewModel
 import com.example.physio.screens.wizards.components.CustomAlertDialog
 import com.example.physio.screens.wizards.components.TextEditorView
 import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.components.AutoCompleteDetailed
-import com.example.physio.ui.icons.Clinical_notes
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.gray
 import com.example.physio.ui.theme.typography
@@ -87,7 +85,8 @@ fun PackageDetailsForm(
                             }
                         },
                         style = typography.bodyLarge,
-                    )
+                        textAlign = TextAlign.Center,
+                        )
                 } else {
                     Text(
                         text = buildAnnotatedString {
@@ -98,7 +97,8 @@ fun PackageDetailsForm(
                             }
                         },
                         style = typography.bodyLarge,
-                    )
+                        textAlign = TextAlign.Center,
+                        )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -135,6 +135,7 @@ fun PackageDetailsForm(
             item {
                 Text(
                     text = "Wybierz ćwiczenia na rozgrzewkę",
+                    textAlign = TextAlign.Center,
                     style = typography.labelLarge,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -158,6 +159,7 @@ fun PackageDetailsForm(
             item {
                 Text(
                     text = "Wybierz ćwiczenia w ramach pakietu ćwiczeń",
+                    textAlign = TextAlign.Center,
                     style = typography.labelLarge,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -180,6 +182,7 @@ fun PackageDetailsForm(
             item {
                 Text(
                     text = "Wybierz schorzenia przypisane do tego pakietu ćwiczeń",
+                    textAlign = TextAlign.Center,
                     style = typography.labelLarge,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -202,8 +205,9 @@ fun PackageDetailsForm(
             item {
                 Text(
                     text = "Uzupełnij opis",
+                    textAlign = TextAlign.Center,
                     style = typography.labelLarge,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
                 )
                 Box(
                     modifier = Modifier

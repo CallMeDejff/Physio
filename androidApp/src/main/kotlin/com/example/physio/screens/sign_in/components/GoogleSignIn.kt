@@ -49,6 +49,7 @@ fun GoogleSignIn(
 
             coroutineScope.launch {
                 try {
+                    Log.d("OneTapGoogleSignIn", "Starting One Tap")
                     val result = credentialManager.getCredential(
                         request = request,
                         context = context

@@ -15,9 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AssignmentTurnedIn
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,9 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,15 +31,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.physio.screens.exercise.components.ButtonItem
-import com.example.physio.screens.exercise.components.ButtonType
-import com.example.physio.screens.exercise.components.MenuButtons
 import com.example.physio.screens.favorites.components.CategoryCard
 import com.example.physio.screens.favorites.components.WizardAccessButton
-import com.example.physio.service.UserPreferences
+import com.example.physio.screens.reminders.components.ReminderItem
 import com.example.physio.ui.theme.PurpleGrey80
-import com.example.physio.ui.theme.colorPrimary
-import com.example.physio.ui.theme.colorSecondary
 import com.example.physio.ui.theme.typography
 
 @Composable
@@ -54,11 +43,14 @@ fun FavoritesScreen(
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val userPreferences = UserPreferences(context)
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val isLoading by viewModel.isLoading.collectAsState()
     val categories by viewModel.fetchedCategories.collectAsState()
+    val userType by viewModel.userType.collectAsState()
+    val userName by viewModel.userName.collectAsState()
+    val nextReminder by viewModel.nextReminder.collectAsState()
+
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->
@@ -70,8 +62,7 @@ fun FavoritesScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchUserPackages()
-        viewModel.fetchCategories()
+        viewModel.initializer()
     }
 
     if (isLoading) {
@@ -99,7 +90,7 @@ fun FavoritesScreen(
                 ) {
                     item {
                         Text(
-                            text = " Cześć, ${userPreferences.getUserName()} 👋",
+                            text = " Cześć, $userName 👋",
                             style = typography.headlineLarge
                         )
 
@@ -142,7 +133,7 @@ fun FavoritesScreen(
                     item {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .height(150.dp)
                                 .clip(RoundedCornerShape(16.dp))
                                 .border(
@@ -150,14 +141,24 @@ fun FavoritesScreen(
                                     shape = RoundedCornerShape(16.dp)
                                 )
                                 .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
-                                .padding(16.dp)
+                                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
                         ) {
-                            Text("Tekst", style = typography.bodyMedium)
+                                nextReminder?.let { reminder ->
+                                    ReminderItem(
+                                        reminder = reminder,
+                                        deletable = false,
+                                    )
+                                } ?: Text(
+                                    text = "Brak nadchodzących przypomnień",
+                                    style = typography.labelMedium,
+                                    color = Color.White
+                                )
+
                         }
                     }
                 }
 
-                if (userPreferences.getUserType() == 1) {
+                if (userType == 1) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.BottomEnd

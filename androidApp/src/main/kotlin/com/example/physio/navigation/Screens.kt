@@ -29,7 +29,7 @@ sealed class BottomBarScreen(
         icon_focused = Icons.Outlined.Search,
     )
 
-    object Profil : BottomBarScreen(
+    object Profile : BottomBarScreen(
         route = "PROFILE",
         title = "Profil",
         icon = Icons.Default.Person,
@@ -43,6 +43,10 @@ sealed class SearchScreen(val route: String) {
     }
 }
 
+sealed class ProfileScreen(val route: String) {
+    object EditUser : ProfileScreen(route = "edit_user")
+    object ReminderScreen : ProfileScreen(route = "reminders")
+}
 
 sealed class WizardScreen(val route: String) {
     object CreatorWizard : WizardScreen(route = "wizards")
@@ -69,4 +73,5 @@ object Graph {
     const val HOME = "home_graph"
     const val WIZARDS = "wizards_graph"
     const val SEARCH = "search_graph"
+    const val PROFILE = "profile_graph"
 }

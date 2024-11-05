@@ -102,11 +102,6 @@ fun SearchScreen(
                 Column(
                     modifier = modifier
                         .padding(vertical = 32.dp)
-                    //.fillMaxSize()
-                    //.padding(bottom = 60.dp, top = 16.dp)
-                    //.padding(horizontal = 16.dp),
-
-                    //horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = buildAnnotatedString {
@@ -135,7 +130,7 @@ fun SearchScreen(
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Column (
+                        Column(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
 
@@ -206,6 +201,7 @@ fun SearchScreen(
                                     id = id,
                                     name = name,
                                     description = description,
+                                    expandable = true,
                                     onClick = { packageId ->
                                         navigate("exercise_screen/${packageId}")
                                     }

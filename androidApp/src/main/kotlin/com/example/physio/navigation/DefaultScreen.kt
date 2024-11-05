@@ -2,9 +2,7 @@ package com.example.physio.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -49,7 +46,7 @@ fun DefaultScreen(navController: NavHostController = rememberNavController()) {
                 if (currentRoute in listOf(
                         BottomBarScreen.Home.route,
                         BottomBarScreen.Search.route,
-                        BottomBarScreen.Profil.route
+                        BottomBarScreen.Profile.route
                     )
                 ) {
                     BottomBar(navController = navController)
@@ -66,7 +63,7 @@ fun BottomBar(navController: NavHostController) {
     val screens = listOf(
         BottomBarScreen.Home,
         BottomBarScreen.Search,
-        BottomBarScreen.Profil,
+        BottomBarScreen.Profile,
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination

@@ -1,11 +1,12 @@
 package com.example.physio.screens.sign_up
 
 import android.util.Log
+import com.example.physio.models.Provider
 import com.example.physio.models.User
 import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
-import com.example.physio.screens.PhysioAppViewModel
-import com.example.physio.service.services.AccountService
+import com.example.physio.core.PhysioAppViewModel
+import com.example.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,8 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    private val accountService: AccountService,
-    //private val storageService: StorageService
+    private val authenticationService: AuthenticationService
 ) : PhysioAppViewModel() {
 
     var name: String = ""
@@ -125,28 +125,26 @@ class SignUpViewModel @Inject constructor(
             errorMessage = "Ups! Tworzenie konta nie powiodło się.",
             onError = { message -> _message.emit(message) },
             block = {
-                val resultSignUp = accountService.signUp(email, password)
+                val resultSignUp = authenticationService.signUp(email, password)
                 if (resultSignUp.isSuccess) {
                     Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
-                    val userId = accountService.currentUserId
+                    val userId = authenticationService.currentUserId
                     Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success:currentUserId:$userId")
 
-                    val userType = if (licenseNumber == 0) {
-                        0
-                    } else {
-                        1
-                    }
+                    val userType = if (licenseNumber == 0) { 0 } else { 1 }
+
                     val newUser = User(
                         uid = userId,
                         name = name,
                         lastname = lastname,
                         email = email,
                         licenseNumber = licenseNumber,
-                        userType = userType
+                        userType = userType,
+                        provider = Provider.Physio.providerId
                     )
                     Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
 
-                    accountService.createUser(newUser)
+                    authenticationService.createUser(newUser)
                     Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
                     openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
                 } else {

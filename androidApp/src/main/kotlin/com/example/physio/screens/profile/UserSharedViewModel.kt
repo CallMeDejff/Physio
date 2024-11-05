@@ -1,0 +1,79 @@
+package com.example.physio.screens.profile
+
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.example.physio.core.PhysioAppViewModel
+import com.example.physio.models.ExercisePackage
+import com.example.physio.models.Reminder
+import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.ExercisePackageService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+abstract class UserSharedViewModel : PhysioAppViewModel() {
+
+    protected val _userName = MutableStateFlow("")
+    protected val _userLastname = MutableStateFlow("")
+    protected val _userEmail = MutableStateFlow("")
+    protected val _userType = MutableStateFlow(0)
+    protected val _userLicenseNumber = MutableStateFlow(0)
+    protected val _userAssignedPackages = MutableStateFlow<List<String>>(emptyList())
+    protected val _userFavoritePackages = MutableStateFlow<List<String>>(emptyList())
+    protected val _isEmailVerified = MutableStateFlow(false)
+    protected val _provider = MutableStateFlow("")
+    protected val _userAssignedPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
+    protected val _userFavoritePackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
+    val _reminders = MutableLiveData<List<Reminder>>()
+    val reminders: LiveData<List<Reminder>> = _reminders
+
+    open fun fetchUserPackages(exercisePackageService: ExercisePackageService, tag: String) {
+        launchCatching(
+            tag = tag,
+            block = {
+                val userPackages = exercisePackageService.getUserExercisePackages()
+                _userFavoritePackagesList.value = userPackages.favoritePackages as List<ExercisePackage>
+                _userAssignedPackagesList.value = userPackages.assignedPackages as List<ExercisePackage>
+                Log.d(
+                    tag,
+                    "Fetched favorite packages: ${userPackages.favoritePackages.size}, assigned packages: ${userPackages.assignedPackages.size}"
+                )
+            }
+        )
+    }
+
+    fun fetchReminders(accountService: AccountService, tag: String) {
+        viewModelScope.launch {
+            val remindersList = accountService.getRemindersForUser()
+            _reminders.value = remindersList
+            Log.d(tag, "Fetched reminders: ${_reminders.value}")
+        }
+    }
+
+    fun fetchUser(accountService: AccountService, tag: String) {
+        launchCatching(
+            tag = tag,
+            errorMessage = "Nie udało się pobrać danych użytkownika",
+            block = {
+                _isLoading.update { true }
+                val user = accountService.getUserInfo()
+                _userName.value = user?.name ?: ""
+                _userLastname.value = user?.lastname ?: ""
+                _userEmail.value = user?.email ?: ""
+                _userType.value = user?.userType ?: 0
+                _userLicenseNumber.value = user?.licenseNumber ?: 0
+                _userAssignedPackages.value = user?.assignedPackages ?: emptyList()
+                _userFavoritePackages.value = user?.favoritePackages ?: emptyList()
+                _provider.value = user?.provider ?: ""
+
+                Log.d(tag, "Fetched user information: $user")
+                _isLoading.update { false }
+            }
+        )
+    }
+
+
+}
