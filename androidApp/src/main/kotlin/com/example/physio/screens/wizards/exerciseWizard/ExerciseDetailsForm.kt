@@ -2,7 +2,6 @@ package com.example.physio.screens.wizards.exerciseWizard
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,7 +57,9 @@ import com.example.physio.screens.exercise.components.PreviewScreen
 import com.example.physio.screens.exercise.components.getThumbnailFromUri
 import com.example.physio.screens.exercise.components.getThumbnailFromUrl
 import com.example.physio.screens.wizards.components.ActionButton
+import com.example.physio.screens.wizards.components.CheckboxWithText
 import com.example.physio.screens.wizards.components.CustomAlertDialog
+import com.example.physio.screens.wizards.components.SliderSelectorWithValue
 import com.example.physio.screens.wizards.components.TextEditorView
 import com.example.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.example.physio.ui.components.AutoCompleteDetailed
@@ -70,7 +72,7 @@ fun ExerciseDetailsForm(
     navigate: (String) -> Unit,
     popBackStack: () -> Unit,
     viewModel: ExerciseCreatorViewModel,
-    isEditorNextStep: Boolean
+    isEditorNextStep: Boolean,
 ) {
     val context = LocalContext.current
     val selectedEquipment by viewModel.selectedEquipment.collectAsState()
@@ -78,6 +80,10 @@ fun ExerciseDetailsForm(
     val selectedMediaUris by viewModel.selectedMediaUris.collectAsState()
     val description by viewModel.exerciseDescription.collectAsState()
     val mediaType by viewModel.mediaType.collectAsState()
+    val title by viewModel.exerciseTitle.collectAsState()
+    val attempts by viewModel.attempts.collectAsState()
+    val time by viewModel.time.collectAsState()
+    val nonPublic by viewModel.nonPublic.collectAsState()
 
     val pickMedia = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -86,6 +92,7 @@ fun ExerciseDetailsForm(
             viewModel.addSelectedMedia(context, uri)
         }
     }
+
     var showDialog by remember { mutableStateOf(false) }
     var previewMediaUri by remember { mutableStateOf<Uri?>(null) }
     var showPreviewDialog by remember { mutableStateOf(false) }
@@ -104,7 +111,11 @@ fun ExerciseDetailsForm(
                 val mimeType = context.contentResolver.getType(selectedMediaUri)
                 when {
                     mimeType?.startsWith("image/") == true -> null
-                    mimeType?.startsWith("video/") == true -> getThumbnailFromUri(context, selectedMediaUri)
+                    mimeType?.startsWith("video/") == true -> getThumbnailFromUri(
+                        context,
+                        selectedMediaUri
+                    )
+
                     else -> null
                 }
             }
@@ -134,20 +145,23 @@ fun ExerciseDetailsForm(
                     },
                     style = typography.bodyLarge,
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
                 TextField(
-                    value = viewModel.exerciseTitle.collectAsState().value ?: "",
-                    onValueChange = { newTitle -> viewModel.updateExerciseTitle(newTitle) },
-                    label = { Text(
-                        text = "Tytuł ćwiczenia",
-                        style = typography.labelMedium,
-                        textAlign = TextAlign.Center,
-                        color = Color.Black,)
-                            },
+                    value = title ?: "",
+                    onValueChange = { newTitle ->
+                        viewModel.updateExerciseTitle(newTitle)
+                    },
+                    label = {
+                        Text(
+                            text = "Tytuł ćwiczenia",
+                            style = typography.labelMedium,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -172,7 +186,41 @@ fun ExerciseDetailsForm(
                 AutoCompleteDetailed(
                     itemList = equipmentList,
                     selectedItems = selectedEquipment,
-                    onToggleItem = { equipmentId -> viewModel.toggleEquipment(equipmentId) }
+                    onToggleItem = { equipmentId ->
+                        viewModel.toggleEquipment(equipmentId)
+                    },
+                )
+            }
+
+            item {
+                Text(
+                    text = "Wybierz liczbę prób:",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                SliderSelectorWithValue(
+                    value = attempts!!.toFloat(),
+                    onValueChange = { newValue ->
+                        viewModel.updateAttempts(newValue.toInt())
+                    },
+                    valueRange = 1f..10f
+                )
+            }
+
+            item {
+                Text(
+                    text = "Wybierz czas (minuty):",
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                SliderSelectorWithValue(
+                    value = time!!.toFloat(),
+                    onValueChange = { newValue ->
+                        viewModel.updateTime(newValue.toInt())
+                    },
+                    valueRange = 1f..30f
                 )
             }
 
@@ -182,7 +230,6 @@ fun ExerciseDetailsForm(
                     style = typography.labelLarge,
                     modifier = Modifier.height(32.dp)
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -202,6 +249,21 @@ fun ExerciseDetailsForm(
 
             item {
                 Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize()
+                        .padding(12.dp)
+                ) {
+                    CheckboxWithText(
+                        isChecked = nonPublic!!,
+                        onCheckedChange = { newValue -> viewModel.updateNonPublic(newValue) },
+                        text = "Ćwiczenie niepubliczne - tylko autor może je zobaczyć"
+                    )
+                }
+            }
+
+            item {
+                Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     ActionButton(
@@ -214,7 +276,6 @@ fun ExerciseDetailsForm(
             }
 
             item {
-                Log.d("ExerciseDetailsForm", "selectedMediaUris: $selectedMediaUris, isEditorNextStep: $isEditorNextStep")
                 if (selectedMediaUris.isNotEmpty()) {
                     val selectedMediaUri = selectedMediaUris.first()
 
@@ -243,29 +304,29 @@ fun ExerciseDetailsForm(
                             )
                         }
 
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .background(
-                                        Color.Red.copy(alpha = 0.7f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable {
-                                        viewModel.removeMediaUri(selectedMediaUri)
-                                    }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Remove media",
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .padding(4.dp)
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .background(
+                                    Color.Red.copy(alpha = 0.7f),
+                                    shape = CircleShape
                                 )
-                            }
+                                .clickable {
+                                    viewModel.removeMediaUri(selectedMediaUri)
+                                }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Remove media",
+                                tint = Color.White,
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .padding(4.dp)
+                            )
                         }
                     }
                 }
+            }
 
             item {
                 if (isEditorNextStep) {
@@ -290,7 +351,6 @@ fun ExerciseDetailsForm(
                         )
                     }
 
-
                     if (showDialog) {
                         CustomAlertDialog(
                             title = "Usuwanie ćwiczenia",
@@ -305,30 +365,18 @@ fun ExerciseDetailsForm(
             }
         }
 
-        if (isEditorNextStep) {
-            if (showPreviewDialog) {
-                PreviewScreen(
-                    mediaUrl = previewMediaUri.toString(),
-                    mediaType = mediaType.toString(),
-                    onDismiss = {
-                        showPreviewDialog = false
-                        previewMediaUri = null
-                    },
-                    isUrl = true,
-                )
-            }
-        } else {
-            if (showPreviewDialog) {
-                PreviewScreen(
-                    mediaUrl = previewMediaUri.toString(),
-                    mediaType = mediaType.toString(),
-                    onDismiss = {
-                        showPreviewDialog = false
-                        previewMediaUri = null
-                    },
-                    isUrl = false
-                )
-            }
+        if (showPreviewDialog) {
+            PreviewScreen(
+                mediaUrl = previewMediaUri.toString(),
+                mediaType = mediaType.toString(),
+                onDismiss = {
+                    showPreviewDialog = false
+                    previewMediaUri = null
+                },
+                isUrl = isEditorNextStep
+            )
         }
     }
 }
+
+

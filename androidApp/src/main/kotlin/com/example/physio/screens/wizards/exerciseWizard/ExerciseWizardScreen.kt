@@ -1,5 +1,6 @@
 package com.example.physio.screens.wizards.exerciseWizard
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -54,118 +55,184 @@ fun ExerciseWizardScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (isEditorNextStep) {
-            viewModel.getExerciseDetails()
-            viewModel.loadEquipmentList()
-            viewModel.loadCondition()
-        } else if (isEditor) {
-            viewModel.loadExercises()
-        } else {
-            viewModel.loadEquipmentList()
-            viewModel.loadCondition()
+        when {
+            isEditorNextStep -> {
+                viewModel.getExerciseDetails()
+                viewModel.loadEquipmentList()
+                viewModel.loadCondition()
+            }
+
+            isEditor -> viewModel.loadExercises()
+            else -> {
+                viewModel.loadEquipmentList()
+                viewModel.loadCondition()
+            }
         }
     }
 
     if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        LoadingScreen()
     } else {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (header, wizardForm, navigationButtons) = createRefs()
+        WizardContent(
+            navigate = navigate,
+            popBackStack = popBackStack,
+            viewModel = viewModel,
+            context = context,
+            isEditor = isEditor,
+            isEditorNextStep = isEditorNextStep
+        )
+    }
+}
 
-            HeaderView(
-                modifier = Modifier
-                    .height(320.dp)
-                    .fillMaxWidth()
-                    .constrainAs(header) {
-                        top.linkTo(parent.top)
-                    },
-                200, 0.7f
-            )
+@Composable
+fun LoadingScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
 
-            Card(
-                shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-                colors = CardDefaults.cardColors(containerColor = ghost_white),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(wizardForm) {
-                        top.linkTo(header.bottom)
-                        bottom.linkTo(navigationButtons.top)
-                    }
-            ) {
-                if (isEditor) {
-                    ExerciseEditorForm(navigate, popBackStack, viewModel = viewModel)
-                } else if (isEditorNextStep) {
-                    ExerciseDetailsForm(
-                        navigate,
-                        popBackStack,
-                        isEditorNextStep = true,
-                        viewModel = viewModel
-                    )
+@Composable
+fun WizardContent(
+    navigate: (String) -> Unit,
+    popBackStack: () -> Unit,
+    viewModel: ExerciseCreatorViewModel,
+    context: Context,
+    isEditor: Boolean,
+    isEditorNextStep: Boolean
+) {
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        val (header, wizardForm, navigationButtons) = createRefs()
 
-                } else {
-                    ExerciseDetailsForm(
-                        navigate,
-                        popBackStack,
-                        isEditorNextStep = false,
-                        viewModel = viewModel
-                    )
+        HeaderView(
+            modifier = Modifier
+                .height(320.dp)
+                .fillMaxWidth()
+                .constrainAs(header) {
+                    top.linkTo(parent.top)
+                },
+            200, 0.7f
+        )
+
+        Card(
+            shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
+            colors = CardDefaults.cardColors(containerColor = ghost_white),
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(wizardForm) {
+                    top.linkTo(header.bottom)
+                    bottom.linkTo(navigationButtons.top)
                 }
-            }
+        ) {
+            ExerciseFormSelector(
+                isEditor = isEditor,
+                isEditorNextStep = isEditorNextStep,
+                navigate = navigate,
+                popBackStack = popBackStack,
+                viewModel = viewModel
+            )
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 8.dp)
-                    .constrainAs(navigationButtons) {
-                        bottom.linkTo(parent.bottom)
-                    }
-            ) {
-                Button(
-                    onClick = {
-                        if (isEditor) {
-                            viewModel.onEditExerciseContinueClick(navigate)
-                        } else if (isEditorNextStep) {
-                            viewModel.onUpdateExerciseClick(context, navigate)
+        NavigationButtons(
+            onCreateOrEditClick = {
+                val title = viewModel.exerciseTitle.value.toString()
+                val description = viewModel.exerciseDescription.value.toString()
+                val selectedEquipment = viewModel.selectedEquipment.value.toList()
+
+                when {
+                    isEditor -> {
+                        if (!viewModel.hasSelectedExercise()) {
+                            viewModel.showMessage("Nie wybrano ćwiczenia do edycji")
                         } else {
+                            viewModel.onEditExerciseContinueClick(navigate)
+                        }
+                    }
+
+                    isEditorNextStep -> {
+                        if (viewModel.validateFields(title, description, selectedEquipment)) {
+                            viewModel.onUpdateExerciseClick(context, navigate)
+                        }
+                    }
+
+                    else -> {
+                        if (viewModel.validateFields(title, description, selectedEquipment)) {
                             viewModel.onCreateExerciseClick(context, navigate)
                         }
-                    },
-                    modifier = Modifier.weight(2f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
-                ) {
-                    Text(
-                        text = if (isEditorNextStep || isEditor) "Edytuj" else "Utwórz",
-                        color = Color.White,
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    }
                 }
-
-                Spacer(modifier = Modifier.size(8.dp))
-
-                Button(
-                    onClick = { viewModel.onGoBackClick(popBackStack) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
-                ) {
-                    Text(
-                        text = "Cofnij",
-                        color = Color.White,
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+            },
+            onBackClick = { viewModel.onGoBackClick(popBackStack) },
+            buttonText = if (isEditorNextStep || isEditor) "Edytuj" else "Utwórz",
+            modifier = Modifier.constrainAs(navigationButtons) {
+                bottom.linkTo(parent.bottom)
             }
-            Spacer(modifier = Modifier.height(1.dp))
+        )
+    }
+}
+
+@Composable
+fun ExerciseFormSelector(
+    isEditor: Boolean,
+    isEditorNextStep: Boolean,
+    navigate: (String) -> Unit,
+    popBackStack: () -> Unit,
+    viewModel: ExerciseCreatorViewModel
+) {
+    when {
+        isEditor -> ExerciseEditorForm(navigate, popBackStack, viewModel = viewModel)
+        else -> ExerciseDetailsForm(
+            navigate,
+            popBackStack,
+            isEditorNextStep = isEditorNextStep,
+            viewModel = viewModel
+        )
+    }
+}
+
+@Composable
+fun NavigationButtons(
+    onCreateOrEditClick: () -> Unit,
+    onBackClick: () -> Unit,
+    buttonText: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 8.dp)
+    ) {
+        Button(
+            onClick = onCreateOrEditClick,
+            modifier = Modifier.weight(2f),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+        ) {
+            Text(
+                text = buttonText,
+                color = Color.White,
+                style = typography.labelLarge,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Button(
+            onClick = onBackClick,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+        ) {
+            Text(
+                text = "Cofnij",
+                color = Color.White,
+                style = typography.labelLarge,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }

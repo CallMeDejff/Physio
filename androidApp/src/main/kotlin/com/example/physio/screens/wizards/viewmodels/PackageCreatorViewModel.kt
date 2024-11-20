@@ -1,5 +1,6 @@
 package com.example.physio.screens.wizards.viewmodels
 
+import android.net.Uri
 import android.util.Log
 import com.example.physio.models.ExercisePackage
 import com.example.physio.models.User
@@ -66,6 +67,79 @@ class PackageCreatorViewModel @Inject constructor(
     private val _selectedUsers = MutableStateFlow<Set<String>>(emptySet())
     val selectedUsers: StateFlow<Set<String>> = _selectedUsers
 
+    private val _selectedMediaUris = MutableStateFlow<List<Uri>>(emptyList())
+    val selectedMediaUris: StateFlow<List<Uri>> = _selectedMediaUris
+
+    private val titleError = MutableStateFlow<String?>(null)
+    private val descriptionError = MutableStateFlow<String?>(null)
+    private val conditionError = MutableStateFlow<String?>(null)
+    private val exerciseError = MutableStateFlow<String?>(null)
+
+    fun validateFields(
+        title: String,
+        description: String,
+        selectedExercises: List<String>,
+        selectedConditions: List<String>,
+    ): Boolean {
+        var isValid = true
+        val errorMessages = mutableListOf<String>()
+
+        titleError.value = if (title.isBlank()) {
+            isValid = false
+            val error = "Tytuł nie może być pusty. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        descriptionError.value = if (description.length < 10) {
+            isValid = false
+            val error = "Opis musi mieć co najmniej 10 znaków. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        descriptionError.value = if (description.length > 800) {
+            isValid = false
+            val error = "Opis jest za długi. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        conditionError.value = if (selectedConditions.isEmpty()) {
+            isValid = false
+            val error = "Wybierz przynajmniej jedno schorzenie. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        exerciseError.value = if (selectedExercises.isEmpty()) {
+            isValid = false
+            val error = "Wybierz przynajmniej jedno ćwiczenie. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        if (errorMessages.isNotEmpty()) {
+            showMessage(errorMessages.joinToString("\n"))
+        }
+
+        return isValid
+    }
+
+    fun addSelectedMedia(uri: Uri) { _selectedMediaUris.update { listOf(uri) } }
+
+    fun removeMediaUri(uri: Uri) { _selectedMediaUris.update { it.filter { existingUri -> existingUri != uri } } }
+
     fun loadExercises() {
         loadExercisesList(
             _exercisesList = _exercisesList,
@@ -84,7 +158,7 @@ class PackageCreatorViewModel @Inject constructor(
 
     fun loadPackagesList() {
         loadData(
-            block = { listService.getPackagesList() },
+            block = { listService.getPackagesList(allPackages = false) },
             onSuccess = { _packagesList.value = it },
             errorMessage = "Ups! Nie udało się pobrać listy pakietów."
         )
@@ -93,7 +167,11 @@ class PackageCreatorViewModel @Inject constructor(
     fun loadUsersList() {
         loadData(
             block = { accountService.getUsersList() },
-            onSuccess = { _usersList.value = it },
+            onSuccess = {
+                if (it != null) {
+                    _usersList.value = it
+                }
+            },
             errorMessage = "Ups! Nie udało się pobrać listy użytkowników."
         )
     }
@@ -117,7 +195,10 @@ class PackageCreatorViewModel @Inject constructor(
                     equipmentIds = equipmentFromExercises.values.flatten(),
                     description = _packageDescription.value.toString()
                 )
-                exercisePackageService.createExercisePackage(exercisePackage)
+                exercisePackageService.createExercisePackage(
+                    exercisePackage,
+                    _selectedMediaUris.value
+                )
                 navigate(WizardScreen.CreatorWizard.route)
                 _message.update { "Pakiet ćwiczeń utworzony" }
             })
@@ -143,10 +224,13 @@ class PackageCreatorViewModel @Inject constructor(
                     equipmentIds = equipmentFromExercises.values.flatten(),
                     description = _packageDescription.value.toString()
                 )
-                exercisePackageService.updateExercisePackage(exercisePackage)
+                exercisePackageService.updateExercisePackage(
+                    exercisePackage,
+                    _selectedMediaUris.value
+                )
 
-                navigate(WizardScreen.CreatorWizard.route)
                 _message.update { "Pakiet ćwiczeń zaktualizowany" }
+                navigate(WizardScreen.CreatorWizard.route)
             })
         navigate(WizardScreen.CreatorWizard.route)
     }
@@ -192,15 +276,15 @@ class PackageCreatorViewModel @Inject constructor(
                     _selectedExercises.value = exercisePackage.exerciseIds.toSet()
                     _selectedWarmUp.value = exercisePackage.warmUpIds.toSet()
                     _packageAuthor.value = exercisePackage.uid
+                    _selectedMediaUris.value =
+                        exercisePackage.mediaUrls.toList().map { Uri.parse(it) }
                 }
                 Log.d(PACKAGE_VIEWMODEL_TAG, "Package details loaded: ${packageDetails}}")
                 _isLoading.value = false
             })
     }
 
-    fun updatePackageName(name: String) {
-        _packageName.value = name
-    }
+    fun updatePackageName(name: String) { _packageName.value = name }
 
     fun onAssignPackageClick(navigate: (String) -> Unit) {
         launchCatching(
@@ -219,10 +303,7 @@ class PackageCreatorViewModel @Inject constructor(
         )
     }
 
-
-    override fun updateDescription(description: String) {
-        _packageDescription.value = description
-    }
+    override fun updateDescription(description: String) { _packageDescription.value = description }
 
     fun togglePackage(packageId: String) = toggleItem(
         packageId,
@@ -248,16 +329,11 @@ class PackageCreatorViewModel @Inject constructor(
         itemType = "Condition"
     )
 
-    fun toggleUser(userId: String) =
-        toggleItem(userId, _selectedUsers, allowMultipleSelection = false, itemType = "User")
+    fun toggleUser(userId: String) = toggleItem(userId, _selectedUsers, allowMultipleSelection = false, itemType = "User")
 
-    fun onGoBackClick(popBackStack: () -> Unit) {
-        popBackStack()
-    }
+    fun onGoBackClick(popBackStack: () -> Unit) { popBackStack() }
 
-    fun onEditPackageContinueClick(navigate: (String) -> Unit) {
-        navigate(WizardScreen.EditPackageDetails.route)
-    }
+    fun onEditPackageContinueClick(navigate: (String) -> Unit) { navigate(WizardScreen.EditPackageDetails.route) }
 
     companion object {
         private const val PACKAGE_VIEWMODEL_TAG = "PackageViewModel"

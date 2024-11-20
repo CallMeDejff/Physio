@@ -18,6 +18,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.example.physio.ui.components.AutoComplete
+import com.example.physio.ui.components.AutoCompleteDetailed
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.typography
 
@@ -61,7 +62,7 @@ fun PackageEditorForm(
                     style = typography.labelLarge,
                     modifier = Modifier.height(32.dp)
                 )
-                AutoComplete(
+                AutoCompleteDetailed(
                     itemList = packagesList,
                     selectedItems = selectedPackage,
                     onToggleItem = { packageId -> viewModel.togglePackage(packageId) }

@@ -1,9 +1,11 @@
 package com.example.physio.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -17,7 +19,7 @@ sealed class BottomBarScreen(
 ) {
     object Home : BottomBarScreen(
         route = "HOME",
-        title = "Dashboard",
+        title = "Start",
         icon = Icons.Default.Home,
         icon_focused = Icons.Outlined.Home
     )
@@ -27,6 +29,13 @@ sealed class BottomBarScreen(
         title = "Szukaj",
         icon = Icons.Default.Search,
         icon_focused = Icons.Outlined.Search,
+    )
+
+    object Scheduler : BottomBarScreen(
+        route = "SCHEDULER",
+        title = "Harmonogram",
+        icon = Icons.Default.CalendarToday,
+        icon_focused = Icons.Outlined.CalendarToday,
     )
 
     object Profile : BottomBarScreen(
@@ -46,6 +55,10 @@ sealed class SearchScreen(val route: String) {
 sealed class ProfileScreen(val route: String) {
     object EditUser : ProfileScreen(route = "edit_user")
     object ReminderScreen : ProfileScreen(route = "reminders")
+}
+
+sealed class CalendarScreen(val route: String) {
+    object Calendar : CalendarScreen(route = "calendar")
 }
 
 sealed class WizardScreen(val route: String) {
@@ -74,4 +87,5 @@ object Graph {
     const val WIZARDS = "wizards_graph"
     const val SEARCH = "search_graph"
     const val PROFILE = "profile_graph"
+    const val SCHEDULER = "scheduler_graph"
 }

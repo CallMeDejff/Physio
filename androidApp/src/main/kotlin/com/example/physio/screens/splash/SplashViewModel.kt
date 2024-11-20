@@ -1,9 +1,9 @@
 package com.example.physio.screens.splash
 
 import android.util.Log
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
-import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

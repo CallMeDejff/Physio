@@ -3,14 +3,10 @@ package com.example.physio.screens.favorites
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.example.physio.models.ExercisePackage
-import com.example.physio.navigation.WizardScreen
-import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.models.Category
+import com.example.physio.models.ExercisePackage
 import com.example.physio.models.Reminder
+import com.example.physio.navigation.WizardScreen
 import com.example.physio.screens.profile.UserSharedViewModel
 import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AccountService
@@ -19,7 +15,6 @@ import com.example.physio.ui.icons.Clinical_notes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -30,8 +25,6 @@ class FavoritesViewModel @Inject constructor(
     private val userPreferences: UserPreferences
 ) : UserSharedViewModel() {
 
-    private val fetchedFavorites = MutableStateFlow<List<ExercisePackage>>(emptyList())
-    private val fetchedAssigned = MutableStateFlow<List<ExercisePackage>>(emptyList())
     private val _fetchedCategories = MutableStateFlow<List<Category>>(emptyList())
     val fetchedCategories: StateFlow<List<Category>> = _fetchedCategories
     val userType: StateFlow<Int> = _userType
@@ -39,7 +32,7 @@ class FavoritesViewModel @Inject constructor(
     private val _nextReminder = MutableStateFlow<Reminder?>(null)
     var nextReminder: StateFlow<Reminder?> = _nextReminder
 
-    fun initializer() {
+    init {
         fetchUserPackages()
         fetchUserType()
         fetchReminders()
@@ -50,8 +43,10 @@ class FavoritesViewModel @Inject constructor(
             tag = FAVORITES_VIEW_MODEL_TAG,
             block = {
                 val userPackages = exercisePackageService.getUserExercisePackages()
-                _userFavoritePackagesList.value = userPackages.favoritePackages as List<ExercisePackage>
-                _userAssignedPackagesList.value = userPackages.assignedPackages as List<ExercisePackage>
+                _userFavoritePackagesList.value =
+                    userPackages.favoritePackages as List<ExercisePackage>
+                _userAssignedPackagesList.value =
+                    userPackages.assignedPackages as List<ExercisePackage>
                 fetchCategories()
             }
         )
@@ -73,19 +68,56 @@ class FavoritesViewModel @Inject constructor(
     }
 
     private fun getNextReminder(reminders: List<Reminder>): Reminder? {
-        val currentTime = Calendar.getInstance().timeInMillis
+        val currentTimeMillis = System.currentTimeMillis()
+        val currentCalendar = Calendar.getInstance()
+        currentCalendar.timeInMillis = currentTimeMillis
 
         val remindersWithTimeInMillis = reminders.mapNotNull { reminder ->
             val reminderTimeInMillis = getReminderTimeInMillis(reminder.dayOfWeek, reminder.time)
-            reminderTimeInMillis?.takeIf { it > currentTime }?.let { reminder to it }
+
+            reminderTimeInMillis?.let {
+                val reminderCalendar = Calendar.getInstance()
+                val dayOfWeekInt = mapDayOfWeekToCalendar(reminder.dayOfWeek)
+                reminderCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeekInt)
+
+                val (hour, minute) = reminder.time.split(":").map { it.toInt() }
+                reminderCalendar.set(Calendar.HOUR_OF_DAY, hour)
+                reminderCalendar.set(Calendar.MINUTE, minute)
+                reminderCalendar.set(Calendar.SECOND, 0)
+                reminderCalendar.set(Calendar.MILLISECOND, 0)
+
+                if (reminderCalendar.timeInMillis < currentTimeMillis) {
+                    reminderCalendar.add(Calendar.WEEK_OF_YEAR, 1)
+                }
+
+                reminder to reminderCalendar.timeInMillis
+            }
         }
 
-        return remindersWithTimeInMillis.minByOrNull { it.second }?.first
+        val futureReminders = remindersWithTimeInMillis
+            .filter { it.second != null && it.second > currentTimeMillis }
+
+        return futureReminders.minByOrNull { it.second }?.first
     }
 
-    private fun getReminderTimeInMillis(dayOfWeek: String, time: String): Long? {
+
+    private fun getReminderTimeInMillis(dayOfWeek: String, time: String): Long {
         val calendar = Calendar.getInstance()
-        val dayOfWeekInt = when (dayOfWeek) {
+        val (hour, minute) = time.split(":").map { it.toInt() }
+
+        calendar.set(Calendar.HOUR_OF_DAY, hour)
+        calendar.set(Calendar.MINUTE, minute)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val dayOfWeekInt = mapDayOfWeekToCalendar(dayOfWeek)
+        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeekInt)
+
+        return calendar.timeInMillis
+    }
+
+
+    private fun mapDayOfWeekToCalendar(dayOfWeek: String): Int {
+        return when (dayOfWeek) {
             "Poniedziałek" -> Calendar.MONDAY
             "Wtorek" -> Calendar.TUESDAY
             "Środa" -> Calendar.WEDNESDAY
@@ -93,35 +125,30 @@ class FavoritesViewModel @Inject constructor(
             "Piątek" -> Calendar.FRIDAY
             "Sobota" -> Calendar.SATURDAY
             "Niedziela" -> Calendar.SUNDAY
-            else -> return null
+            else -> Calendar.MONDAY
         }
-
-        calendar.apply {
-            set(Calendar.DAY_OF_WEEK, dayOfWeekInt)
-            set(Calendar.HOUR_OF_DAY, time.split(":")[0].toInt())
-            set(Calendar.MINUTE, time.split(":")[1].toInt())
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            if (before(Calendar.getInstance())) add(Calendar.WEEK_OF_YEAR, 1)
-        }
-        return calendar.timeInMillis
     }
+
 
     private fun fetchCategories() {
         _fetchedCategories.value = listOf(
             Category(
-                "Ulubione pakiety",
+                "Ulubione",
                 Icons.Outlined.FavoriteBorder,
                 "Treść dla kategorii 1",
                 _userFavoritePackagesList.value
             ),
             Category(
-                "Przypisane pakiety",
+                "Przypisane",
                 Clinical_notes,
                 "Treść dla kategorii 2",
                 _userAssignedPackagesList.value
             ),
-            Category("Kategoria 2", Clinical_notes, "Treść dla kategorii 2"),
+            Category(
+                "Posiadane",
+                Clinical_notes,
+                "Treść dla kategorii 2"
+            ),
         )
         Log.d(FAVORITES_VIEW_MODEL_TAG, "Fetched categories: ${_fetchedCategories.value}")
     }

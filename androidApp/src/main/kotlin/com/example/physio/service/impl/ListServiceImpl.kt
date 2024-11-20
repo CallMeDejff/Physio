@@ -1,6 +1,7 @@
 package com.example.physio.service.impl
 
 import android.util.Log
+import com.example.physio.service.services.AuthenticationService
 import com.example.physio.service.services.CacheManager
 import com.example.physio.service.services.ListService
 import com.google.firebase.firestore.FirebaseFirestore
@@ -8,7 +9,8 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ListServiceImpl @Inject constructor(
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
+    private val auth: AuthenticationService
 ) : ListService {
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -34,23 +36,28 @@ class ListServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPackagesList(): List<Pair<String, String>> {
+    override suspend fun getPackagesList(allPackages: Boolean): List<Pair<String, String>> {
         return try {
-            val documentSnapshot = firestore.collection(SUMMARY_COLLECTION)
-                .document("packages")
-                .get()
-                .await()
+            val currentUserId = auth.currentUserId
+            val documentSnapshot = firestore.collection(SUMMARY_COLLECTION).document("packages").get().await()
 
             val packagesList =
-                documentSnapshot.get("packages") as? List<Map<String, String>> ?: emptyList()
+                documentSnapshot.get("packages") as? List<Map<String, Any>> ?: emptyList()
             Log.d(LIST_SERVICE_TAG, "Packages list loaded, item count: ${packagesList.size}")
 
-            packagesList.map { exercisePackage ->
-                Pair(
-                    exercisePackage["id"] ?: "",
-                    exercisePackage["name"] ?: ""
-                )
+            val filteredPackages = packagesList.mapNotNull { entry ->
+                val id = entry["id"] as? String
+                val name = entry["name"] as? String
+                val uid = entry["uid"] as? String
+
+                if (id != null && name != null) {
+                    if (allPackages || (uid == currentUserId)) {
+                        id to name
+                    } else { null }
+                } else { null }
             }
+
+            filteredPackages
         } catch (e: Exception) {
             Log.e(LIST_SERVICE_TAG, "Error getting packages", e)
             emptyList()
@@ -58,20 +65,30 @@ class ListServiceImpl @Inject constructor(
     }
 
     override suspend fun getExercises(): List<Pair<String, String>> {
+        val currentUserId = auth.currentUserId
         return cacheManager.getCachedExercisesList() ?: try {
             val exercisesDocument =
                 firestore.collection(SUMMARY_COLLECTION).document("exercises").get().await()
 
             val exercisesList =
-                exercisesDocument.get("exercises") as? List<Map<String, String>> ?: emptyList()
+                exercisesDocument.get("exercises") as? List<Map<String, Any>> ?: emptyList()
 
-            val result = exercisesList.mapNotNull { entry ->
-                val id = entry["id"]
-                val title = entry["title"]
-                if (id != null && title != null) id to title else null
+            val filteredExercises = exercisesList.mapNotNull { entry ->
+                val id = entry["id"] as? String
+                val title = entry["title"] as? String
+                val nonPublic = entry["nonPublic"] as? Boolean ?: false
+                val uid = entry["uid"] as? String
+
+                if (!nonPublic || (nonPublic && uid == currentUserId)) {
+                    if (id != null && title != null) id to title else null
+                } else {
+                    null
+                }
             }
-            cacheManager.setCachedExercisesList(result)
-            result
+
+            cacheManager.setCachedExercisesList(filteredExercises)
+
+            filteredExercises
         } catch (e: Exception) {
             Log.e(LIST_SERVICE_TAG, "getExercises: Error getting exercises", e)
             emptyList()

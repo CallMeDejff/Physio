@@ -13,7 +13,7 @@ class CacheManagerImpl @Inject constructor() : CacheManager {
     private var cachedEquipmentsList: List<Pair<String, String>>? = null
     private var cachedUserPackages: UserPackages? = null
 
-    private var cacheExpiryTime = 7 * 24 * 60 * 60 * 1000
+    private var cacheExpiryTime = 60 * 60 * 1000
     private var cachedExercisesListTimestamp: Long = 0
     private var cachedExercisePackagesTimestamp: Long = 0
     private var cachedConditionsListTimestamp: Long = 0

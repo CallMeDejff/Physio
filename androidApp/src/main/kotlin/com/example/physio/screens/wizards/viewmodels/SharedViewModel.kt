@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.ListService
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 abstract class SharedViewModel : PhysioAppViewModel() {
 
@@ -65,4 +66,7 @@ abstract class SharedViewModel : PhysioAppViewModel() {
         )
     }
 
+    fun showMessage(message: String) {
+        _message.update { message }
+    }
 }

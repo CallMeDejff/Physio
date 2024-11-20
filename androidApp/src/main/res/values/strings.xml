@@ -1,6 +1,9 @@
 <resources>
     <string name="web_client_id">318365160423-5121ndqeq7sfgu5719ks6mvmg4qm32r8.apps.googleusercontent.com</string>
     <string name="app_name">Physio</string>
+    <string name="facebook_app_id">573160261807989</string>
+    <string name="facebook_client_token">ae6950107bd777b59b0ec4528fff670e</string>
+    <string name="fb_login_protocol_scheme">fb573160261807989</string>
 
     <string name="error_login_custom_token">The custom token format is incorrect. Please check the documentation.</string>
     <string name="error_login_custom_token_mismatch">The custom token corresponds to a different audience.</string>

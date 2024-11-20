@@ -1,7 +1,6 @@
 package com.example.physio.screens.editUser
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -42,12 +40,13 @@ fun EditUserForm(
     nameState: MutableState<TextFieldValue>,
     lastnameState: MutableState<TextFieldValue>,
     licenseNumberState: MutableState<TextFieldValue>,
+    userType: Int,
 ) {
     val isLicenseChecked = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
-                .fillMaxSize()
+            .fillMaxSize()
             .padding(bottom = 60.dp)
             .wrapContentHeight(Alignment.Top)
             .padding(30.dp),
@@ -83,7 +82,7 @@ fun EditUserForm(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
-                checked = licenseNumberState.value.text.isNotEmpty() || isLicenseChecked.value,
+                checked = userType == 1 || isLicenseChecked.value,
                 onCheckedChange = { isChecked ->
                     isLicenseChecked.value = isChecked
                 },
@@ -103,7 +102,7 @@ fun EditUserForm(
             )
         }
 
-        if (licenseNumberState.value.text.isNotEmpty() || isLicenseChecked.value) {
+        if (userType == 1 || isLicenseChecked.value) {
             LabeledTextField(
                 label = "Numer licencji",
                 valueState = licenseNumberState,

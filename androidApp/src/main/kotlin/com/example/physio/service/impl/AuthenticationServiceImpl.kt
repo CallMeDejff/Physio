@@ -8,6 +8,7 @@ import com.example.physio.service.UserPreferences
 import com.example.physio.service.services.AuthenticationService
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
@@ -157,14 +158,38 @@ class AuthenticationServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun signInWithGoogle(idToken: String) {
-        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-        val signInResult = Firebase.auth.signInWithCredential(firebaseCredential).await()
+    override suspend fun signInWithFacebook(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val credential = FacebookAuthProvider.getCredential(token)
+        try {
+            val signInResult = auth.signInWithCredential(credential).await()
+            Log.d(AUTHENTICATION_SERVICE_TAG, "signInWithFacebook:success:${signInResult.user?.uid}")
+            currentUserId = signInResult.user?.uid ?: ""
 
-        val userId = signInResult.user?.uid
-        Log.d(AUTHENTICATION_SERVICE_TAG, "signInWithGoogle:success:$userId")
-        currentUserId = userId ?: ""
+            fetchUserLogInInfo(Provider.Facebook)
+            onSuccess()
+        } catch (exception: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithFacebook: Firebase auth exception: ${exception.message}", exception)
+            onFailure(exception)
+        }
+    }
 
+    override suspend fun signInWithGoogle(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val credential = GoogleAuthProvider.getCredential(token, null)
+        try {
+            val signInResult = auth.signInWithCredential(credential).await()
+            Log.d(AUTHENTICATION_SERVICE_TAG, "signInWithGoogle:success:${signInResult.user?.uid}")
+            currentUserId = signInResult.user?.uid ?: ""
+
+            fetchUserLogInInfo(Provider.Google)
+            onSuccess()
+
+        } catch (exception: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithGoogle: Firebase auth exception: ${exception.message}", exception)
+            onFailure(exception)
+        }
+    }
+
+    private suspend fun fetchUserLogInInfo(provider: Provider) {
         val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
         val documentSnapshot = userDocRef.get().await()
 
@@ -182,11 +207,13 @@ class AuthenticationServiceImpl @Inject constructor(
             return
         }
 
+        val providerToSet = provider.providerId
+
         val newUser = User(
             uid = Firebase.auth.currentUser?.uid ?: "",
             name = Firebase.auth.currentUser?.displayName ?: "",
             email = Firebase.auth.currentUser?.email ?: "",
-            provider = Provider.Google.providerId
+            provider = providerToSet
         )
         createUser(newUser)
         Log.d(AUTHENTICATION_SERVICE_TAG, "createUser: $newUser")

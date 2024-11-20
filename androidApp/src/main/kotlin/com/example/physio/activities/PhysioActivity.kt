@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -22,6 +23,8 @@ import com.example.physio.core.Constants.FIRESTORE_PORT
 import com.example.physio.core.Constants.LOCALHOST
 import com.example.physio.core.Constants.STORAGE_PORT
 import com.example.physio.service.services.StorageSampleDataService
+import com.facebook.CallbackManager
+import com.facebook.FacebookSdk
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -38,6 +41,7 @@ class PhysioActivity : ComponentActivity() {
     lateinit var storageSampleDataService: StorageSampleDataService
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private val callbackManager = CallbackManager.Factory.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +69,12 @@ class PhysioActivity : ComponentActivity() {
             val navController = rememberNavController()
             PhysioApp(navController = navController)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("PhysioActivity", "onActivityResult called with requestCode: $requestCode, resultCode: $resultCode")
+        callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun createNotificationChannel() {

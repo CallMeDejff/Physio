@@ -3,9 +3,9 @@ package com.example.physio.screens.sign_in
 import android.util.Log
 import androidx.credentials.Credential
 import androidx.credentials.CustomCredential
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
-import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.AuthenticationService
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
@@ -39,6 +39,26 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onSignInWithFacebook(token: String, openAndPopUp: (String, String) -> Unit) {
+        launchCatching(
+            tag = LOGIN_VIEW_MODEL_TAG,
+            errorMessage = "Ups! Logowanie kontem Facebook nie powiodło się.",
+            onError = { message -> _message.emit(message) },
+            block = {
+                _isLoading.update { true }
+
+                authenticationService.signInWithFacebook(
+                    token,
+                    onSuccess = {
+                        _isLoading.update { false }
+                        openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
+                    },
+                    onFailure = { _isLoading.update { false } }
+                )
+            }
+        )
+    }
+
     fun onSignInWithGoogle(credential: Credential, openAndPopUp: (String, String) -> Unit) {
         launchCatching(
             tag = LOGIN_VIEW_MODEL_TAG,
@@ -49,9 +69,13 @@ class LoginViewModel @Inject constructor(
                 if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     val googleIdTokenCredential =
                         GoogleIdTokenCredential.createFrom(credential.data)
-                    authenticationService.signInWithGoogle(googleIdTokenCredential.idToken)
-                    _isLoading.update { false }
-                    openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
+                    authenticationService.signInWithGoogle(googleIdTokenCredential.idToken,
+                        onSuccess = {
+                            _isLoading.update { false }
+                            openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
+                        },
+                        onFailure = { _isLoading.update { false } }
+                    )
                 } else {
                     Log.e(
                         LOGIN_VIEW_MODEL_TAG,

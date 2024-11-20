@@ -1,11 +1,11 @@
 package com.example.physio.screens.sign_up
 
 import android.util.Log
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.models.Provider
 import com.example.physio.models.User
 import com.example.physio.navigation.AuthScreen
 import com.example.physio.navigation.Graph
-import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,7 +131,11 @@ class SignUpViewModel @Inject constructor(
                     val userId = authenticationService.currentUserId
                     Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success:currentUserId:$userId")
 
-                    val userType = if (licenseNumber == 0) { 0 } else { 1 }
+                    val userType = if (licenseNumber == 0) {
+                        0
+                    } else {
+                        1
+                    }
 
                     val newUser = User(
                         uid = userId,

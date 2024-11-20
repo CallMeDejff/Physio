@@ -1,6 +1,5 @@
 package com.example.physio.screens.editUser
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,7 +30,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.physio.models.Provider
 import com.example.physio.screens.sign_in.components.HeaderView
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.ghost_white
@@ -41,7 +38,6 @@ import com.example.physio.ui.theme.typography
 @Composable
 fun EditUserScreen(
     popBackStack: () -> Unit,
-    navigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EditUserViewModel = hiltViewModel()
 ) {
@@ -51,11 +47,13 @@ fun EditUserScreen(
     val userName by viewModel.userName.collectAsState()
     val userLastname by viewModel.userLastname.collectAsState()
     val userLicenseNumber by viewModel.userLicenseNumber.collectAsState()
+    val userType by viewModel.userType.collectAsState()
 
     val nameState = remember { mutableStateOf(TextFieldValue(userName)) }
     val lastnameState = remember { mutableStateOf(TextFieldValue(userLastname)) }
     val licenseNumberState =
         remember { mutableStateOf(TextFieldValue(userLicenseNumber.toString())) }
+    val userTypeState = remember { mutableStateOf(userType) }
 
     LaunchedEffect(userName, userLastname, userLicenseNumber) {
         viewModel.fetchUserInformation()
@@ -111,6 +109,7 @@ fun EditUserScreen(
                     nameState = nameState,
                     lastnameState = lastnameState,
                     licenseNumberState = licenseNumberState,
+                    userType = userTypeState.value
                 )
             }
 
@@ -128,7 +127,7 @@ fun EditUserScreen(
                             name = nameState.value.text,
                             lastname = lastnameState.value.text,
                             licenseNumber = licenseNumberState.value.text.toInt(),
-                            navigate = navigate
+                            popBackStack = popBackStack
                         )
                     },
                     modifier = Modifier

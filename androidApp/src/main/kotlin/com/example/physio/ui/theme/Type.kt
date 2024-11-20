@@ -54,7 +54,11 @@ val typography = androidx.compose.material3.Typography(
         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
         fontWeight = FontWeight.Normal,
         lineHeight = 28.sp
-    )
+    ),
+
+   bodyMedium = TextStyle(
+        fontSize = 18.sp,
+)
     /* Other default text styles to override
     button = TextStyle(
     fontFamily = FontFamily.Default,

@@ -1,15 +1,18 @@
 package com.example.physio.screens.exercise.components
 
 import android.text.Html
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,15 +24,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.physio.models.Exercise
+import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.colorTertiary
 import com.example.physio.ui.theme.typography
 
 @Composable
 fun ExerciseCard(
     exercise: Exercise,
-    onMediaClick: (String, String) -> Unit
+    equipmentList: List<Pair<String, String>>,
+    onMediaClick: (String, String) -> Unit,
+    modifier: Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -38,15 +46,15 @@ fun ExerciseCard(
         colors = CardDefaults.cardColors(containerColor = colorTertiary),
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
-            .width(300.dp)
-            .wrapContentSize(Alignment.TopStart),
+            .padding(8.dp)
+            .heightIn(max = 650.dp),
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
                 .padding(bottom = 32.dp)
-                .heightIn(max = 400.dp)
+                .wrapContentHeight()
         ) {
             item {
                 MediaView(
@@ -59,13 +67,7 @@ fun ExerciseCard(
             }
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = exercise.title,
-                    style = typography.headlineMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                ExerciseStats(exercise, equipmentList)
             }
 
             item {
@@ -96,4 +98,3 @@ fun ExerciseCard(
         }
     }
 }
-

@@ -2,6 +2,7 @@ package com.example.physio.screens.search
 
 import android.util.Log
 import com.example.physio.core.PhysioAppViewModel
+import com.example.physio.models.ExercisePackage
 import com.example.physio.service.services.ExercisePackageService
 import com.example.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,9 +30,8 @@ class SearchViewModel @Inject constructor(
     private val _conditionsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val conditionsList: StateFlow<List<Pair<String, String>>> = _conditionsList
 
-    private val _matchingPackages =
-        MutableStateFlow<List<Triple<String, String, String>>>(emptyList())
-    val matchingPackages: StateFlow<List<Triple<String, String, String>>> = _matchingPackages
+    private val _matchingPackages = MutableStateFlow<List<ExercisePackage>>(emptyList())
+    val matchingPackages: StateFlow<List<ExercisePackage>> = _matchingPackages
 
 
     fun loadEquipmentList() {
@@ -92,10 +92,10 @@ class SearchViewModel @Inject constructor(
                 if (matchingPackages.isNotEmpty()) {
                     _matchingPackages.value = matchingPackages
 
-                    matchingPackages.forEach { (id, name, description) ->
+                    matchingPackages.forEach { pkg ->
                         Log.d(
                             SEARCH_VIEW_MODEL_TAG,
-                            "searchForMatchingPackages: Found package: ID = $id, Name = $name, Description = $description"
+                            "searchForMatchingPackages: Found package: ID = ${pkg.id}, Name = ${pkg.name}, Description = ${pkg.description}"
                         )
                     }
                     Log.d(

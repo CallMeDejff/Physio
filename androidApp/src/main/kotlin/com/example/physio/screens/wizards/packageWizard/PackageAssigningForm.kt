@@ -1,14 +1,11 @@
 package com.example.physio.screens.wizards.packageWizard
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -71,11 +68,11 @@ fun PackageAssigningForm(
             modifier = Modifier
                 .height(200.dp)
         ) {
-                AutoCompleteDetailed(
-                    itemList = packagesList,
-                    selectedItems = selectedPackage,
-                    onToggleItem = { packageId -> viewModel.togglePackage(packageId) }
-                )
+            AutoCompleteDetailed(
+                itemList = packagesList,
+                selectedItems = selectedPackage,
+                onToggleItem = { packageId -> viewModel.togglePackage(packageId) }
+            )
         }
 
         Text(
@@ -89,14 +86,13 @@ fun PackageAssigningForm(
             modifier = Modifier
                 .height(200.dp)
         ) {
-                AutoCompleteDetailed(
-                    userList = usersList,
-                    selectedItems = selectedUsers,
-                    onToggleItem = { userId ->
-                        viewModel.toggleUser(userId)
-                    }
-                )
-            }
-
+            AutoCompleteDetailed(
+                userList = usersList,
+                selectedItems = selectedUsers,
+                onToggleItem = { userId ->
+                    viewModel.toggleUser(userId)
+                }
+            )
+        }
     }
 }

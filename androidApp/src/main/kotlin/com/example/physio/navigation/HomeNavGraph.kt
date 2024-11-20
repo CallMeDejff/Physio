@@ -1,5 +1,6 @@
 package com.example.physio.navigation
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -11,10 +12,13 @@ import com.example.physio.screens.exercise.ExerciseViewModel
 import com.example.physio.screens.favorites.FavoritesScreen
 import com.example.physio.screens.profile.ProfileScreen
 import com.example.physio.screens.profile.ProfileViewModel
+import com.example.physio.screens.reminders.ReminderViewModel
+import com.example.physio.screens.reminders.SchedulerScreen
 import com.example.physio.screens.search.SearchScreen
 import com.example.physio.screens.search.SearchViewModel
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeNavGraph(navController: NavHostController) {
 
@@ -45,6 +49,15 @@ fun HomeNavGraph(navController: NavHostController) {
                 viewModel = viewModel
             )
         }
+
+        composable(route = BottomBarScreen.Scheduler.route) { backStackEntry ->
+            val viewModel: ReminderViewModel = hiltViewModel(backStackEntry)
+            SchedulerScreen(
+                navigate = { popUp -> navController.navigate(popUp) },
+                viewModel = viewModel
+            )
+        }
+
         composable(route = BottomBarScreen.Profile.route) { backStackEntry ->
             val viewModel: ProfileViewModel = hiltViewModel(backStackEntry)
             ProfileScreen(
@@ -59,5 +72,6 @@ fun HomeNavGraph(navController: NavHostController) {
         searchNavGraph(navController = navController)
         wizardsNavGraph(navController = navController)
         profileNavGraph(navController = navController)
+        schedulerNavGraph(navController = navController)
     }
 }

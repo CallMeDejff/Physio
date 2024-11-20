@@ -6,7 +6,9 @@ import android.util.Log
 import com.example.physio.models.Exercise
 import com.example.physio.models.ExercisePackage
 import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.AuthenticationService
 import com.example.physio.service.services.ExerciseService
+import com.example.physio.service.services.FileStorageService
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -14,7 +16,8 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ExerciseServiceImpl @Inject constructor(
-    private val auth: AccountService
+    private val auth: AuthenticationService,
+    private val fileStorageService: FileStorageService,
 ) : ExerciseService {
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -75,7 +78,7 @@ class ExerciseServiceImpl @Inject constructor(
     @SuppressLint("SuspiciousIndentation")
     override suspend fun createExerciseWithMedia(exercise: Exercise, mediaUris: List<Uri>) {
         try {
-            val mediaUrls = uploadFilesToFirebase(mediaUris, path = auth.currentUserId)
+            val mediaUrls = fileStorageService.uploadFilesToFirebase(mediaUris, path = auth.currentUserId)
             val exerciseWithMedia = exercise.copy(mediaUrls = mediaUrls)
 
             val documentReference = firestore.collection(EXERCISES_COLLECTION)
@@ -90,7 +93,7 @@ class ExerciseServiceImpl @Inject constructor(
                 .update("id", generatedId, "uid", auth.currentUserId)
                 .await()
 
-            val exerciseSummaryEntry = mapOf("id" to generatedId, "title" to exercise.title)
+            val exerciseSummaryEntry = mapOf("id" to generatedId, "title" to exercise.title, "nonPublic" to exercise.nonPublic, "uid" to auth.currentUserId)
 
             firestore.collection(SUMMARY_COLLECTION)
                 .document("exercises")
@@ -105,18 +108,20 @@ class ExerciseServiceImpl @Inject constructor(
     override suspend fun updateExercise(exercise: Exercise, mediaUris: List<Uri>?) {
         try {
             val updatedMediaUrls = if (!mediaUris.isNullOrEmpty()) {
-                uploadFilesToFirebase(mediaUris, path = exercise.id)
+                fileStorageService.uploadFilesToFirebase(mediaUris, path = exercise.id)
             } else {
                 exercise.mediaUrls
             }
 
-            val updatedExercise =
-                exercise.copy(mediaUrls = updatedMediaUrls, uid = auth.currentUserId)
-            val exerciseRef = firestore.collection(EXERCISES_COLLECTION).document(exercise.id)
+            val updatedExercise = exercise.copy(mediaUrls = updatedMediaUrls, uid = auth.currentUserId)
+
+            val exerciseRef = firestore.collection(EXERCISES_COLLECTION)
+                .document(exercise.id)
             exerciseRef.set(updatedExercise).await()
             Log.d(EXERCISE_SERVICE_TAG, "Exercise updated with ID: ${exercise.id}")
 
-            val exerciseSummaryEntry = mapOf("id" to exercise.id, "title" to exercise.title)
+            val exerciseSummaryEntry = mapOf("id" to exercise.id, "title" to exercise.title, "nonPublic" to exercise.nonPublic, "uid" to auth.currentUserId)
+
             val exercisesDocument =
                 firestore.collection(SUMMARY_COLLECTION).document("exercises").get().await()
             val existingExercises =
@@ -134,29 +139,9 @@ class ExerciseServiceImpl @Inject constructor(
         }
     }
 
-    private suspend fun uploadFilesToFirebase(uris: List<Uri>, path: String): List<String> {
-        val uploadedUrls = mutableListOf<String>()
-
-        uris.forEach { uri ->
-            val uriString = uri.toString()
-
-            if (uriString.startsWith("https://")) {
-                uploadedUrls.add(uriString)
-            } else {
-                val storageRef = storage.reference.child("${path}/${uri.lastPathSegment}")
-                val uploadTask = storageRef.putFile(uri).await()
-                val downloadUrl = storageRef.downloadUrl.await()
-                uploadedUrls.add(downloadUrl.toString())
-            }
-        }
-        return uploadedUrls
-    }
-
     override suspend fun deleteExercise(exercise: Exercise) {
-        Log.d(
-            EXERCISE_SERVICE_TAG,
-            "deleteExercise: Deleting exercise with ID: ${exercise.id}, mediaUrls: ${exercise.mediaUrls}"
-        )
+        Log.d(EXERCISE_SERVICE_TAG, "deleteExercise: Deleting exercise with ID: ${exercise.id}, mediaUrls: ${exercise.mediaUrls}")
+
         val documentId = exercise.id
         try {
             deleteExerciseMedia(exercise)
@@ -182,26 +167,13 @@ class ExerciseServiceImpl @Inject constructor(
         )
         exercise.mediaUrls.forEach { mediaUrl ->
             try {
-                val storagePath = getStoragePathFromUrl(mediaUrl)
+                val storagePath = fileStorageService.getStoragePathFromUrl(mediaUrl)
                 val storageRef = storage.reference.child(storagePath)
                 storageRef.delete().await()
                 Log.d(EXERCISE_SERVICE_TAG, "Deleted media file: $mediaUrl")
             } catch (e: Exception) {
                 Log.e(EXERCISE_SERVICE_TAG, "Error deleting media file: $mediaUrl", e)
             }
-        }
-    }
-
-    private fun getStoragePathFromUrl(mediaUrl: String): String {
-        val apiUrlPrefix = "https://firebasestorage.googleapis.com/v0/b/"
-        if (mediaUrl.startsWith(apiUrlPrefix)) {
-            val decodedUrl = Uri.decode(mediaUrl)
-            return decodedUrl.substringAfter("/o/").substringBefore("?")
-        } else {
-            val storageUrl = storage.reference.toString()
-            val decodedUrl = Uri.decode(mediaUrl)
-            return decodedUrl.removePrefix("$storageUrl/")
-                .substringBefore("?")
         }
     }
 

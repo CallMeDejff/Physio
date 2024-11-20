@@ -4,14 +4,11 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.automirrored.outlined.Message
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.VerifiedUser
@@ -166,11 +163,6 @@ fun ProfileScreen(
                         Icons.Outlined.Edit,
                         "Edytuj dane użytkownika"
                     ) { viewModel.onEditUserClick(navigate) }
-
-                    ActionButton(
-                        Icons.Outlined.CalendarMonth,
-                        "Ustal harmonogram"
-                    ) { navigate(com.example.physio.navigation.ProfileScreen.ReminderScreen.route) }
 
                     if (accProvider == Provider.Physio.providerId) {
                         ActionButton(

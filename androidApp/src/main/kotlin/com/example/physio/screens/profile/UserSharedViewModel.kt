@@ -10,7 +10,6 @@ import com.example.physio.models.Reminder
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.ExercisePackageService
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -35,8 +34,10 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
             tag = tag,
             block = {
                 val userPackages = exercisePackageService.getUserExercisePackages()
-                _userFavoritePackagesList.value = userPackages.favoritePackages as List<ExercisePackage>
-                _userAssignedPackagesList.value = userPackages.assignedPackages as List<ExercisePackage>
+                _userFavoritePackagesList.value =
+                    userPackages.favoritePackages as List<ExercisePackage>
+                _userAssignedPackagesList.value =
+                    userPackages.assignedPackages as List<ExercisePackage>
                 Log.d(
                     tag,
                     "Fetched favorite packages: ${userPackages.favoritePackages.size}, assigned packages: ${userPackages.assignedPackages.size}"

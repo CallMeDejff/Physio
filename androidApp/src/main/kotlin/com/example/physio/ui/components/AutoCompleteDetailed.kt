@@ -18,6 +18,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
@@ -47,7 +48,7 @@ fun AutoCompleteDetailed(
     itemList: List<Pair<String, String>> = emptyList(),
     userList: List<User> = emptyList(),
     selectedItems: Set<String>,
-    onToggleItem: (String) -> Unit
+    onToggleItem: (String) -> Unit,
 ) {
     var category by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }

@@ -157,7 +157,11 @@ fun LoginForm(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    FacebookSignIn()
+                    FacebookSignIn(
+                        onAuthComplete = { token ->
+                            viewModel.onSignInWithFacebook(token, openAndPopUp)
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(10.dp))
 

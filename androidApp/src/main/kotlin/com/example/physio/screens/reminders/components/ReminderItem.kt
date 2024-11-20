@@ -60,7 +60,9 @@ fun ReminderItem(
                     .weight(4f)
             ) {
                 Text(reminder.topic, style = typography.labelLarge)
-                Text("${reminder.dayOfWeek} - ${reminder.time}", style = typography.labelMedium)
+                val fullDay = mapShortDayToFull(reminder.dayOfWeek)
+                Text("$fullDay - ${reminder.time}", style = typography.labelMedium)
+
             }
 
             if(deletable) {
@@ -76,5 +78,18 @@ fun ReminderItem(
                 }
             }
         }
+    }
+}
+
+private fun mapShortDayToFull(shortDay: String): String {
+    return when (shortDay) {
+        "PN" -> "Poniedziałek"
+        "WT" -> "Wtorek"
+        "ŚR" -> "Środa"
+        "CZ" -> "Czwartek"
+        "PT" -> "Piątek"
+        "SB" -> "Sobota"
+        "ND" -> "Niedziela"
+        else -> "Poniedziałek"
     }
 }

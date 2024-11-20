@@ -1,20 +1,29 @@
 package com.example.physio.service.impl
 
+import android.net.Uri
 import android.util.Log
+import com.example.physio.models.Exercise
 import com.example.physio.models.ExercisePackage
 import com.example.physio.models.User
 import com.example.physio.models.UserPackages
 import com.example.physio.models.UserSummary
 import com.example.physio.service.services.AccountService
+import com.example.physio.service.services.AuthenticationService
 import com.example.physio.service.services.CacheManager
 import com.example.physio.service.services.ExercisePackageService
+import com.example.physio.service.services.FileStorageService
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ExercisePackageServiceImpl @Inject constructor(
+    private val auth: AuthenticationService,
+    private val fileStorageService: FileStorageService,
+    private val accountService: AccountService,
     private val cacheManager: CacheManager
 ) : ExercisePackageService {
 
@@ -22,6 +31,7 @@ class ExercisePackageServiceImpl @Inject constructor(
         get() = Firebase.auth.currentUser?.uid.orEmpty()
 
     private val firestore = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
 
     override suspend fun getExercisePackages(): List<ExercisePackage> {
         return cacheManager.getCachedExercisePackages() ?: try {
@@ -55,10 +65,13 @@ class ExercisePackageServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun createExercisePackage(exercisePackage: ExercisePackage) {
+    override suspend fun createExercisePackage(exercisePackage: ExercisePackage, mediaUris: List<Uri>) {
         try {
+            val mediaUrls = fileStorageService.uploadFilesToFirebase(mediaUris, path = auth.currentUserId)
+            val packageWithMedia = exercisePackage.copy(mediaUrls = mediaUrls)
+
             val documentReference = firestore.collection(EXERCISE_PACKAGES_COLLECTION)
-                .add(exercisePackage.copy(id = ""))
+                .add(packageWithMedia)
                 .await()
 
             val generatedId = documentReference.id
@@ -69,20 +82,11 @@ class ExercisePackageServiceImpl @Inject constructor(
                 .update("id", generatedId, "uid", currentUserId)
                 .await()
 
-            val exercisePackageSummaryEntry = mapOf(
-                "id" to generatedId,
-                "name" to exercisePackage.name
-            )
-
-            val packagesDocument =
-                firestore.collection(SUMMARY_COLLECTION).document("packages").get().await()
-            val existingPackages =
-                packagesDocument.get("packages") as? List<Map<String, String>> ?: emptyList()
-            val updatedPackages = existingPackages + exercisePackageSummaryEntry
+            val exercisePackageSummaryEntry = mapOf("id" to generatedId, "name" to exercisePackage.name, "uid" to currentUserId)
 
             firestore.collection(SUMMARY_COLLECTION)
                 .document("packages")
-                .set(mapOf("packages" to updatedPackages))
+                .update("packages", FieldValue.arrayUnion(exercisePackageSummaryEntry))
                 .await()
 
         } catch (e: Exception) {
@@ -91,8 +95,12 @@ class ExercisePackageServiceImpl @Inject constructor(
     }
 
     override suspend fun deleteExercisePackage(exercisePackage: ExercisePackage) {
+        Log.d(EXERCISE_PACKAGE_SERVICE_TAG, "deleteExercisePackage: Deleting exercise package with ID: ${exercisePackage.id}")
+
         val documentId = exercisePackage.id
         try {
+            deleteExercisePackageMedia(exercisePackage)
+
             val exercisePackageDocRef = firestore.collection(EXERCISE_PACKAGES_COLLECTION).document(documentId)
             val exercisePackageSnapshot = exercisePackageDocRef.get().await()
             val exercisePackageFromDb = exercisePackageSnapshot.toObject(ExercisePackage::class.java)
@@ -104,7 +112,7 @@ class ExercisePackageServiceImpl @Inject constructor(
 
             val assignedUsers = exercisePackageFromDb.assignedTo
             for (userId in assignedUsers) {
-                removePackageFromUser(userId, documentId)
+                accountService.removePackageFromUser(userId, documentId)
             }
 
             exercisePackageDocRef.delete().await()
@@ -116,7 +124,7 @@ class ExercisePackageServiceImpl @Inject constructor(
                 .await()
 
             val existingPackages =
-                packagesDocument.get("packages") as? List<Map<String, String>> ?: emptyList()
+                packagesDocument.get("packages") as? List<Map<String, Any>> ?: emptyList()
 
             val updatedPackages = existingPackages.filter { it["id"] != documentId }
 
@@ -154,24 +162,27 @@ class ExercisePackageServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateExercisePackage(exercisePackage: ExercisePackage) {
+    override suspend fun updateExercisePackage(exercisePackage: ExercisePackage, mediaUris: List<Uri>) {
         try {
-            val updatedExercisePackage = exercisePackage.copy(uid = currentUserId)
+            val updatedMediaUrls = if (!mediaUris.isNullOrEmpty()) {
+                fileStorageService.uploadFilesToFirebase(mediaUris, path = exercisePackage.id)
+            } else {
+                exercisePackage.mediaUrls
+            }
+
+            val updatedExercisePackage = exercisePackage.copy(mediaUrls = updatedMediaUrls,uid = currentUserId)
 
             firestore.collection(EXERCISE_PACKAGES_COLLECTION)
                 .document(updatedExercisePackage.id)
                 .set(updatedExercisePackage)
                 .await()
 
-            val exercisePackageSummaryEntry = mapOf(
-                "id" to updatedExercisePackage.id,
-                "name" to updatedExercisePackage.name
-            )
+            val exercisePackageSummaryEntry = mapOf("id" to updatedExercisePackage.id, "name" to updatedExercisePackage.name, "uid" to currentUserId)
 
             val packagesDocument =
                 firestore.collection(SUMMARY_COLLECTION).document("packages").get().await()
             val existingPackages =
-                packagesDocument.get("packages") as? List<Map<String, String>> ?: emptyList()
+                packagesDocument.get("packages") as? List<Map<String, Any>> ?: emptyList()
             val updatedPackages =
                 existingPackages.filterNot { it["id"] == updatedExercisePackage.id } + exercisePackageSummaryEntry
 
@@ -187,10 +198,27 @@ class ExercisePackageServiceImpl @Inject constructor(
         }
     }
 
+    private suspend fun deleteExercisePackageMedia(exercisePackage: ExercisePackage) {
+        Log.d(
+            EXERCISE_PACKAGE_SERVICE_TAG,
+            "deleteExercisePackageMedia: Deleting exercise package with ID: ${exercisePackage.id}, mediaUrls: ${exercisePackage.mediaUrls}"
+        )
+        exercisePackage.mediaUrls.forEach { mediaUrl ->
+            try {
+                val storagePath = fileStorageService.getStoragePathFromUrl(mediaUrl)
+                val storageRef = storage.reference.child(storagePath)
+                storageRef.delete().await()
+                Log.d(EXERCISE_PACKAGE_SERVICE_TAG, "Deleted media file: $mediaUrl")
+            } catch (e: Exception) {
+                Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error deleting media file: $mediaUrl", e)
+            }
+        }
+    }
+
     override suspend fun findMatchingExercisePackages(
         conditionIds: List<String>,
         equipmentIds: List<String>
-    ): List<Triple<String, String, String>> {
+    ): List<ExercisePackage> {
         return try {
             val allPackages = getExercisePackages()
 
@@ -204,7 +232,7 @@ class ExercisePackageServiceImpl @Inject constructor(
             val matchingPackages = allPackages.filter { exercisePackage ->
                 exercisePackage.conditionIds.containsAll(conditionIds) &&
                         exercisePackage.equipmentIds.containsAll(equipmentIds)
-            }.map { Triple(it.id, it.name, it.description) }
+            }
 
             matchingPackages
         } catch (e: Exception) {
@@ -213,46 +241,38 @@ class ExercisePackageServiceImpl @Inject constructor(
         }
     }
 
+
     override suspend fun getUserExercisePackages(): UserPackages {
         return cacheManager.getCachedUserPackages() ?: try {
-            val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
-            val documentSnapshot = userDocRef.get().await()
-            val user = documentSnapshot.toObject(User::class.java)
+            val user = accountService.getUserInfo()
 
-            val favoritePackages = user?.favoritePackages?.map { packageId ->
-                getExercisePackage(packageId)
-            } ?: emptyList()
+            val favoritePackageIds = user?.favoritePackages ?: emptyList()
+            val assignedPackageIds = user?.assignedPackages ?: emptyList()
 
-            val assignedPackages = user?.assignedPackages?.map { packageId ->
+            val favoritePackages = favoritePackageIds.mapNotNull { packageId ->
                 getExercisePackage(packageId)
-            } ?: emptyList()
+            }
+
+            val assignedPackages = assignedPackageIds.mapNotNull { packageId ->
+                getExercisePackage(packageId)
+            }
 
             val userPackages = UserPackages(
-                favoritePackages = favoritePackages.filterNotNull(),
-                assignedPackages = assignedPackages.filterNotNull()
+                favoritePackages = favoritePackages,
+                assignedPackages = assignedPackages
             )
 
             cacheManager.setCachedUserPackages(userPackages)
             userPackages
         } catch (e: Exception) {
-            Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error getting exercise packages", e)
+            Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error getting user exercise packages", e)
             UserPackages()
         }
     }
 
     override suspend fun assignPackageToUser(userId: String, packageId: String) {
         try {
-            val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
-            val userSnapshot = userDocRef.get().await()
-            val user = userSnapshot.toObject(User::class.java)
-
-            if (user == null) {
-                Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "User not found with ID: $userId")
-                return
-            }
-
-            val updatedAssignedPackages = user.assignedPackages + packageId
-            userDocRef.update("assignedPackages", updatedAssignedPackages).await()
+            accountService.assignPackageToUser(userId, packageId)
 
             val exercisePackageDocRef = firestore.collection(EXERCISE_PACKAGES_COLLECTION).document(packageId)
             val exercisePackageSnapshot = exercisePackageDocRef.get().await()
@@ -274,17 +294,7 @@ class ExercisePackageServiceImpl @Inject constructor(
 
     override suspend fun removePackageFromUser(userId: String, packageId: String) {
         try {
-            val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
-            val userSnapshot = userDocRef.get().await()
-            val user = userSnapshot.toObject(User::class.java)
-
-            if (user == null) {
-                Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "User not found with ID: $userId")
-                return
-            }
-
-            val updatedAssignedPackages = user.assignedPackages.filter { it != packageId }
-            userDocRef.update("assignedPackages", updatedAssignedPackages).await()
+            accountService.removePackageFromUser(userId, packageId)
 
             val exercisePackageDocRef = firestore.collection(EXERCISE_PACKAGES_COLLECTION).document(packageId)
             val exercisePackageSnapshot = exercisePackageDocRef.get().await()
@@ -305,11 +315,9 @@ class ExercisePackageServiceImpl @Inject constructor(
         }
     }
 
-
     companion object {
         private const val EXERCISE_PACKAGE_SERVICE_TAG = "ExercisePackageService"
         private const val EXERCISE_PACKAGES_COLLECTION = "exercise_packages"
         private const val SUMMARY_COLLECTION = "summaries"
-        private const val USERS_COLLECTION = "users"
     }
 }

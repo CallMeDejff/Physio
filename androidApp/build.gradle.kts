@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.volley)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.constraintlayout.compose)
@@ -71,6 +72,7 @@ dependencies {
     implementation(libs.facebook.login)
     implementation(libs.coil.compose)
     implementation(libs.play.services.auth)
+    implementation("com.vanniktech:android-image-cropper:4.6.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     kapt("com.github.bumptech.glide:compiler:4.12.0")
 

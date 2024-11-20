@@ -16,8 +16,13 @@ import androidx.compose.ui.unit.dp
 import com.example.physio.R
 
 @Composable
-fun HeaderView(modifier: Modifier, paddingValue: Int = 60, logoScale: Float = 1f) {
-    val centeredImage = painterResource(id = R.drawable.logo_clear)
+fun HeaderView(
+    modifier: Modifier,
+    paddingValue: Int = 60,
+    logoScale: Float = 1f,
+    image: Int = R.drawable.logo_clear
+) {
+    val centeredImage = painterResource(id = image)
 
     Box(
         modifier = modifier
@@ -32,8 +37,6 @@ fun HeaderView(modifier: Modifier, paddingValue: Int = 60, logoScale: Float = 1f
                 .padding(
                     top = 0.dp,
                     bottom = paddingValue.dp
-                    //bottom = 160.dp
-                    //bottom = 160.dp
                 )
                 .align(Alignment.Center)
                 .scale(logoScale)

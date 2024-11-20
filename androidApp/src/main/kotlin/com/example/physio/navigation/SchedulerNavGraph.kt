@@ -5,22 +5,20 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.physio.screens.editUser.EditUserScreen
-import com.example.physio.screens.editUser.EditUserViewModel
 import com.example.physio.screens.reminders.ReminderViewModel
 import com.example.physio.screens.reminders.ScheduleReminderScreen
 
-fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.schedulerNavGraph(navController: NavHostController) {
 
     navigation(
-        route = Graph.PROFILE,
-        startDestination = BottomBarScreen.Profile.route
+        route = Graph.SCHEDULER,
+        startDestination = BottomBarScreen.Scheduler.route
     ) {
 
-        composable(route = ProfileScreen.EditUser.route) { backStackEntry ->
-            val viewModel: EditUserViewModel = hiltViewModel(backStackEntry)
+        composable(route = CalendarScreen.Calendar.route) { backStackEntry ->
+            val viewModel: ReminderViewModel = hiltViewModel(backStackEntry)
 
-            EditUserScreen(
+            ScheduleReminderScreen(
                 popBackStack = { navController.popBackStack() },
                 viewModel = viewModel
             )

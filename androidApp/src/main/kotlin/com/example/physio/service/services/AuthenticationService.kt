@@ -9,7 +9,8 @@ interface AuthenticationService {
     suspend fun hasUser(): Boolean
     suspend fun setUserInfo(userId: String): User?
     suspend fun signIn(email: String, password: String): Result<Unit>
-    suspend fun signInWithGoogle(idToken: String)
+    suspend fun signInWithGoogle(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+    suspend fun signInWithFacebook(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
     suspend fun signUp(email: String, password: String): Result<Unit>
     suspend fun signOut()
     suspend fun updateEmail(email: String)

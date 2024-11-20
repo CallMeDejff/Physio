@@ -29,13 +29,14 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.physio.ui.theme.PhysioBarTheme
 import com.example.physio.ui.theme.PhysioTheme
 import com.example.physio.ui.theme.colorPrimary
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DefaultScreen(navController: NavHostController = rememberNavController()) {
-    PhysioTheme {
+    PhysioBarTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
@@ -46,6 +47,7 @@ fun DefaultScreen(navController: NavHostController = rememberNavController()) {
                 if (currentRoute in listOf(
                         BottomBarScreen.Home.route,
                         BottomBarScreen.Search.route,
+                        BottomBarScreen.Scheduler.route,
                         BottomBarScreen.Profile.route
                     )
                 ) {
@@ -63,6 +65,7 @@ fun BottomBar(navController: NavHostController) {
     val screens = listOf(
         BottomBarScreen.Home,
         BottomBarScreen.Search,
+        BottomBarScreen.Scheduler,
         BottomBarScreen.Profile,
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -120,7 +123,7 @@ fun RowScope.AddItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -133,7 +136,7 @@ fun RowScope.AddItem(
             AnimatedVisibility(visible = selected) {
                 Text(
                     text = screen.title,
-                    color = contentColor
+                    color = contentColor,
                 )
             }
         }

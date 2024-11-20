@@ -1,0 +1,69 @@
+package com.example.physio.screens.exercise.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.physio.models.Exercise
+import com.example.physio.ui.icons.Timelapse
+import com.example.physio.ui.icons.Timer
+import com.example.physio.ui.theme.typography
+
+@Composable
+fun ExerciseStats(
+    exercise: Exercise,
+    equipmentList: List<Pair<String, String>>
+) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        Column(
+            Modifier
+                .padding(vertical = 6.dp)
+                .align(Alignment.TopStart),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = exercise.title,
+                style = typography.headlineMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Row(
+                Modifier
+                    .align(Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Icon(imageVector = Timer, contentDescription = "Timer Icon")
+                Text(
+                    text = ": " + if (exercise.time.toString() == "0") "-" else exercise.time.toString(),
+                    style = typography.labelMedium
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Icon(imageVector = Timelapse, contentDescription = "Timelapse Icon")
+                Text(
+                    text = ": " + if (exercise.time.toString() == "0") "-" else exercise.time.toString(),
+                    style = typography.labelMedium
+                )
+            }
+
+            EquipmentStats(exercise = exercise, equipmentList = equipmentList)
+        }
+    }
+}

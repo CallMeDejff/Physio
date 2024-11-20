@@ -1,12 +1,13 @@
 package com.example.physio.screens.exercise
 
 import android.util.Log
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.models.Exercise
 import com.example.physio.models.StorageResult
-import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.service.services.AccountService
 import com.example.physio.service.services.ExercisePackageService
 import com.example.physio.service.services.ExerciseService
+import com.example.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,9 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
     private val accountService: AccountService,
-    //private val storageService: StorageService,
     private val exerciseService: ExerciseService,
-    private val exercisePackageService: ExercisePackageService
+    private val exercisePackageService: ExercisePackageService,
+    private val listService: ListService
 ) : PhysioAppViewModel() {
 
     private val _packageName = MutableStateFlow<String?>("")
@@ -41,6 +42,9 @@ class ExerciseViewModel @Inject constructor(
     private val _equipmentList = MutableStateFlow<List<String>>(emptyList())
     val equipmentList: StateFlow<List<String>> = _equipmentList
 
+    private val _equipmentFullList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val equipmentFullList: StateFlow<List<Pair<String, String>>> = _equipmentFullList
+
     private val _warmUpList = MutableStateFlow<List<String>>(emptyList())
     val warmUpList: StateFlow<List<String>> = _warmUpList
 
@@ -52,6 +56,9 @@ class ExerciseViewModel @Inject constructor(
 
     private val _fetchedWarmUps = MutableStateFlow<List<Exercise>>(emptyList())
     val fetchedWarmUps: StateFlow<List<Exercise>> = _fetchedWarmUps
+
+    private val _mediaUris = MutableStateFlow<String?>("")
+    val mediaUris: StateFlow<String?> = _mediaUris
 
     fun getExercisePackage(exercisePackageId: String) {
         launchCatching(
@@ -74,6 +81,7 @@ class ExerciseViewModel @Inject constructor(
                     _packageDescription.value = exPackage.description
                     _warmUpList.value = exPackage.warmUpIds
                     _exercisesList.value = exPackage.exerciseIds
+                    _mediaUris.value = exPackage.mediaUrls.firstOrNull().toString()
                 }
                 val exercises = try {
                     _exercisesList.value.map { exerciseId ->
@@ -112,24 +120,44 @@ class ExerciseViewModel @Inject constructor(
             block = {
                 when (val result = accountService.toggleFavoritePackage(packageId)) {
                     is StorageResult.Added -> {
-                        Log.d("ViewModel", "Package ${result.packageId} added to favorites")
+                        Log.d(EXERCISE_VIEW_MODEL, "Package ${result.packageId} added to favorites")
                         _message.update { "Pakiet dodany do ulubionych" }
                     }
 
                     is StorageResult.Removed -> {
-                        Log.d("ViewModel", "Package ${result.packageId} removed from favorites")
+                        Log.d(EXERCISE_VIEW_MODEL, "Package ${result.packageId} removed from favorites")
                         _message.update { "Pakiet usunięty z ulubionych" }
                     }
 
                     is StorageResult.Failure -> {
-                        Log.e("ViewModel", "Error: ${result.error.message}")
+                        Log.e(EXERCISE_VIEW_MODEL, "Error: ${result.error.message}")
                         _message.update { "Wystąpił błąd przy dodawaniu do ulubionych" }
+                    }
+
+                    null -> {
+                        Log.e(EXERCISE_VIEW_MODEL, "An error occurred while toggling package favorite status")
                     }
                 }
             }
         )
     }
 
+    fun loadEquipmentList() {
+        launchCatching(
+            tag = EXERCISE_VIEW_MODEL,
+            errorMessage = "Ups! Nie udało się pobrać listy sprzętów.",
+            onError = { message -> _message.emit(message) },
+            block = {
+                _isLoading.value = true
+                _equipmentFullList.value = listService.getEquipments()
+                Log.d(
+                    EXERCISE_VIEW_MODEL,
+                    "loadEquipmentList:Equipment list loaded, item count: ${_equipmentFullList.value.size}"
+                )
+                _isLoading.value = false
+
+            })
+    }
 
     fun onGoBackClick(popBackStack: () -> Unit) {
         popBackStack()

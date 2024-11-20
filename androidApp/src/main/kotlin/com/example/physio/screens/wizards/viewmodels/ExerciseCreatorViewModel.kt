@@ -41,7 +41,6 @@ class ExerciseCreatorViewModel @Inject constructor(
     val mediaType: StateFlow<String?> = _mediaType
 
     private val _exerciseAuthor = MutableStateFlow<String?>("")
-    val exerciseAuthor: StateFlow<String?> = _exerciseAuthor
 
     private val _exercisesList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val exercisesList: StateFlow<List<Pair<String, String>>> = _exercisesList
@@ -53,7 +52,72 @@ class ExerciseCreatorViewModel @Inject constructor(
     val equipmentList: StateFlow<List<Pair<String, String>>> = _equipmentList
 
     private val _conditionsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
-    val conditionsList: StateFlow<List<Pair<String, String>>> = _conditionsList
+
+    private val _attempts = MutableStateFlow<Int?>(0)
+    val attempts: StateFlow<Int?> = _attempts
+
+    private val _time = MutableStateFlow<Int?>(0)
+    val time: StateFlow<Int?> = _time
+
+    private val _nonPublic = MutableStateFlow<Boolean?>(false)
+    val nonPublic: StateFlow<Boolean?> = _nonPublic
+
+    private val titleError = MutableStateFlow<String?>(null)
+    private val descriptionError = MutableStateFlow<String?>(null)
+    private val equipmentError = MutableStateFlow<String?>(null)
+
+    fun validateFields(
+        title: String,
+        description: String,
+        selectedEquipment: List<String>
+    ): Boolean {
+        var isValid = true
+        val errorMessages = mutableListOf<String>()
+
+        titleError.value = if (title.isBlank()) {
+            isValid = false
+            val error = "Tytuł nie może być pusty. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        descriptionError.value = if (description.length < 10) {
+            isValid = false
+            val error = "Opis musi mieć co najmniej 10 znaków. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        descriptionError.value = if (description.length > 800) {
+            isValid = false
+            val error = "Opis jest za długi. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        equipmentError.value = if (selectedEquipment.isEmpty()) {
+            isValid = false
+            val error = "Wybierz przynajmniej jeden sprzęt. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        if (errorMessages.isNotEmpty()) {
+            showMessage(errorMessages.joinToString("\n"))
+        }
+
+        return isValid
+    }
+
+    fun hasSelectedExercise(): Boolean = _selectedExercises.value.isNotEmpty()
 
     fun loadExercises() {
         loadExercisesList(
@@ -83,6 +147,18 @@ class ExerciseCreatorViewModel @Inject constructor(
         _exerciseTitle.value = title
     }
 
+    fun updateAttempts(attempts: Int) {
+        _attempts.value = attempts
+    }
+
+    fun updateTime(time: Int) {
+        _time.value = time
+    }
+
+    fun updateNonPublic(nonPublic: Boolean) {
+        _nonPublic.value = nonPublic
+    }
+
     fun addSelectedMedia(context: Context, uri: Uri) {
         if (isVideoUri(context, uri) && getVideoDuration(context, uri) > 60000) return
         _selectedMediaUris.update { listOf(uri) }
@@ -99,7 +175,10 @@ class ExerciseCreatorViewModel @Inject constructor(
             equipmentIds = _selectedEquipment.value.toList(),
             mediaUrls = _selectedMediaUris.value.map { it.toString() },
             mediaType = _mediaType.value.toString(),
-            description = _exerciseDescription.value.toString()
+            description = _exerciseDescription.value.toString(),
+            attempts = _attempts.value?.toInt() ?: 0,
+            time = _time.value?.toInt() ?: 0,
+            nonPublic = _nonPublic.value ?: false,
         )
 
         launchCatching(
@@ -121,7 +200,10 @@ class ExerciseCreatorViewModel @Inject constructor(
             equipmentIds = _selectedEquipment.value.toList(),
             mediaUrls = _selectedMediaUris.value.map { it.toString() },
             mediaType = _mediaType.value.toString(),
-            description = _exerciseDescription.value.toString()
+            description = _exerciseDescription.value.toString(),
+            attempts = _attempts.value?.toInt() ?: 0,
+            time = _time.value?.toInt() ?: 0,
+            nonPublic = _nonPublic.value ?: false,
         )
 
         launchCatching(
@@ -176,6 +258,9 @@ class ExerciseCreatorViewModel @Inject constructor(
                         _selectedMediaUris.value =
                             exercise.mediaUrls.map { Uri.parse(it.toString()) }
                         _mediaType.value = exercise.mediaType
+                        _time.value = exercise.time
+                        _attempts.value = exercise.attempts
+                        _nonPublic.value = exercise.nonPublic
                     }
                     Log.d(EXERCISE_VIEWMODEL_TAG, "Exercise details loaded: $exerciseDetails")
                 } catch (e: Exception) {
@@ -227,14 +312,20 @@ class ExerciseCreatorViewModel @Inject constructor(
     }
 
     fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(
-        exerciseId,
-        _selectedExercises,
+        itemId = exerciseId,
+        selectedItemsFlow = _selectedExercises,
         allowMultipleSelection = multipleSelection,
-        itemType = "Exercise"
+        itemType = "Exercise",
+        tag = EXERCISE_VIEWMODEL_TAG
     )
 
-    fun toggleEquipment(equipmentId: String) =
-        toggleItem(equipmentId, _selectedEquipment, itemType = "Equipment")
+    fun toggleEquipment(equipmentId: String) = toggleItem(
+        itemId = equipmentId,
+        selectedItemsFlow = _selectedEquipment,
+        allowMultipleSelection = true,
+        tag = EXERCISE_VIEWMODEL_TAG,
+        itemType = "Equipment"
+    )
 
     fun onEditExerciseContinueClick(navigate: (String) -> Unit) {
         navigate(WizardScreen.EditExerciseDetailsScreen.route)

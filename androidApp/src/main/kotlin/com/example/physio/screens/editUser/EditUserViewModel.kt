@@ -2,12 +2,10 @@ package com.example.physio.screens.editUser
 
 import android.util.Log
 import com.example.physio.models.User
-import com.example.physio.navigation.Graph
 import com.example.physio.screens.profile.UserSharedViewModel
 import com.example.physio.service.services.AccountService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,7 +27,7 @@ class EditUserViewModel @Inject constructor(
         name: String,
         lastname: String,
         licenseNumber: Int,
-        navigate: (String) -> Unit,
+        popBackStack: () -> Unit,
         auth: Boolean = false
     ) {
         launchCatching(
@@ -38,7 +36,7 @@ class EditUserViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 val userId = accountService.currentUserId
-                Log.d("UserUpdate", "Pobranie userId: $userId")
+                Log.d(EDIT_USER_VIEW_MODEL_TAG, "Fetching data for userId: $userId")
 
                 val userType = if (licenseNumber == 0) 0 else 1
 
@@ -60,7 +58,7 @@ class EditUserViewModel @Inject constructor(
                     Log.d(EDIT_USER_VIEW_MODEL_TAG, "callUserUpdate: success")
                 }
 
-                navigate(Graph.PROFILE)
+                popBackStack()
             }
         )
     }

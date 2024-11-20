@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,6 +42,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.search.components.ExercisePackageCard
 import com.example.physio.ui.components.AutoComplete
+import com.example.physio.ui.components.FilterableItemSelector
 import com.example.physio.ui.theme.PurpleGrey80
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.typography
@@ -56,8 +56,6 @@ fun SearchScreen(
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
     val isLoadingResults by viewModel.isLoadingResults.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
 
     val selectedEquipment by viewModel.selectedEquipment.collectAsState()
     val equipmentList by viewModel.equipmentList.collectAsState()
@@ -97,12 +95,9 @@ fun SearchScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 25.dp)
+                    .padding(bottom = 60.dp, top = 10.dp)
             ) {
-                Column(
-                    modifier = modifier
-                        .padding(vertical = 32.dp)
-                ) {
+                Column {
                     Text(
                         text = buildAnnotatedString {
                             append(" Znajdź swój ")
@@ -118,41 +113,42 @@ fun SearchScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(screenHeight * 2 / 5, screenHeight * 3 / 5)
+                            .wrapContentHeight()
                             .clip(RoundedCornerShape(16.dp))
                             .border(
                                 BorderStroke(4.dp, Color.Transparent),
                                 shape = RoundedCornerShape(16.dp)
                             )
-                            .wrapContentHeight(Alignment.Top)
                             .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
-                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(8.dp),
                     ) {
-
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.wrapContentSize()
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(110.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            ) {
+                                AutoComplete(
+                                    itemList = conditionsList,
+                                    selectedItems = selectedCondition,
+                                    onToggleItem = { conditionId ->
+                                        viewModel.toggleCondition(conditionId)
+                                    }
+                                )
+                            }
 
-                            AutoComplete(
+                            FilterableItemSelector(
                                 itemList = equipmentList,
                                 selectedItems = selectedEquipment,
                                 onToggleItem = { equipmentId ->
-                                    viewModel.toggleEquipment(
-                                        equipmentId
-                                    )
+                                    viewModel.toggleEquipment(equipmentId)
                                 }
                             )
 
-                            AutoComplete(
-                                itemList = conditionsList,
-                                selectedItems = selectedCondition,
-                                onToggleItem = { conditionId ->
-                                    viewModel.toggleCondition(
-                                        conditionId
-                                    )
-                                }
-                            )
 
                             Button(
                                 onClick = { viewModel.searchForMatchingPackages() },
@@ -189,19 +185,18 @@ fun SearchScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         if (matchingPackages.isNotEmpty()) {
-                            items(matchingPackages) { (id, name, description) ->
+                            items(matchingPackages) { exercisePackage ->
                                 ExercisePackageCard(
-                                    id = id,
-                                    name = name,
-                                    description = description,
-                                    expandable = true,
+                                    id = exercisePackage.id,
+                                    name = exercisePackage.name,
+                                    description = exercisePackage.description,
+                                    increased = true,
+                                    imageUrl = exercisePackage.mediaUrls.firstOrNull().toString(),
                                     onClick = { packageId ->
                                         navigate("exercise_screen/${packageId}")
                                     }
@@ -212,7 +207,7 @@ fun SearchScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(16.dp),
+                                        .padding(32.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(

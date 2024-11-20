@@ -1,5 +1,6 @@
 package com.example.physio.screens.wizards.packageWizard
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.ghost_white
 import com.example.physio.ui.theme.typography
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun PackageWizardScreen(
     navigate: (String) -> Unit,
@@ -133,13 +135,18 @@ fun PackageWizardScreen(
                         bottom.linkTo(parent.bottom)
                     },
             ) {
+                val title = viewModel.packageName.value.toString()
+                val description = viewModel.packageDescription.value.toString()
+                val selectedCondition = viewModel.selectedConditions.value.toList()
+                val selectedExercises = viewModel.selectedExercises.value.toList()
+
                 Button(
                     onClick = {
                         when {
                             assignToPerson -> viewModel.onAssignPackageClick(navigate)
                             isEditor -> viewModel.onEditPackageContinueClick(navigate)
-                            isEditorNextStep -> viewModel.onEditPackageClick(navigate)
-                            else -> viewModel.onCreatePackageClick(navigate)
+                            isEditorNextStep -> if (viewModel.validateFields(title, description, selectedCondition, selectedExercises)) viewModel.onEditPackageClick(navigate)
+                            else -> if (viewModel.validateFields(title, description, selectedCondition, selectedExercises)) viewModel.onCreatePackageClick(navigate)
                         }
                     },
                     modifier = Modifier

@@ -50,16 +50,10 @@ fun ScheduleReminderScreen(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
 
     val selectedDay = remember { mutableStateOf("") }
     val selectedTime = remember { mutableStateOf("") }
     val selectedPackage = remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        viewModel.initializer()
-    }
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->

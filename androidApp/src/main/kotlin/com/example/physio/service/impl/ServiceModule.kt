@@ -11,6 +11,7 @@ import com.example.physio.service.services.FileStorageService
 import com.example.physio.service.services.ListService
 import com.example.physio.service.services.StorageSampleDataService
 import com.example.physio.service.services.StorageService
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -48,6 +49,17 @@ abstract class ServiceModule {
 
     @Binds
     abstract fun provideCacheManagerService(impl: CacheManagerImpl): CacheManager
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object FirebaseModule {
+
+    @Provides
+    @Singleton
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
+    }
 }
 
 @Module

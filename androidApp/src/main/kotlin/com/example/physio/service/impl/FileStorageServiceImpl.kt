@@ -2,6 +2,7 @@ package com.example.physio.service.impl
 
 import android.net.Uri
 import android.util.Log
+import com.example.physio.models.Exercise
 import com.example.physio.service.services.FileStorageService
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -39,13 +40,16 @@ class FileStorageServiceImpl @Inject constructor(
         }
     }
 
-    private fun getStoragePathFromUrl(mediaUrl: String): String {
+    override suspend fun getStoragePathFromUrl(mediaUrl: String): String {
         val apiUrlPrefix = "https://firebasestorage.googleapis.com/v0/b/"
-        return if (mediaUrl.startsWith(apiUrlPrefix)) {
-            Uri.decode(mediaUrl).substringAfter("/o/").substringBefore("?")
-        } else {
+        if (mediaUrl.startsWith(apiUrlPrefix)) {
             val decodedUrl = Uri.decode(mediaUrl)
-            decodedUrl.removePrefix("${storage.reference}/").substringBefore("?")
+            return decodedUrl.substringAfter("/o/").substringBefore("?")
+        } else {
+            val storageUrl = storage.reference.toString()
+            val decodedUrl = Uri.decode(mediaUrl)
+            return decodedUrl.removePrefix("$storageUrl/")
+                .substringBefore("?")
         }
     }
 

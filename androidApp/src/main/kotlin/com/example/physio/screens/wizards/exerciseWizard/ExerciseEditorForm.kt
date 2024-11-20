@@ -19,6 +19,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.example.physio.ui.components.AutoComplete
+import com.example.physio.ui.components.AutoCompleteDetailed
 import com.example.physio.ui.theme.colorPrimary
 import com.example.physio.ui.theme.typography
 
@@ -65,7 +66,7 @@ fun ExerciseEditorForm(
                         style = typography.labelLarge,
                         modifier = Modifier.height(32.dp)
                     )
-                    AutoComplete(
+                    AutoCompleteDetailed(
                         itemList = exercisesList,
                         selectedItems = selectedExercise,
                         onToggleItem = { exerciseId ->

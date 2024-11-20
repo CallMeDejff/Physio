@@ -24,9 +24,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
-import kotlinx.coroutines.withContext
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun PreviewScreen(
@@ -44,7 +44,6 @@ fun PreviewScreen(
     } else {
         mediaType == "video"
     }
-    Log.d("PreviewScreen", "isEditor: $isUrl, mediaType: $mediaType, isVideo: $isVideo")
 
     Box(
         modifier = Modifier
@@ -52,12 +51,13 @@ fun PreviewScreen(
             .background(Color.Black)
             .padding(horizontal = 6.dp, vertical = 6.dp)
             .clickable { onDismiss() },
-        contentAlignment = Alignment.Center
-    ) {
+        contentAlignment = Alignment.Center,
+
+        ) {
         when {
             isVideo -> {
                 Log.d("PreviewScreen", "Displaying video player for URL: $mediaUrl")
-                VideoPlayer(mediaUrl = mediaUrl, context = context)
+                VideoPlayer(videoUrl = mediaUrl, onClick = {})
             }
 
             mediaType == "image" || !isVideo -> {

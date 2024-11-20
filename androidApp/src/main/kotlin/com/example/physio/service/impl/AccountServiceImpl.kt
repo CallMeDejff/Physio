@@ -4,7 +4,9 @@ import android.util.Log
 import com.example.physio.models.Reminder
 import com.example.physio.models.StorageResult
 import com.example.physio.models.User
+import com.example.physio.models.UserPackages
 import com.example.physio.service.UserPreferences
+import com.example.physio.service.impl.ExercisePackageServiceImpl.Companion
 import com.example.physio.service.services.AccountService
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -30,35 +32,25 @@ class AccountServiceImpl @Inject constructor(
     override var currentUserId: String = ""
         get() = Firebase.auth.currentUser?.uid.orEmpty()
 
-    override suspend fun getUsersList(): List<User> {
-        val userList = mutableListOf<User>()
-        try {
-            val querySnapshot = firestore.collection(USERS_COLLECTION)
-                .get()
-                .await()
-
-            for (document in querySnapshot.documents) {
-                val user = document.toObject(User::class.java)
-                user?.let {
-                    userList.add(
-                        User(
-                            uid = it.uid,
-                            name = it.name,
-                            lastname = it.lastname,
-                            email = it.email,
-                            emailVerified = it.emailVerified,
-                        )
+    override suspend fun getUsersList(): List<User>? {
+        return safeFirestoreCall {
+            val querySnapshot = firestore.collection(USERS_COLLECTION).get().await()
+            querySnapshot.documents.mapNotNull { document ->
+                document.toObject(User::class.java)?.let {
+                    User(
+                        uid = it.uid,
+                        name = it.name,
+                        lastname = it.lastname,
+                        email = it.email,
+                        emailVerified = it.emailVerified
                     )
                 }
             }
-        } catch (e: Exception) {
-            Log.e(ACCOUNT_SERVICE_TAG, "getUsersList:Error getting users: ", e)
         }
-        return userList
     }
 
     override suspend fun getUserInfo(): User? {
-        return try {
+        return safeFirestoreCall {
             val documentSnapshot = firestore.collection(USERS_COLLECTION)
                 .document(currentUserId)
                 .get()
@@ -71,14 +63,11 @@ class AccountServiceImpl @Inject constructor(
                 Log.e(ACCOUNT_SERVICE_TAG, "Document for userId $currentUserId does not exist")
                 null
             }
-        } catch (e: Exception) {
-            Log.e(ACCOUNT_SERVICE_TAG, "Error getting user info", e)
-            null
         }
     }
 
-    override suspend fun updateUser(user: User): Result<Unit> {
-            return try {
+    override suspend fun updateUser(user: User): Result<Unit>? {
+            return safeFirestoreCall {
                 val userRef = firestore.collection(USERS_COLLECTION)
                     .document(currentUserId)
 
@@ -93,44 +82,29 @@ class AccountServiceImpl @Inject constructor(
 
                 Log.d(ACCOUNT_SERVICE_TAG, "updateUser: User updated: $user")
                 Result.success(Unit)
-            } catch (e: Exception) {
-                Log.e(ACCOUNT_SERVICE_TAG, "updateUser: Error when updating user:", e)
-                Result.failure(e)
             }
         }
 
-    override suspend fun toggleFavoritePackage(packageId: String): StorageResult {
-        return try {
+    override suspend fun toggleFavoritePackage(packageId: String): StorageResult? {
+        return safeFirestoreCall {
             val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
 
-            val result = firestore.runTransaction { transaction ->
+            firestore.runTransaction { transaction ->
                 val snapshot = transaction.get(userDocRef)
-                val user = snapshot.toObject(User::class.java)
+                val user = snapshot.toObject(User::class.java) ?: throw Exception("User document not found")
+                val updatedFavorites = user.favoritePackages.toMutableSet()
 
-                user?.let {
-                    val updatedFavorites = it.favoritePackages.toMutableList()
+                val result = if (updatedFavorites.contains(packageId)) {
+                    updatedFavorites.remove(packageId)
+                    StorageResult.Removed(packageId)
+                } else {
+                    updatedFavorites.add(packageId)
+                    StorageResult.Added(packageId)
+                }
 
-                    return@runTransaction if (updatedFavorites.contains(packageId)) {
-                        updatedFavorites.remove(packageId)
-                        transaction.update(userDocRef, "favoritePackages", updatedFavorites)
-                        Log.d(ACCOUNT_SERVICE_TAG, "$packageId removed from favorites.")
-                        StorageResult.Removed(packageId)
-                    } else {
-                        updatedFavorites.add(packageId)
-                        transaction.update(userDocRef, "favoritePackages", updatedFavorites)
-                        Log.d(ACCOUNT_SERVICE_TAG, "$packageId added to favorites.")
-                        StorageResult.Added(packageId)
-                    }
-                } ?: throw Exception("User document not found")
+                transaction.update(userDocRef, "favoritePackages", updatedFavorites.toList())
+                result
             }.await()
-            result
-        } catch (e: Exception) {
-            Log.e(
-                ACCOUNT_SERVICE_TAG,
-                "toggleFavoritePackage: Error toggling packageId: $packageId",
-                e
-            )
-            StorageResult.Failure(e)
         }
     }
 
@@ -138,72 +112,89 @@ class AccountServiceImpl @Inject constructor(
         val reminderId = UUID.randomUUID().toString()
         val reminderWithId = reminder.copy(id = reminderId)
 
-        return try {
+        return safeFirestoreCall {
             firestore.collection(USERS_COLLECTION)
                 .document(currentUserId)
                 .update("reminders", FieldValue.arrayUnion(reminderWithId))
                 .await()
-
             reminderId
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    override suspend fun getRemindersForUser(): List<Reminder> {
-        return try {
-            val userDoc = firestore
-                .collection(USERS_COLLECTION)
-                .document(currentUserId)
-                .get()
-                .await()
-
-            val reminders = userDoc.get("reminders") as? List<Map<String, Any>> ?: emptyList()
-
-            reminders.mapNotNull { reminderMap ->
-                try {
-                    Reminder(
-                        id = reminderMap["id"] as? String ?: "",
-                        dayOfWeek = reminderMap["dayOfWeek"] as? String ?: "",
-                        time = reminderMap["time"] as? String ?: "",
-                        topic = reminderMap["topic"] as? String ?: ""
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
         }
     }
 
     override suspend fun deleteReminderForUser(reminderId: String) {
-        try {
-            val userDoc = firestore
-                .collection(USERS_COLLECTION)
-                .document(currentUserId)
-                .get()
-                .await()
-
+        safeFirestoreCall {
+            val userDoc = firestore.collection(USERS_COLLECTION).document(currentUserId).get().await()
             val reminders = userDoc.get("reminders") as? List<Map<String, Any>> ?: emptyList()
-
             val updatedReminders = reminders.filterNot { it["id"] == reminderId }
 
             firestore.collection(USERS_COLLECTION)
                 .document(currentUserId)
                 .update("reminders", updatedReminders)
                 .await()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
+    }
+
+
+    override suspend fun assignPackageToUser(userId: String, packageId: String) {
+        safeFirestoreCall {
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
+            val userSnapshot = userDocRef.get().await()
+            val user = userSnapshot.toObject(User::class.java) ?: return@safeFirestoreCall
+
+            val updatedAssignedPackages = user.assignedPackages + packageId
+            userDocRef.update("assignedPackages", updatedAssignedPackages).await()
+            Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId assigned to user $userId")
+        }
+    }
+
+
+    override suspend fun removePackageFromUser(userId: String, packageId: String) {
+        safeFirestoreCall {
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
+            val userSnapshot = userDocRef.get().await()
+            val user = userSnapshot.toObject(User::class.java)
+
+            if (user == null) {
+                Log.e(ACCOUNT_SERVICE_TAG, "User not found with ID: $userId")
+                return@safeFirestoreCall
+            }
+
+            val updatedAssignedPackages = user.assignedPackages.filter { it != packageId }
+            userDocRef.update("assignedPackages", updatedAssignedPackages).await()
+            Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId removed from user $userId")
+        }
+    }
+
+    override suspend fun getRemindersForUser(): List<Reminder> {
+        return safeFirestoreCall {
+            val userDoc = firestore.collection(USERS_COLLECTION).document(currentUserId).get().await()
+            val reminders = userDoc.get("reminders") as? List<Map<String, Any>> ?: emptyList()
+            reminders.mapNotNull { reminderMap ->
+                runCatching {
+                    Reminder(
+                        id = reminderMap["id"] as? String ?: "",
+                        dayOfWeek = reminderMap["dayOfWeek"] as? String ?: "",
+                        time = reminderMap["time"] as? String ?: "",
+                        topic = reminderMap["topic"] as? String ?: ""
+                    )
+                }.getOrNull()
+            }
+        } ?: emptyList()
     }
 
 
     companion object {
         private const val USERS_COLLECTION = "users"
         private const val ACCOUNT_SERVICE_TAG = "AccountService"
-        private const val EXERCISE_PACKAGES_COLLECTION = "exercise_packages"
     }
+
+    private suspend fun <T> safeFirestoreCall(operation: suspend () -> T): T? {
+        return try {
+            operation()
+        } catch (e: Exception) {
+            Log.e(ACCOUNT_SERVICE_TAG, "Firestore operation failed", e)
+            null
+        }
+    }
+
 }

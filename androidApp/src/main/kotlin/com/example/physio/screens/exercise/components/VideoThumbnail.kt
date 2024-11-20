@@ -63,7 +63,8 @@ fun VideoThumbnail(mediaUrl: String, onMediaClick: (String) -> Unit) {
         Icon(
             imageVector = Icons.Outlined.PlayCircleOutline,
             contentDescription = "Play Video",
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier
+                .size(64.dp)
                 .align(Alignment.Center)
         )
     }

@@ -1,8 +1,8 @@
 package com.example.physio.screens.wizards.viewmodels
 
+import com.example.physio.core.PhysioAppViewModel
 import com.example.physio.navigation.Graph
 import com.example.physio.navigation.WizardScreen
-import com.example.physio.core.PhysioAppViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
