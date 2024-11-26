@@ -1,0 +1,341 @@
+package com.dawidkubica.physio.screens.wizards.viewmodels
+
+import android.content.Context
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.util.Log
+import com.dawidkubica.physio.models.Exercise
+import com.dawidkubica.physio.navigation.WizardScreen
+import com.dawidkubica.physio.service.services.AccountService
+import com.dawidkubica.physio.service.services.ExerciseService
+import com.dawidkubica.physio.service.services.ListService
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+
+@HiltViewModel
+class ExerciseCreatorViewModel @Inject constructor(
+    private val exerciseService: ExerciseService,
+    private val listService: ListService,
+    private val authenticateService: AccountService
+) : SharedViewModel(), DescriptionUpdatable {
+
+    private val _exerciseTitle = MutableStateFlow<String?>("")
+    val exerciseTitle: StateFlow<String?> = _exerciseTitle
+
+    private val _exerciseId = MutableStateFlow<String?>("")
+    val exerciseId: StateFlow<String?> = _exerciseId
+
+    private val _exerciseDescription = MutableStateFlow<String?>("")
+    val exerciseDescription: StateFlow<String?> = _exerciseDescription
+
+    private val _selectedMediaUris = MutableStateFlow<List<Uri>>(emptyList())
+    val selectedMediaUris: StateFlow<List<Uri>> = _selectedMediaUris
+
+    private val _selectedEquipment = MutableStateFlow<Set<String>>(emptySet())
+    val selectedEquipment: StateFlow<Set<String>> = _selectedEquipment
+
+    private val _mediaType = MutableStateFlow<String?>("")
+    val mediaType: StateFlow<String?> = _mediaType
+
+    private val _exerciseAuthor = MutableStateFlow<String?>("")
+
+    private val _exercisesList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val exercisesList: StateFlow<List<Pair<String, String>>> = _exercisesList
+
+    private val _selectedExercises = MutableStateFlow<Set<String>>(emptySet())
+    val selectedExercises: StateFlow<Set<String>> = _selectedExercises
+
+    private val _equipmentList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val equipmentList: StateFlow<List<Pair<String, String>>> = _equipmentList
+
+    private val _conditionsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+
+    private val _attempts = MutableStateFlow<Int?>(0)
+    val attempts: StateFlow<Int?> = _attempts
+
+    private val _time = MutableStateFlow<Int?>(0)
+    val time: StateFlow<Int?> = _time
+
+    private val _nonPublic = MutableStateFlow<Boolean?>(false)
+    val nonPublic: StateFlow<Boolean?> = _nonPublic
+
+    private val titleError = MutableStateFlow<String?>(null)
+    private val descriptionError = MutableStateFlow<String?>(null)
+    private val equipmentError = MutableStateFlow<String?>(null)
+
+    fun validateFields(
+        title: String,
+        description: String,
+        selectedEquipment: List<String>
+    ): Boolean {
+        var isValid = true
+        val errorMessages = mutableListOf<String>()
+
+        titleError.value = if (title.isBlank()) {
+            isValid = false
+            val error = "Tytuł nie może być pusty. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        descriptionError.value = if (description.length < 10) {
+            isValid = false
+            val error = "Opis musi mieć co najmniej 10 znaków. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        descriptionError.value = if (description.length > 800) {
+            isValid = false
+            val error = "Opis jest za długi. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        equipmentError.value = if (selectedEquipment.isEmpty()) {
+            isValid = false
+            val error = "Wybierz przynajmniej jeden sprzęt. "
+            errorMessages.add(error)
+            error
+        } else {
+            null
+        }
+
+        if (errorMessages.isNotEmpty()) {
+            showMessage(errorMessages.joinToString("\n"))
+        }
+
+        return isValid
+    }
+
+    fun hasSelectedExercise(): Boolean = _selectedExercises.value.isNotEmpty()
+
+    fun loadExercises() {
+        loadExercisesList(
+            _exercisesList = _exercisesList,
+            listService = listService,
+            tag = EXERCISE_VIEWMODEL_TAG
+        )
+    }
+
+    fun loadCondition() {
+        loadConditionList(
+            _conditionsList = _conditionsList,
+            listService = listService,
+            tag = EXERCISE_VIEWMODEL_TAG
+        )
+    }
+
+    fun loadEquipmentList() {
+        loadData(
+            block = { listService.getEquipments() },
+            onSuccess = { _equipmentList.value = it },
+            errorMessage = "Ups! Nie udało się pobrać listy sprzętów."
+        )
+    }
+
+    fun updateExerciseTitle(title: String) {
+        _exerciseTitle.value = title
+    }
+
+    fun updateAttempts(attempts: Int) {
+        _attempts.value = attempts
+    }
+
+    fun updateTime(time: Int) {
+        _time.value = time
+    }
+
+    fun updateNonPublic(nonPublic: Boolean) {
+        _nonPublic.value = nonPublic
+    }
+
+    fun addSelectedMedia(context: Context, uri: Uri) {
+        if (isVideoUri(context, uri) && getVideoDuration(context, uri) > 60000) return
+        _selectedMediaUris.update { listOf(uri) }
+    }
+
+    fun removeMediaUri(uri: Uri) {
+        _selectedMediaUris.update { it.filter { existingUri -> existingUri != uri } }
+    }
+
+    fun onCreateExerciseClick(context: Context, navigate: (String) -> Unit) {
+        setMediaType(context = context, uris = _selectedMediaUris.value)
+        val exercise = Exercise(
+            title = _exerciseTitle.value.toString(),
+            equipmentIds = _selectedEquipment.value.toList(),
+            mediaUrls = _selectedMediaUris.value.map { it.toString() },
+            mediaType = _mediaType.value.toString(),
+            description = _exerciseDescription.value.toString(),
+            attempts = _attempts.value?.toInt() ?: 0,
+            time = _time.value?.toInt() ?: 0,
+            nonPublic = _nonPublic.value ?: false,
+        )
+
+        launchCatching(
+            tag = EXERCISE_VIEWMODEL_TAG,
+            errorMessage = "Nie udało się utworzyć ćwiczenia.",
+            onError = { message -> _message.emit(message) },
+            block = {
+                exerciseService.createExerciseWithMedia(exercise, _selectedMediaUris.value)
+            })
+        navigate(WizardScreen.CreatorWizard.route)
+        _message.update { "ćwiczenie utworzone" }
+    }
+
+    fun onUpdateExerciseClick(context: Context, navigate: (String) -> Unit) {
+        setMediaType(context = context, uris = _selectedMediaUris.value)
+        val exercise = Exercise(
+            id = _exerciseId.value.toString(),
+            title = _exerciseTitle.value.toString(),
+            equipmentIds = _selectedEquipment.value.toList(),
+            mediaUrls = _selectedMediaUris.value.map { it.toString() },
+            mediaType = _mediaType.value.toString(),
+            description = _exerciseDescription.value.toString(),
+            attempts = _attempts.value?.toInt() ?: 0,
+            time = _time.value?.toInt() ?: 0,
+            nonPublic = _nonPublic.value ?: false,
+        )
+
+        launchCatching(
+            tag = EXERCISE_VIEWMODEL_TAG,
+            errorMessage = "Nie udało się zaktualizować ćwiczenia.",
+            onError = { message -> _message.emit(message) },
+            block = {
+                exerciseService.updateExercise(exercise, _selectedMediaUris.value)
+            })
+        navigate(WizardScreen.CreatorWizard.route)
+        _message.update { "ćwiczenie zaktualizowane" }
+    }
+
+    fun deleteExercise(navigate: (String) -> Unit) {
+        if (authenticateService.currentUserId == _exerciseAuthor.value.toString()) {
+            launchCatching(
+                tag = EXERCISE_VIEWMODEL_TAG,
+                errorMessage = "Nie udało się usunąć ćwiczenia.",
+                onError = { message -> _message.emit(message) },
+                block = {
+                    val deletedExercise = Exercise(
+                        id = _exerciseId.value.toString(),
+                        mediaUrls = _selectedMediaUris.value.map { it.toString() }
+                    )
+                    exerciseService.deleteExercise(deletedExercise)
+                }
+            )
+            navigate(WizardScreen.CreatorWizard.route)
+        } else {
+            _message.update { "Nie jesteś autorem tego ćwiczenia" }
+        }
+    }
+
+    fun getExerciseDetails() {
+        launchCatching(
+            tag = EXERCISE_VIEWMODEL_TAG,
+            block = {
+                _isLoading.value = true
+                try {
+                    val selectedExerciseId = _selectedExercises.value.first()
+                    Log.d(
+                        EXERCISE_VIEWMODEL_TAG,
+                        "Selected exercise ID from getExerciseDetails: $selectedExerciseId"
+                    )
+                    val exerciseDetails = exerciseService.getExercise(selectedExerciseId)
+                    exerciseDetails?.let { exercise ->
+                        _exerciseId.value = exercise.id
+                        _exerciseTitle.value = exercise.title
+                        _exerciseAuthor.value = exercise.uid
+                        _exerciseDescription.value = exercise.description
+                        _selectedEquipment.value = exercise.equipmentIds.toSet()
+                        _selectedMediaUris.value =
+                            exercise.mediaUrls.map { Uri.parse(it.toString()) }
+                        _mediaType.value = exercise.mediaType
+                        _time.value = exercise.time
+                        _attempts.value = exercise.attempts
+                        _nonPublic.value = exercise.nonPublic
+                    }
+                    Log.d(EXERCISE_VIEWMODEL_TAG, "Exercise details loaded: $exerciseDetails")
+                } catch (e: Exception) {
+                    _message.emit("Nie udało się pobrać szczegółów ćwiczenia.")
+                    Log.e(EXERCISE_VIEWMODEL_TAG, "Error getting exercise details:", e)
+                } finally {
+                    _isLoading.value = false
+                }
+            })
+    }
+
+    private fun setMediaType(context: Context, uris: List<Uri>) {
+        uris.forEach { uri ->
+            val mimeType = context.contentResolver.getType(uri)
+            when {
+                mimeType?.startsWith("image/") == true -> _mediaType.value = "image"
+                mimeType?.startsWith("video/") == true -> _mediaType.value = "video"
+            }
+        }
+    }
+
+    private fun isVideoUri(context: Context, uri: Uri): Boolean {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(context, uri)
+            val hasVideo = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO)
+            hasVideo == "yes"
+        } catch (e: Exception) {
+            false
+        } finally {
+            retriever.release()
+        }
+    }
+
+    private fun getVideoDuration(context: Context, uri: Uri): Long {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(context, uri)
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0L
+        } catch (e: Exception) {
+            0L
+        } finally {
+            retriever.release()
+        }
+    }
+
+    override fun updateDescription(description: String) {
+        _exerciseDescription.value = description
+    }
+
+    fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(
+        itemId = exerciseId,
+        selectedItemsFlow = _selectedExercises,
+        allowMultipleSelection = multipleSelection,
+        itemType = "Exercise",
+        tag = EXERCISE_VIEWMODEL_TAG
+    )
+
+    fun toggleEquipment(equipmentId: String) = toggleItem(
+        itemId = equipmentId,
+        selectedItemsFlow = _selectedEquipment,
+        allowMultipleSelection = true,
+        tag = EXERCISE_VIEWMODEL_TAG,
+        itemType = "Equipment"
+    )
+
+    fun onEditExerciseContinueClick(navigate: (String) -> Unit) {
+        navigate(WizardScreen.EditExerciseDetailsScreen.route)
+    }
+
+    fun onGoBackClick(popBackStack: () -> Unit) {
+        popBackStack()
+    }
+
+    companion object {
+        private const val EXERCISE_VIEWMODEL_TAG = "ExerciseViewModel"
+    }
+}

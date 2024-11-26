@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:318365160423:android:d869f4000394464b076342",
+        "mobilesdk_app_id": "1:318365160423:android:310d5032f64ce700076342",
         "android_client_info": {
-          "package_name": "com.example.physio"
+          "package_name": "com.dawidkubica.physio"
         }
       },
       "oauth_client": [
         {
-          "client_id": "318365160423-5121ndqeq7sfgu5719ks6mvmg4qm32r8.apps.googleusercontent.com",
+          "client_id": "318365160423-m3uehobhma5sfe6oa72b403qlkg10u4u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.physio",
+            "package_name": "com.dawidkubica.physio",
             "certificate_hash": "a6e64dc79cd4bd44e87229f5ff74a9eeeab42734"
           }
         },

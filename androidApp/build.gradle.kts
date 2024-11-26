@@ -10,10 +10,10 @@ plugins {
 }
 
 android {
-    namespace = "com.example.physio"
+    namespace = "com.dawidkubica.physio"
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.example.physio"
+        applicationId = "com.dawidkubica.physio"
         minSdk = 34
         targetSdk = 34
         versionCode = 1
