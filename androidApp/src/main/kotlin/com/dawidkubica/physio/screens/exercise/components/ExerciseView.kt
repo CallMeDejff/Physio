@@ -51,7 +51,6 @@ fun ExercisesView(
     val currentPage = remember { mutableStateOf(pagerState.currentPage) }
 
     LaunchedEffect(pagerState.currentPage) {
-        Log.d("ExercisesView", "Current page: ${pagerState.currentPage}")
         currentPage.value = pagerState.currentPage
     }
 

@@ -1,5 +1,6 @@
 package com.dawidkubica.physio.screens.favorites.components
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -31,6 +32,7 @@ import com.dawidkubica.physio.models.Category
 import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.typography
 
+@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun CategoryTabs(
     categories: List<Category>,
@@ -80,7 +82,7 @@ fun CategoryTabs(
                     ) {
                         Text(
                             text = category.title,
-                            style = typography.labelMedium,
+                            style = typography.headlineMedium,
                             color = if (index == selectedIndex) Color.Black else Color.Gray,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

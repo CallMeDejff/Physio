@@ -11,13 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dawidkubica.physio.screens.favorites.FavoritesViewModel
+import com.dawidkubica.physio.screens.search.SearchViewModel
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.ghost_white
 
 @Composable
 fun WizardAccessButton(
     navController: NavController,
-    viewModel: FavoritesViewModel
+    viewModel: FavoritesViewModel,
+    modifier: Modifier
 ) {
     FloatingActionButton(
         onClick = {

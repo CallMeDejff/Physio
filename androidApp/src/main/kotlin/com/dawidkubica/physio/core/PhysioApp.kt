@@ -1,15 +1,18 @@
 package com.dawidkubica.physio.core
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dawidkubica.physio.navigation.DefaultScreen
 import com.dawidkubica.physio.navigation.Graph
 import com.dawidkubica.physio.navigation.authNavGraph
+import com.dawidkubica.physio.screens.splash.SplashViewModel
 
 @Composable
 fun PhysioApp(navController: NavHostController) {
+    val splashViewModel: SplashViewModel = hiltViewModel()
     NavHost(
         navController = navController,
         route = Graph.ROOT,

@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -17,6 +18,13 @@ sealed class BottomBarScreen(
     val icon: ImageVector,
     val icon_focused: ImageVector
 ) {
+    object CreatorPanel : BottomBarScreen(
+        route = "wizards",
+        title = "",
+        icon = Icons.Outlined.AddCircle,
+        icon_focused = Icons.Outlined.AddCircle
+    )
+
     object Home : BottomBarScreen(
         route = "HOME",
         title = "Start",

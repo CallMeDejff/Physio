@@ -43,6 +43,11 @@ class PhysioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setContent {
+            val navController = rememberNavController()
+            PhysioApp(navController = navController)
+        }
+
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -62,14 +67,8 @@ class PhysioActivity : ComponentActivity() {
         }
 
         createNotificationChannel()
-
         //configureFirebaseServices()
         insertSampleData()
-
-        setContent {
-            val navController = rememberNavController()
-            PhysioApp(navController = navController)
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -104,9 +103,5 @@ class PhysioActivity : ComponentActivity() {
         lifecycleScope.launch {
             storageSampleDataService.setSampleData()
         }
-    }
-
-    companion object {
-        private const val REQUEST_CODE = 1001
     }
 }

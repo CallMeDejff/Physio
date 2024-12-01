@@ -205,7 +205,8 @@ fun PackageHeader(isEditor: Boolean) {
             "Kreator nowego pakietu ćwiczeń"
         },
         style = typography.bodyLarge,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(8.dp)
     )
 }
 

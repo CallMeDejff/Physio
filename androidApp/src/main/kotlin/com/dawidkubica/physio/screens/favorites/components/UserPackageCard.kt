@@ -1,17 +1,7 @@
-package com.dawidkubica.physio.screens.search.components
+package com.dawidkubica.physio.screens.favorites.components
 
 import android.text.Html
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -23,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,28 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradient
-import androidx.compose.ui.graphics.LinearGradientShader
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
@@ -74,7 +44,7 @@ import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
-fun ExercisePackageCard(
+fun UserPackageCard(
     id: String,
     name: String,
     description: String,
@@ -92,9 +62,8 @@ fun ExercisePackageCard(
         modifier = Modifier
             .padding(vertical = 4.dp, horizontal = 4.dp)
             .clickable { onClick(id) }
-            .widthIn(max = 400.dp)
+            .width(320.dp)
             .fillMaxWidth()
-            .heightIn(max = 250.dp)
             .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(16.dp))
     ) {
         Column {
@@ -109,7 +78,7 @@ fun ExercisePackageCard(
                         .align(Alignment.TopEnd)
                         .zIndex(1f)
                         .padding(8.dp),
-                        label = "Premium"
+                        label = "P"
                     )
                 }
                 if (imageUrl.isNullOrEmpty() || imageUrl == "null") {
@@ -129,7 +98,8 @@ fun ExercisePackageCard(
             Row(
                 modifier = Modifier
                     .padding(12.dp)
-                    .heightIn(max = 150.dp)
+                    .heightIn(max = 100.dp)
+                    .wrapContentHeight()
                     .animateContentSize()
             ) {
                 Column(
@@ -137,11 +107,13 @@ fun ExercisePackageCard(
                         .weight(4f)
                         .padding(8.dp)
                 ) {
-                    AnimatedVisibility(
-                        visible = expanded,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 250)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 200))
-                    ) {
+                    Text(
+                        text = name,
+                        style = typography.labelLarge,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (expanded) {
                         val decodedDescription =
                             Html.fromHtml(description, Html.FROM_HTML_MODE_LEGACY).toString()
 
@@ -156,23 +128,7 @@ fun ExercisePackageCard(
                             style = typography.labelMedium
                         )
                     }
-
-                    AnimatedVisibility(
-                        visible = !expanded,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 250)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 200))
-                    ) {
-                        Text(
-                            text = name,
-                            style = typography.labelLarge,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .padding(4.dp)
-                        )
-                    }
                 }
-
 
                 if (increased) {
                     IconButton(
@@ -195,4 +151,3 @@ fun ExercisePackageCard(
         }
     }
 }
-

@@ -145,7 +145,7 @@ class FavoritesViewModel @Inject constructor(
                 _userAssignedPackagesList.value
             ),
             Category(
-                "Posiadane",
+                "Premium",
                 Clinical_notes,
                 "Treść dla kategorii 2"
             ),

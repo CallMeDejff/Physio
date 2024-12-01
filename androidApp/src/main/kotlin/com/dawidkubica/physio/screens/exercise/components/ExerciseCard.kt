@@ -1,6 +1,7 @@
 package com.dawidkubica.physio.screens.exercise.components
 
 import android.text.Html
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -34,9 +35,10 @@ fun ExerciseCard(
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colorTertiary),
-        elevation = CardDefaults.cardElevation(4.dp),
+        //elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .padding(8.dp)
+            .animateContentSize()
             .heightIn(max = 650.dp),
     ) {
         LazyColumn(

@@ -1,19 +1,31 @@
 package com.dawidkubica.physio.screens.favorites
 
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Discount
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,13 +38,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dawidkubica.physio.models.Category
+import com.dawidkubica.physio.models.ExercisePackage
+import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.screens.favorites.components.CategoryCard
 import com.dawidkubica.physio.screens.favorites.components.CategoryTabs
+import com.dawidkubica.physio.screens.favorites.components.DiscoverCard
 import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
 import com.dawidkubica.physio.ui.theme.PurpleGrey80
@@ -46,6 +65,7 @@ fun FavoritesScreen(
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
     val categories by viewModel.fetchedCategories.collectAsState()
+    val discoverPackages by viewModel._userFavoritePackagesList.collectAsState()
     val userType by viewModel.userType.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val nextReminder by viewModel.nextReminder.collectAsState()
@@ -62,92 +82,47 @@ fun FavoritesScreen(
     }
 
     if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        LoadingView()
     } else {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Column(
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = 60.dp, top = 10.dp)
                 ) {
-                    Text(
-                        text = "Cześć, $userName 👋",
-                        style = typography.headlineLarge
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (nextReminder !== null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .clip(RoundedCornerShape(16.dp))
-                                .border(
-                                    BorderStroke(4.dp, Color.Transparent),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                                .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
-                                .padding(4.dp)
-                                .align(Alignment.CenterHorizontally),
-                        ) {
-                            nextReminder?.let { reminder ->
-                                ReminderItem(
-                                    reminder = reminder,
-                                    deletable = false,
-                                )
-                            }
-                        }
+                    item {
+                        GreetingSection(userName = userName)
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    item {
+                        ReminderSection(nextReminder = nextReminder)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(
-                                BorderStroke(4.dp, Color.Transparent),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column {
-                            CategoryTabs(
-                                categories = categories,
-                                selectedIndex = selectedCategoryIndex,
-                                onCategorySelected = { index -> selectedCategoryIndex = index }
-                            )
-
-                            val selectedCategory = categories.getOrNull(selectedCategoryIndex)
-
-                            selectedCategory?.let { category ->
-                                CategoryCard(
-                                    title = category.title,
-                                    icon = category.icon,
-                                    exercisePackages = category.exercisePackages,
-                                    onExerciseClick = { packageId ->
-                                        navController.navigate("exercise_screen/${packageId}")
-                                    }
-                                )
+                    item {
+                        CategorySection(
+                            categories = categories,
+                            selectedCategoryIndex = selectedCategoryIndex,
+                            onCategorySelected = { selectedCategoryIndex = it },
+                            onExerciseClick = { packageId ->
+                                navController.navigate("exercise_screen/${packageId}")
                             }
-                        }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    item {
+                        DiscoverSection(
+                            discoverPackages = discoverPackages,
+                            onExerciseClick = { packageId ->
+                                navController.navigate("exercise_screen/${packageId}")
+                            }
+                        )
                     }
                 }
 
@@ -155,11 +130,15 @@ fun FavoritesScreen(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(8.dp)
+                            .padding(4.dp)
+                            .wrapContentSize()
                     ) {
                         WizardAccessButton(
                             navController = navController,
                             viewModel = viewModel,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
                         )
                     }
                 }
@@ -168,5 +147,139 @@ fun FavoritesScreen(
     }
 }
 
+@Composable
+fun LoadingView() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
 
+@Composable
+fun GreetingSection(userName: String) {
+    Text(
+        text = "Cześć, $userName 👋",
+        style = typography.headlineLarge
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+}
 
+@Composable
+fun ReminderSection(nextReminder: Reminder?) {
+    nextReminder?.let {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .clip(RoundedCornerShape(16.dp))
+                .border(
+                    BorderStroke(4.dp, Color.Transparent),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
+        ) {
+            ReminderItem(
+                reminder = it,
+                deletable = false,
+            )
+        }
+    }
+}
+
+@Composable
+fun CategorySection(
+    categories: List<Category>,
+    selectedCategoryIndex: Int,
+    onCategorySelected: (Int) -> Unit,
+    onExerciseClick: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .animateContentSize()
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                BorderStroke(4.dp, Color.Transparent),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
+            .padding(vertical = 4.dp, horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column {
+            CategoryTabs(
+                categories = categories,
+                selectedIndex = selectedCategoryIndex,
+                onCategorySelected = onCategorySelected
+            )
+
+            val selectedCategory = categories.getOrNull(selectedCategoryIndex)
+
+            selectedCategory?.let { category ->
+                CategoryCard(
+                    title = category.title,
+                    icon = category.icon!!,
+                    exercisePackages = category.exercisePackages,
+                    onExerciseClick = onExerciseClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DiscoverSection(
+    discoverPackages: List<ExercisePackage>,
+    onExerciseClick: (String) -> Unit
+) {
+
+    Box(
+        modifier = Modifier
+            .animateContentSize()
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                BorderStroke(4.dp, Color.Transparent),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
+            .padding(top = 4.dp)
+            .padding(vertical = 4.dp, horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column {
+
+            Box(
+                modifier = Modifier
+                    .shadow(4.dp, RoundedCornerShape(8.dp))
+                    .fillMaxWidth(0.98f)
+                    .height(52.dp)
+                    .background(Color.White)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = "Odkryj coś nowego",
+                    style = typography.headlineMedium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(vertical = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            DiscoverCard(
+                exercisePackages = discoverPackages,
+                onExerciseClick = onExerciseClick
+            )
+        }
+    }
+}

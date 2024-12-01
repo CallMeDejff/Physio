@@ -49,9 +49,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.dawidkubica.physio.models.ExercisePackage
+import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.search.components.ExercisePackageCard
 import com.dawidkubica.physio.ui.components.FilterableItemSelector
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.gray
@@ -59,6 +62,7 @@ import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun SearchScreen(
+    navController: NavController,
     navigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel
@@ -86,37 +90,28 @@ fun SearchScreen(
         }
     }
 
-    if (isLoading) {
-        FullScreenLoader()
-    } else {
-        SearchContent(
-            searchText = searchText,
-            onSearchTextChanged = { searchText = it },
-            isLoadingResults = isLoadingResults,
-            onSearchClick = {
-                viewModel.apply {
-                    searchForMatchingPackages()
-                    filterPackagesList(searchText)
-                }
-            },
-            matchingPackages = packagesToShow,
-            navigate = navigate,
-            viewModel = viewModel
-        )
+    Box(modifier = modifier.fillMaxSize()) {
+        if (isLoading) {
+            FullScreenLoader()
+        } else {
+            SearchContent(
+                searchText = searchText,
+                onSearchTextChanged = { searchText = it },
+                isLoadingResults = isLoadingResults,
+                onSearchClick = {
+                    viewModel.apply {
+                        searchForMatchingPackages()
+                        filterPackagesList(searchText)
+                    }
+                },
+                matchingPackages = packagesToShow,
+                navigate = navigate,
+                viewModel = viewModel
+            )
+        }
     }
 }
 
-@Composable
-fun FullScreenLoader() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
 
 @Composable
 fun SearchContent(
@@ -147,6 +142,8 @@ fun SearchContent(
                 onSearchTextChanged = onSearchTextChanged,
                 viewModel = viewModel,
             )
+            
+            Spacer(modifier = Modifier.height(8.dp))
 
             SearchResults(
                 matchingPackages = matchingPackages,

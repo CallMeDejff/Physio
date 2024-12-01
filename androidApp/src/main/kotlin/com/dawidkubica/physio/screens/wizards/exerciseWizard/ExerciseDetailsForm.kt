@@ -144,6 +144,7 @@ fun ExerciseDetailsForm(
                         }
                     },
                     style = typography.bodyLarge,
+                    modifier = Modifier.padding(8.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -194,7 +195,7 @@ fun ExerciseDetailsForm(
 
             item {
                 Text(
-                    text = "Wybierz liczbę prób:",
+                    text = "Wybierz liczbę powtórzeń:",
                     style = typography.labelLarge,
                     modifier = Modifier.padding(top = 8.dp)
                 )

@@ -45,6 +45,7 @@ fun HomeNavGraph(navController: NavHostController) {
         composable(route = BottomBarScreen.Search.route) { backStackEntry ->
             val viewModel: SearchViewModel = hiltViewModel(backStackEntry)
             SearchScreen(
+                navController = navController,
                 navigate = { popUp -> navController.navigate(popUp) },
                 viewModel = viewModel
             )

@@ -25,7 +25,7 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
     protected val _isEmailVerified = MutableStateFlow(false)
     protected val _provider = MutableStateFlow("")
     protected val _userAssignedPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
-    protected val _userFavoritePackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
+    val _userFavoritePackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     val _reminders = MutableLiveData<List<Reminder>>()
     val reminders: LiveData<List<Reminder>> = _reminders
 

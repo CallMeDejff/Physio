@@ -3,6 +3,7 @@ package com.dawidkubica.physio.screens.search
 import android.util.Log
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.ExercisePackage
+import com.dawidkubica.physio.navigation.WizardScreen
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import com.dawidkubica.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,6 +51,9 @@ class SearchViewModel @Inject constructor(
     private val _filteredPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     val filteredPackages: StateFlow<List<ExercisePackage>> = _filteredPackagesList.asStateFlow()
 
+    fun onAddExerciseClick(navigate: (String) -> Unit) {
+        navigate(WizardScreen.CreatorWizard.route)
+    }
 
     fun loadEquipmentList() {
         launchCatching(
