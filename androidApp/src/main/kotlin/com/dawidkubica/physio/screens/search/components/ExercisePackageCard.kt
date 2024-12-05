@@ -17,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -34,6 +35,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -86,7 +88,7 @@ fun ExercisePackageCard(
     var expanded by remember { mutableStateOf(false) }
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.background
         ),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -95,7 +97,7 @@ fun ExercisePackageCard(
             .widthIn(max = 400.dp)
             .fillMaxWidth()
             .heightIn(max = 250.dp)
-            .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(16.dp))
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp))
     ) {
         Column {
             Box(
@@ -109,7 +111,8 @@ fun ExercisePackageCard(
                         .align(Alignment.TopEnd)
                         .zIndex(1f)
                         .padding(8.dp),
-                        label = "Premium"
+                        label = "Premium",
+                        typography = typography.headlineMedium
                     )
                 }
                 if (imageUrl.isNullOrEmpty() || imageUrl == "null") {
@@ -122,6 +125,7 @@ fun ExercisePackageCard(
                         model = imageUrl,
                         contentDescription = "Exercise Image",
                         contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

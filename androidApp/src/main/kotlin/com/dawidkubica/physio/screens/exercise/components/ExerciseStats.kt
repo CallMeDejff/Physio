@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ fun ExerciseStats(
         ) {
             Text(
                 text = exercise.title,
+                color = MaterialTheme.colorScheme.onBackground,
                 style = typography.headlineMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -48,18 +50,18 @@ fun ExerciseStats(
                     .align(Alignment.CenterHorizontally),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Icon(imageVector = Timer, contentDescription = "Timer Icon")
+                Icon(imageVector = Timer, contentDescription = "Timer Icon", tint = MaterialTheme.colorScheme.onBackground)
                 Text(
                     text = ": " + if (exercise.time.toString() == "0") "-" else exercise.time.toString() + " min",
-                    style = typography.labelMedium
+                    style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground)
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Icon(imageVector = Timelapse, contentDescription = "Timelapse Icon")
+                Icon(imageVector = Timelapse, contentDescription = "Timelapse Icon", tint = MaterialTheme.colorScheme.onBackground)
                 Text(
                     text = ": " + if (exercise.time.toString() == "0") "-" else exercise.time.toString() + "x",
-                    style = typography.labelMedium
+                    style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground)
                 )
             }
 

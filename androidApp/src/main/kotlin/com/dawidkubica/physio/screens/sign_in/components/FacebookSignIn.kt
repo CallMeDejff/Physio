@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Facebook
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,14 +39,14 @@ fun FacebookSignIn(
                 Log.d("FacebookSignIn", "Starting Facebook login")
             },
             modifier = modifier
-                .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(16.dp))
+                .border(width = 2.dp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), shape = RoundedCornerShape(16.dp))
                 .fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Icon(
                 imageVector = Icons.Default.Facebook,
-                tint = Color.Gray,
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 contentDescription = "Facebook Sign In button",
                 modifier = Modifier
                     .padding(top = 8.dp, bottom = 8.dp)

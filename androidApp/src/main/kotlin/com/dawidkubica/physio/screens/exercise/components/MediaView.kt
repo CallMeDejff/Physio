@@ -1,5 +1,6 @@
 package com.dawidkubica.physio.screens.exercise.components
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 
 @Composable
@@ -50,7 +53,6 @@ fun MediaView(
                 "video" -> {
                     VideoPlayer(
                         videoUrl = mediaUrl,
-                        onClick = { },
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -68,7 +70,7 @@ fun MediaView(
             Icon(
                 imageVector = Icons.Outlined.Fullscreen,
                 contentDescription = "Play or Expand",
-                tint = Color.Gray,
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(2.dp)

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,11 +43,11 @@ fun ProfilePicture(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(88.dp)
-                .background(Color.White, shape = CircleShape)
+                .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
         ) {
             Text(
                 text = firstLetter + lastLetter,
-                color = PurpleGrey80,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 34.sp
             )
         }
@@ -63,7 +64,7 @@ fun ProfilePicture(
                     .background(Color.Transparent, shape = CircleShape)
                     .border(
                         width = 2.dp,
-                        color = PurpleGrey80,
+                        color = MaterialTheme.colorScheme.tertiary,
                         shape = CircleShape
                     )
             )
@@ -74,7 +75,7 @@ fun ProfilePicture(
                     .background(if (isEmailVerified) GreenConfirmed else RedConfirmed, shape = CircleShape)
                     .border(
                         width = 2.dp,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.surface,
                         shape = CircleShape
                     )
             )

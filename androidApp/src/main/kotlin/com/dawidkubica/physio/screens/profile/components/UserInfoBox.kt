@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,7 +57,7 @@ fun UserInfoBox(
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Top)
             .clip(RoundedCornerShape(16.dp))
-            .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
+            .background(color = MaterialTheme.colorScheme.tertiary, shape = RoundedCornerShape(16.dp))
             .clickable { isExpanded = !isExpanded }
             .padding(16.dp)
             .animateContentSize()
@@ -77,7 +78,7 @@ fun UserInfoBox(
             Text(
                 text = "$userName $userLastname",
                 style = typography.headlineLarge,
-                color = colorPrimary
+                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.size(4.dp))

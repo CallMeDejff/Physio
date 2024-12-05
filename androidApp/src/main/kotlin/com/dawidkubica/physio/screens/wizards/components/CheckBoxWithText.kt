@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.ui.theme.GreenConfirmed
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -40,7 +42,7 @@ fun CheckboxWithText(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(if (isChecked) Color.Green else Color.Gray)
+                .background(if (isChecked) GreenConfirmed else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
                 .clickable { onCheckedChange(!isChecked) },
             contentAlignment = Alignment.Center
         ) {
@@ -48,7 +50,7 @@ fun CheckboxWithText(
                 Icon(
                     imageVector = Icons.Outlined.Check,
                     contentDescription = "Checked",
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.size(16.dp)
                 )
             }

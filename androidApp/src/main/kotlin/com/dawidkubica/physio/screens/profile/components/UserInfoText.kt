@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,7 +25,7 @@ fun UserInfoText(icon: ImageVector? = null, label: String, value: String = "") {
         Text(
             text = label,
             style = typography.headlineSmall,
-            color = colorPrimary
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.width(4.dp))
@@ -33,14 +34,14 @@ fun UserInfoText(icon: ImageVector? = null, label: String, value: String = "") {
             Text(
                 text = value,
                 style = typography.headlineSmall,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         } else {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.padding(end = 4.dp),
-                tint = colorPrimary
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }

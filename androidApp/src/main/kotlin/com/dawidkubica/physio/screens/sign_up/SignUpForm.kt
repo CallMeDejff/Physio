@@ -20,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -69,11 +70,11 @@ fun SignUpForm(
             text = buildAnnotatedString {
                 val text = "Utwórz nowe konto."
                 val styleNormal = SpanStyle(
-                    color = dark_gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
                 )
                 val styleHighlight = SpanStyle(
-                    color = colorPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_medium))
                 )
                 append("Utwórz nowe ")
@@ -138,7 +139,7 @@ fun SignUpForm(
                 onCheckedChange = { isChecked ->
                     isLicenseChecked.value = isChecked
                 },
-                colors = CheckboxDefaults.colors(colorPrimary)
+                colors = CheckboxDefaults.colors(MaterialTheme.colorScheme.primary)
             )
 
             Text(
@@ -147,7 +148,7 @@ fun SignUpForm(
                     .fillMaxWidth()
                     .padding(8.dp),
                 style = TextStyle(
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
                 )
@@ -174,10 +175,10 @@ fun SignUpForm(
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             if (showProgress) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(20.dp))
             } else {
                 Text(
                     modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),

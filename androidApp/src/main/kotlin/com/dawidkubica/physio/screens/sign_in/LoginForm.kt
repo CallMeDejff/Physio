@@ -14,6 +14,7 @@ import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -61,16 +62,16 @@ fun LoginForm(
     ) {
         Text(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 20.dp),
+                .fillMaxSize()
+                .padding(top = 10.dp,),
             text = buildAnnotatedString {
                 val text = "Zaloguj się do swojego konta."
                 val styleNormal = SpanStyle(
-                    color = dark_gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
                 )
                 val styleHighlight = SpanStyle(
-                    color = colorPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_medium))
                 )
                 append("Zaloguj się do ")
@@ -109,7 +110,7 @@ fun LoginForm(
         ClickableText(
             text = AnnotatedString(
                 "Zapomniałem hasła",
-                SpanStyle(color = colorPrimary, fontSize = 18.sp)
+                SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
             ),
             onClick = {
                 onForgotPasswordClick()
@@ -142,12 +143,12 @@ fun LoginForm(
                             .align(Alignment.CenterHorizontally)
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Text(
                             modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
                             text = "Zaloguj",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.surface,
                             style = typography.labelLarge
                         )
 
@@ -156,7 +157,7 @@ fun LoginForm(
 
                     Text(
                         text = "lub zaloguj się za pomocą:",
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onBackground.copy(0.7f),
                         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
                         fontSize = 18.sp,
                         modifier = Modifier
@@ -181,13 +182,13 @@ fun LoginForm(
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         ClickableText(
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
                         fontSize = 18.sp
                     )
@@ -196,7 +197,7 @@ fun LoginForm(
                 }
                 withStyle(
                     style = SpanStyle(
-                        color = colorPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontFamily = FontFamily(Font(R.font.helvetica_neue_medium)),
                         fontSize = 18.sp
                     )
@@ -205,7 +206,7 @@ fun LoginForm(
                 }
             },
             onClick = { onSignUpClick() },
-            style = TextStyle(fontSize = 14.sp, color = Color.Black, textAlign = TextAlign.Center),
+            style = TextStyle(fontSize = 14.sp, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center),
             modifier = Modifier
                 .fillMaxWidth()
         )

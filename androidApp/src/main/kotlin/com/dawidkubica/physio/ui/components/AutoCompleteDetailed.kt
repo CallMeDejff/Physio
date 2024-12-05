@@ -18,6 +18,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -34,6 +36,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.models.User
+import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
@@ -86,8 +89,8 @@ fun AutoCompleteDetailed(
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = colorPrimary,
-                unfocusedIndicatorColor = gray
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             )
         )
 
@@ -99,9 +102,7 @@ fun AutoCompleteDetailed(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .background(color = Color.White)
-
+                .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
         ) {
             val filteredItems = when {
                 itemList.isNotEmpty() -> {
@@ -131,7 +132,24 @@ fun AutoCompleteDetailed(
 
             filteredItems.forEach { item ->
                 val itemId = if (item is Pair<*, *>) item.first as String else (item as User).uid
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
+                ) {
                 DropdownMenuItem(
+                    colors = MenuItemColors(
+                        textColor = MaterialTheme.colorScheme.primary,
+                        trailingIconColor = MaterialTheme.colorScheme.primary,
+                        leadingIconColor= MaterialTheme.colorScheme.primary,
+                        disabledTextColor= MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        disabledTrailingIconColor= MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        disabledLeadingIconColor= MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    ),
                     onClick = {
                         onToggleItem(itemId)
                         category = ""
@@ -142,11 +160,12 @@ fun AutoCompleteDetailed(
                         Text(
                             text = if (item is Pair<*, *>) item.second as String else "${(item as User).name} ${item.lastname}",
                             style = typography.labelMedium,
-                            color = colorPrimary
+                            color = MaterialTheme.colorScheme.primary
                         )
                     },
                     modifier = Modifier.background(Color.Transparent),
                 )
+                    }
             }
         }
 
@@ -166,7 +185,7 @@ fun AutoCompleteDetailed(
                     val itemLabel = itemList.find { it.first == selectedItem }?.second
                         ?: userList.find { it.uid == selectedItem }?.let {
                             "${it.name} ${it.lastname} (${it.email})"
-                        } ?: "Nieznany użytkownik"
+                        } ?: "Nieznane"
 
                     RemovableItemCard(
                         label = itemLabel,
@@ -185,10 +204,10 @@ fun RemovableItemCard(label: String, onRemove: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(16.dp)),
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(Color.White)
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -199,7 +218,7 @@ fun RemovableItemCard(label: String, onRemove: () -> Unit) {
             Text(
                 text = label,
                 style = typography.labelSmall,
-                color = colorPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
 
@@ -210,7 +229,7 @@ fun RemovableItemCard(label: String, onRemove: () -> Unit) {
                 Icon(
                     imageVector = Icons.Outlined.Close,
                     contentDescription = "Remove item",
-                    tint = Color.Red
+                    tint = RedConfirmed
                 )
             }
         }

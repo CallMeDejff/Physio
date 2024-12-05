@@ -1,10 +1,13 @@
 package com.dawidkubica.physio.screens.profile
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -14,6 +17,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -125,12 +130,13 @@ fun ProfileScreen(
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = colorPrimary)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
     } else {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
         ) {
             Box(
@@ -138,15 +144,22 @@ fun ProfileScreen(
                     .fillMaxSize()
                     .padding(bottom = 25.dp)
             ) {
-                Column(
+                Column (
                     modifier = Modifier
-                        .padding(vertical = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
+                        .padding(top = 10.dp)
+                ){
                     Text(
-                        text = "Panel ustawień",
+                        text = " Panel ustawień",
                         style = typography.headlineLarge
                     )
+
+                    Text(
+                        text = " Dostosuj wszystko pod siebie",
+                        style = typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(0.7f)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     UserInfoBox(
                         userName = userName,
@@ -159,16 +172,21 @@ fun ProfileScreen(
                         emailVerified = emailVerified,
                     )
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     ActionButton(
                         Icons.Outlined.Edit,
                         "Edytuj dane użytkownika"
                     ) { viewModel.onEditUserClick(navigate) }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     if (accProvider == Provider.Physio.providerId) {
                         ActionButton(
                             Icons.AutoMirrored.Outlined.Message,
                             "Zmień adres email"
                         ) { showEmailChangeDialog.value = true }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
                     if (!emailVerified) {
@@ -176,6 +194,7 @@ fun ProfileScreen(
                             Icons.Outlined.VerifiedUser,
                             "Zweryfikuj adres email"
                         ) { showEmailVerificationDialog.value = true }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
                     if (accProvider == Provider.Physio.providerId) {
@@ -183,6 +202,7 @@ fun ProfileScreen(
                             icon = Icons.Outlined.Password,
                             label = "Zmień hasło"
                         ) { viewModel.onChangePasswordClick(navigate) }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
                     ActionButton(
@@ -190,10 +210,14 @@ fun ProfileScreen(
                         "Wyloguj"
                     ) { viewModel.onLogoutClick(openAndPopUp) }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     ActionButton(
                         Icons.Outlined.DeleteForever,
                         "Usuń konto"
                     ) { showAccountDeleteDialog.value = true }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

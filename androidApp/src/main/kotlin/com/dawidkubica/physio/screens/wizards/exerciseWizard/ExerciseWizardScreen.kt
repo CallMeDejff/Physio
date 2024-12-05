@@ -16,6 +16,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -92,7 +93,7 @@ fun LoadingScreen() {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -120,7 +121,7 @@ fun WizardContent(
 
         Card(
             shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-            colors = CardDefaults.cardColors(containerColor = ghost_white),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = Modifier
                 .fillMaxWidth()
                 .constrainAs(wizardForm) {
@@ -209,11 +210,11 @@ fun NavigationButtons(
             onClick = onCreateOrEditClick,
             modifier = Modifier.weight(2f),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text(
                 text = buttonText,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 style = typography.labelLarge,
                 modifier = Modifier.padding(8.dp)
             )
@@ -225,11 +226,11 @@ fun NavigationButtons(
             onClick = onBackClick,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text(
                 text = "Cofnij",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 style = typography.labelLarge,
                 modifier = Modifier.padding(8.dp)
             )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,18 +28,18 @@ fun ActionButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(16.dp)),
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = colorPrimary,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = label, color = colorPrimary, style = typography.labelLarge)
+        Text(text = label, color = MaterialTheme.colorScheme.primary, style = typography.labelLarge)
     }
 }
 

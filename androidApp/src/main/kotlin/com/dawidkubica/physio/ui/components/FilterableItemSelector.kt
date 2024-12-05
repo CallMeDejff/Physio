@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -69,14 +70,14 @@ fun FilterableItemSelector(
                             showSearchField = !showSearchField
                         }
                         .background(Color.Transparent)
-                        .border(2.dp, colorPrimary, CircleShape)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Search,
                         contentDescription = "Search Icon",
-                        tint = colorPrimary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -93,14 +94,14 @@ fun FilterableItemSelector(
                             .clickable { onToggleItem(item.first) }
                             .border(
                                 width = 1.dp,
-                                color = if (isSelected) colorPrimary else Color.Gray,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                                 shape = RoundedCornerShape(16.dp)
                             )
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = item.second,
-                            color = if (isSelected) colorPrimary else Color.Gray,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                             style = typography.labelMedium
                         )
                     }
@@ -117,12 +118,12 @@ fun FilterableItemSelector(
                     onSearch?.invoke(it)
                 },
                 textStyle = typography.labelMedium,
-                placeholder = { Text("Podaj nazwę", style = typography.labelMedium) },
+                placeholder = { Text("Podaj nazwę", style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .border(2.dp, colorPrimary, RoundedCornerShape(16.dp)),
+                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp)),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,

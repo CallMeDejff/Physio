@@ -8,25 +8,46 @@ import kotlinx.coroutines.flow.update
 
 abstract class SharedViewModel : PhysioAppViewModel() {
 
-    protected fun loadConditionList(
+    protected suspend fun loadConditionList(
         listService: ListService,
         _conditionsList: MutableStateFlow<List<Pair<String, String>>>,
+        _filteredConditionsList: MutableStateFlow<List<Pair<String, String>>> = MutableStateFlow(emptyList()),
         tag: String
     ) {
-        launchCatching(
-            tag = tag,
-            errorMessage = "Ups! Nie udało się pobrać listy schorzeń.",
-            onError = { message -> _message.emit(message) },
-            block = {
-                _isLoading.value = true
-                _conditionsList.value = listService.getConditions()
-                Log.d(
-                    tag,
-                    "loadConditionList: Conditions list loaded, item count: ${_conditionsList.value.size}"
-                )
-                _isLoading.value = false
-            }
-        )
+        try {
+            _isLoading.value = true
+            val conditions = listService.getConditions()
+            _conditionsList.value = conditions
+            _filteredConditionsList.value = conditions
+            Log.d(tag, "loadConditionList: Conditions list loaded, item count: ${conditions.size}")
+        } catch (e: Exception) {
+            _message.emit("Ups! Nie udało się pobrać listy schorzeń.")
+            Log.e(tag, "Error loading conditions list", e)
+        } finally {
+            _isLoading.value = false
+        }
+    }
+
+
+    protected suspend fun loadBodyPartsList(
+        listService: ListService,
+        _bodyPartsList: MutableStateFlow<List<Pair<String, String>>>,
+        _filteredBodyPartsList: MutableStateFlow<List<Pair<String, String>>> = MutableStateFlow(emptyList()),
+        tag: String
+    ) {
+        try {
+            _isLoading.value = true
+            val bodyParts = listService.getBodyParts()
+            Log.d(tag, "Fetched body parts: $bodyParts")
+            _bodyPartsList.value = bodyParts
+            _filteredBodyPartsList.value = bodyParts.toList()
+            Log.d(tag, "Body parts list updated. Total: ${bodyParts.size}")
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to load body parts", e)
+            _message.emit("Ups! Nie udało się pobrać listy filtrów.")
+        } finally {
+            _isLoading.value = false
+        }
     }
 
     protected fun loadExercisesList(

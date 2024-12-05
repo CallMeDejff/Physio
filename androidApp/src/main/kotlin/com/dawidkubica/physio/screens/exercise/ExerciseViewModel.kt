@@ -1,6 +1,8 @@
 package com.dawidkubica.physio.screens.exercise
 
+import android.content.Context
 import android.util.Log
+import androidx.media3.exoplayer.ExoPlayer
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.Exercise
 import com.dawidkubica.physio.models.StorageResult
@@ -62,6 +64,10 @@ class ExerciseViewModel @Inject constructor(
 
     private val _isPremium = MutableStateFlow<Boolean?>(false)
     val isPremium: StateFlow<Boolean?> = _isPremium
+
+    fun clearMediaUrl() {
+        _mediaUris.value = null
+    }
 
     fun getExercisePackage(exercisePackageId: String) {
         launchCatching(

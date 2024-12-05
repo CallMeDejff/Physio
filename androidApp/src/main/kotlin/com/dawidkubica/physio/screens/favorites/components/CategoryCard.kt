@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,13 +33,17 @@ fun CategoryCard(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        shape = RoundedCornerShape(
+            topStart = 0.dp,
+            topEnd = 0.dp,
+            bottomStart = 16.dp,
+            bottomEnd = 16.dp
+        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f))
     ) {
         if (exercisePackages.isNotEmpty()) {
             LazyRow(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(0.dp)
             ) {
                 items(exercisePackages) { exercisePackage ->
                     UserPackageCard(
@@ -47,7 +52,6 @@ fun CategoryCard(
                         description = exercisePackage.description,
                         imageUrl = exercisePackage.mediaUrls.firstOrNull().toString(),
                         isPremium = exercisePackage.premium,
-                        increased = false,
                         onClick = onExerciseClick
                     )
                 }
@@ -56,7 +60,7 @@ fun CategoryCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(233.dp),
+                    .height(226.dp),
                 contentAlignment = Alignment.Center,
             )
             {

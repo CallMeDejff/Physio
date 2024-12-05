@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.models.Exercise
 import com.dawidkubica.physio.navigation.WizardScreen
 import com.dawidkubica.physio.service.services.AccountService
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -128,12 +130,15 @@ class ExerciseCreatorViewModel @Inject constructor(
     }
 
     fun loadCondition() {
-        loadConditionList(
-            _conditionsList = _conditionsList,
-            listService = listService,
-            tag = EXERCISE_VIEWMODEL_TAG
-        )
+        viewModelScope.launch {
+            loadConditionList(
+                listService = listService,
+                _conditionsList = _conditionsList,
+                tag = EXERCISE_VIEWMODEL_TAG
+            )
+        }
     }
+
 
     fun loadEquipmentList() {
         loadData(
@@ -212,9 +217,9 @@ class ExerciseCreatorViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 exerciseService.updateExercise(exercise, _selectedMediaUris.value)
+                navigate(WizardScreen.CreatorWizard.route)
+                _message.update { "ćwiczenie zaktualizowane" }
             })
-        navigate(WizardScreen.CreatorWizard.route)
-        _message.update { "ćwiczenie zaktualizowane" }
     }
 
     fun deleteExercise(navigate: (String) -> Unit) {

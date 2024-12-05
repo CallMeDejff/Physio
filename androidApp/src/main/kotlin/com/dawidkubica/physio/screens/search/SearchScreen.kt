@@ -28,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -126,7 +127,8 @@ fun SearchContent(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .background(color = MaterialTheme.colorScheme.surface)
+            .padding(8.dp),
     ) {
         Column(
             modifier = Modifier
@@ -157,15 +159,23 @@ fun SearchContent(
 
 @Composable
 fun SearchHeader() {
-    Text(
-        text = buildAnnotatedString {
-            append(" Znajdź swój ")
-            withStyle(style = SpanStyle(color = colorPrimary)) {
-                append("pakiet ćwiczeń.")
-            }
-        },
-        style = typography.headlineLarge
-    )
+    Column {
+        Text(
+            text = buildAnnotatedString {
+                append(" Znajdź swój ")
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                    append("pakiet ćwiczeń.")
+                }
+            },
+            style = typography.headlineLarge.copy(color = MaterialTheme.colorScheme.onBackground)
+        )
+
+        Text(
+            text = " Szukaj po schorzeniu, części ciała, nazwie...",
+            style = typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
+    }
     Spacer(modifier = Modifier.height(16.dp))
 }
 
@@ -184,7 +194,7 @@ fun SearchFilters(
             .fillMaxWidth()
             .wrapContentHeight()
             .clip(RoundedCornerShape(16.dp))
-            .background(PurpleGrey80)
+            .background(MaterialTheme.colorScheme.tertiary)
             .padding(8.dp)
     ) {
         Column(
@@ -197,7 +207,7 @@ fun SearchFilters(
                 placeholder = {
                     Text(
                         text = "Wpisz nazwę pakietu...",
-                        style = typography.labelMedium,
+                        style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground),
                         maxLines = 1
                     )
                 },
@@ -209,8 +219,8 @@ fun SearchFilters(
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
                     focusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = colorPrimary,
-                    unfocusedIndicatorColor = gray,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 )
             )
             if (isExpanded) {
@@ -228,12 +238,12 @@ fun SearchFilters(
                         .height(50.dp)
                         .weight(8f),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     if (isLoadingResults) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.primary
                         )
                     } else {
                         Icon(
@@ -253,7 +263,7 @@ fun SearchFilters(
 
                 Button(
                     onClick = { isExpanded = !isExpanded },
-                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .height(50.dp)
                         .weight(2f),
@@ -261,7 +271,8 @@ fun SearchFilters(
                 ) {
                     Icon(
                         if (isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,
-                        contentDescription = "Expand"
+                        contentDescription = "Expand",
+                        tint = Color.White,
                     )
                 }
             }
@@ -329,7 +340,7 @@ fun SearchResults(
                     Text(
                         text = "Brak wyników",
                         style = typography.labelMedium,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
                 }
             }

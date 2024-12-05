@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+
     <application
 
         android:name=".PhysioHiltApp"
@@ -22,6 +23,7 @@
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.Physio">
+        <profileable android:shell="true" />
         <provider
             android:name="androidx.core.content.FileProvider"
             tools:replace="android:authorities"

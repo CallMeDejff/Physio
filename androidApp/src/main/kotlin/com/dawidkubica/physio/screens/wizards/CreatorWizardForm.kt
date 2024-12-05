@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +46,7 @@ fun CreatorWizardForm(
                 .padding(top = 10.dp, bottom = 20.dp),
             text = buildAnnotatedString {
                 val styleHighlight = SpanStyle(
-                    color = colorPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_bold))
                 )
                 append("Wybierz, czy chcesz się zająć ")

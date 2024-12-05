@@ -1,6 +1,8 @@
 package com.dawidkubica.physio.screens.sign_in
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -8,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,11 +51,15 @@ fun LoginScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            ConstraintLayout {
+            ConstraintLayout(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 val (header, loginForm) = createRefs()
 
                 HeaderView(
@@ -68,40 +75,35 @@ fun LoginScreen(
                 )
 
                 Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
                     shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-                    colors = CardDefaults.cardColors(containerColor = ghost_white),
                     modifier = Modifier
-                        .fillMaxSize()
                         .padding(top = 120.dp)
                         .constrainAs(loginForm) {
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                             bottom.linkTo(parent.bottom)
-                        }
-                ) {
-                    LoginForm(
-                        emailState = emailState,
-                        passwordState = passwordState,
-                        isLoading = isLoading.value,
-                        openAndPopUp = openAndPopUp,
-                        onLoginClick = {
-                            viewModel.updateEmail(emailState.value.text)
-                            viewModel.updatePassword(passwordState.value.text)
-                            viewModel.onSignInClick(openAndPopUp, context)
                         },
-                        onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
-                        onForgotPasswordClick = { viewModel.onForgotPasswordClick(navigate = navigate) },
-                        viewModel = viewModel,
-                    )
+                ) {
+                        LoginForm(
+                            emailState = emailState,
+                            passwordState = passwordState,
+                            isLoading = isLoading.value,
+                            openAndPopUp = openAndPopUp,
+                            onLoginClick = {
+                                viewModel.updateEmail(emailState.value.text)
+                                viewModel.updatePassword(passwordState.value.text)
+                                viewModel.onSignInClick(openAndPopUp, context)
+                            },
+                            onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
+                            onForgotPasswordClick = { viewModel.onForgotPasswordClick(navigate = navigate) },
+                            viewModel = viewModel,
+                        )
+
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen() {
-    PhysioTheme {
     }
 }

@@ -23,9 +23,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,7 +55,6 @@ import com.dawidkubica.physio.ui.theme.typography
 @Composable
 @ExperimentalMaterial3Api
 fun ExerciseScreen(
-    navController: NavHostController,
     popBackStack: () -> Unit,
     viewModel: ExerciseViewModel,
     packageId: String?
@@ -160,6 +161,14 @@ fun BottomSheetContent(
     onMediaClick: (String, String) -> Unit
 ) {
     val isLoading by viewModel.isLoading.collectAsState()
+    var isPlayerReleased by remember { mutableStateOf(false) }
+
+    DisposableEffect(isPlayerReleased) {
+        if (isPlayerReleased) {
+            popBackStack()
+        }
+        onDispose {}
+    }
 
     Column(
         modifier = Modifier
@@ -205,7 +214,7 @@ fun LoadingIndicator() {
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(color = colorPrimary)
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -225,7 +234,7 @@ fun NavigationButtons(
             onClick = { viewModel.onGoBackClick(popBackStack) },
             modifier = Modifier.weight(4f),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text(
                 text = "Cofnij",
@@ -241,7 +250,7 @@ fun NavigationButtons(
             onClick = { viewModel.togglePackageFavoriteStatus(packageId.orEmpty()) },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Icon(
                 imageVector = Icons.Outlined.Favorite,

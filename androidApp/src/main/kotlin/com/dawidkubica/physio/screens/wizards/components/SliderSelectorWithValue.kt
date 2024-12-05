@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.ui.theme.colorPrimary
 
@@ -21,6 +23,8 @@ fun SliderSelectorWithValue(
 ) {
     val thumbRadius = 20.dp
     val valueAsString = value.toInt().toString()
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
 
     Slider(
         value = value,
@@ -36,12 +40,12 @@ fun SliderSelectorWithValue(
                     .size(thumbRadius * 2)
             ) {
                 drawCircle(
-                    color = colorPrimary,
+                    color = primaryColor,
                     radius = thumbRadius.toPx()
                 )
                 drawContext.canvas.nativeCanvas.apply {
                     val textPaint = android.graphics.Paint().apply {
-                        color = android.graphics.Color.WHITE
+                        color = surfaceColor.toArgb()
                         textSize = 42f
                         textAlign = android.graphics.Paint.Align.CENTER
                     }

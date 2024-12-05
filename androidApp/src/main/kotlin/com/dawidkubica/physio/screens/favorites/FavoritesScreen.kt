@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Discount
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,6 +88,7 @@ fun FavoritesScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -148,23 +150,20 @@ fun FavoritesScreen(
 }
 
 @Composable
-fun LoadingView() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
 fun GreetingSection(userName: String) {
-    Text(
-        text = "Cześć, $userName 👋",
-        style = typography.headlineLarge
-    )
+    Column {
+        Text(
+            text = " Cześć, $userName 👋",
+            style = typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = " Co dzisiaj zamierzasz ćwiczyć?",
+            style = typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
+    }
+
     Spacer(modifier = Modifier.height(8.dp))
 }
 
@@ -175,18 +174,24 @@ fun ReminderSection(nextReminder: Reminder?) {
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .clip(RoundedCornerShape(16.dp))
-                .border(
-                    BorderStroke(4.dp, Color.Transparent),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
         ) {
             ReminderItem(
                 reminder = it,
                 deletable = false,
             )
         }
+    }
+}
+
+@Composable
+fun LoadingView() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
@@ -203,10 +208,13 @@ fun CategorySection(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .border(
-                BorderStroke(4.dp, Color.Transparent),
+                BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             )
-            .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
+            )
             .padding(vertical = 4.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -236,42 +244,50 @@ fun DiscoverSection(
     discoverPackages: List<ExercisePackage>,
     onExerciseClick: (String) -> Unit
 ) {
-
     Box(
         modifier = Modifier
             .animateContentSize()
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .border(
-                BorderStroke(4.dp, Color.Transparent),
+                BorderStroke(4.dp, MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             )
-            .background(color = PurpleGrey80, shape = RoundedCornerShape(16.dp))
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
+            )
             .padding(top = 4.dp)
-            .padding(vertical = 4.dp, horizontal = 8.dp),
+            .padding(horizontal = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Column {
 
             Box(
                 modifier = Modifier
-                    .shadow(4.dp, RoundedCornerShape(8.dp))
+                    //.shadow(2.dp, RoundedCornerShape(8.dp))
                     .fillMaxWidth(0.98f)
                     .height(52.dp)
-                    .background(Color.White)
-                    .align(Alignment.CenterHorizontally)
+                    //.border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .align(Alignment.Start),
             ) {
-                Text(
-                    text = "Odkryj coś nowego",
-                    style = typography.headlineMedium,
-                    color = Color.Black,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(vertical = 8.dp)
-                )
+                Column {
+                    Text(
+                        text = " Odkryj coś nowego: ",
+                        style = typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                    )
+                    Text(
+                        text = " Co dzisiaj zamierzasz ćwiczyć?",
+                        style = typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -283,3 +299,4 @@ fun DiscoverSection(
         }
     }
 }
+

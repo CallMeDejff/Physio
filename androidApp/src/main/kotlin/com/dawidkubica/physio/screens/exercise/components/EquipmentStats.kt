@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -35,14 +36,14 @@ fun EquipmentStats(exercise: Exercise, equipmentList: List<Pair<String, String>>
                     .clip(RoundedCornerShape(16.dp))
                     .border(
                         width = 1.dp,
-                        color = colorPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = item,
-                    color = colorPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     style = typography.labelMedium
                 )
             }

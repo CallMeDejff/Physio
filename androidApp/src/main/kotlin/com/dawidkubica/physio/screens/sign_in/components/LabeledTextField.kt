@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -39,7 +40,7 @@ fun LabeledTextField(
     ) {
         Text(
             text = label,
-            style = typography.labelMedium.copy(color = gray),
+            style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)),
             modifier = Modifier.padding(bottom = 6.dp, top = 6.dp)
         )
         OutlinedTextField(
@@ -52,14 +53,14 @@ fun LabeledTextField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    style = typography.labelMedium.copy(color = light_gray)
+                    style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    tint = colorPrimary
+                    tint = MaterialTheme.colorScheme.primary
                 )
             },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
@@ -67,8 +68,8 @@ fun LabeledTextField(
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = colorPrimary,
-                unfocusedIndicatorColor = gray,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             )
         )
     }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -82,6 +83,7 @@ fun SchedulerScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
         ) {
             Box(
@@ -93,14 +95,19 @@ fun SchedulerScreen(
                     Text(
                         text = buildAnnotatedString {
                             append(" Zaplanuj swój ")
-                            withStyle(style = SpanStyle(color = colorPrimary)) {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                                 append("harmonogram.")
                             }
                         },
                         style = typography.headlineLarge,
                     )
+                    Text(
+                        text = " Dodaj przypomnienia dla swoich pakietów",
+                        style = typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -174,13 +181,13 @@ fun DayTile(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) colorPrimary else Color.Transparent
-    val textColor = if (isSelected) Color.White else Color.Gray
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val textColor = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
 
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(8.dp))
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp))
             .background(backgroundColor)
             .clickable(onClick = onClick)
             .padding(8.dp)

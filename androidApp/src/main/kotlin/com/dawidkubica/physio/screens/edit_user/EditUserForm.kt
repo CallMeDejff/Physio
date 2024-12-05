@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -86,7 +87,7 @@ fun EditUserForm(
                 onCheckedChange = { isChecked ->
                     isLicenseChecked.value = isChecked
                 },
-                colors = CheckboxDefaults.colors(colorPrimary)
+                colors = CheckboxDefaults.colors(MaterialTheme.colorScheme.primary)
             )
 
             Text(
@@ -95,7 +96,7 @@ fun EditUserForm(
                     .fillMaxWidth()
                     .padding(8.dp),
                 style = TextStyle(
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha=0.7f),
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
                 )

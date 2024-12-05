@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
-
 @Composable
 fun ReminderItem(
     reminder: Reminder,
@@ -32,13 +32,13 @@ fun ReminderItem(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .padding(vertical = 4.dp, horizontal = 4.dp)
             .fillMaxWidth()
-            .border(width = 2.dp, color = colorPrimary, shape = RoundedCornerShape(16.dp))
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp))
     ) {
         Row(
             modifier = Modifier
@@ -49,7 +49,8 @@ fun ReminderItem(
             Icon(
                 imageVector = Icons.Outlined.Timer,
                 contentDescription = "Timer Icon",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                tint = MaterialTheme.colorScheme.onSurface
             )
 
             Column(
@@ -57,12 +58,18 @@ fun ReminderItem(
                     .weight(4f)
                     .padding(8.dp)
                     .align(Alignment.CenterVertically)
-                    .weight(4f)
             ) {
-                Text(reminder.topic, style = typography.labelLarge)
+                Text(
+                    text = reminder.topic,
+                    style = typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 val fullDay = mapShortDayToFull(reminder.dayOfWeek)
-                Text("$fullDay - ${reminder.time}", style = typography.labelMedium)
-
+                Text(
+                    text = "$fullDay - ${reminder.time}",
+                    style = typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
             }
 
             if (deletable) {
@@ -71,9 +78,9 @@ fun ReminderItem(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        Icons.Outlined.Delete,
+                        imageVector = Icons.Outlined.Delete,
                         contentDescription = "Delete Reminder",
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }

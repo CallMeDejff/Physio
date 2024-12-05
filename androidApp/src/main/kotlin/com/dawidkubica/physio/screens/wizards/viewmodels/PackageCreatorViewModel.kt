@@ -1,10 +1,14 @@
 package com.dawidkubica.physio.screens.wizards.viewmodels
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.models.User
 import com.dawidkubica.physio.navigation.WizardScreen
+import com.dawidkubica.physio.screens.wizards.services.MediaProcessor
+import com.dawidkubica.physio.screens.wizards.services.Validator
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.AuthenticationService
 import com.dawidkubica.physio.service.services.ExercisePackageService
@@ -13,7 +17,9 @@ import com.dawidkubica.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +51,18 @@ class PackageCreatorViewModel @Inject constructor(
 
     private val _conditionsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val conditionsList: StateFlow<List<Pair<String, String>>> = _conditionsList
+    private val _filteredConditionsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val filteredConditionsList: StateFlow<List<Pair<String, String>>> =
+        _filteredConditionsList.asStateFlow()
+
+    private val _selectedBodyParts = MutableStateFlow<Set<String>>(emptySet())
+    val selectedBodyParts: StateFlow<Set<String>> = _selectedBodyParts
+    private val _bodyPartsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val bodyPartsList: StateFlow<List<Pair<String, String>>> = _bodyPartsList
+
+    private val _filteredBodyPartsList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val filteredBodyPartsList: StateFlow<List<Pair<String, String>>> =
+        _filteredBodyPartsList.asStateFlow()
 
     private val _packagesList = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val packagesList: StateFlow<List<Pair<String, String>>> = _packagesList
@@ -75,67 +93,6 @@ class PackageCreatorViewModel @Inject constructor(
     private val conditionError = MutableStateFlow<String?>(null)
     private val exerciseError = MutableStateFlow<String?>(null)
 
-    fun validateFields(
-        title: String,
-        description: String,
-        selectedExercises: List<String>,
-        selectedConditions: List<String>,
-    ): Boolean {
-        var isValid = true
-        val errorMessages = mutableListOf<String>()
-
-        titleError.value = if (title.isBlank()) {
-            isValid = false
-            val error = "Tytuł nie może być pusty. "
-            errorMessages.add(error)
-            error
-        } else {
-            null
-        }
-
-        descriptionError.value = if (description.length < 10) {
-            isValid = false
-            val error = "Opis musi mieć co najmniej 10 znaków. "
-            errorMessages.add(error)
-            error
-        } else {
-            null
-        }
-
-        descriptionError.value = if (description.length > 800) {
-            isValid = false
-            val error = "Opis jest za długi. "
-            errorMessages.add(error)
-            error
-        } else {
-            null
-        }
-
-        conditionError.value = if (selectedConditions.isEmpty()) {
-            isValid = false
-            val error = "Wybierz przynajmniej jedno schorzenie. "
-            errorMessages.add(error)
-            error
-        } else {
-            null
-        }
-
-        exerciseError.value = if (selectedExercises.isEmpty()) {
-            isValid = false
-            val error = "Wybierz przynajmniej jedno ćwiczenie. "
-            errorMessages.add(error)
-            error
-        } else {
-            null
-        }
-
-        if (errorMessages.isNotEmpty()) {
-            showMessage(errorMessages.joinToString("\n"))
-        }
-
-        return isValid
-    }
-
     fun addSelectedMedia(uri: Uri) {
         _selectedMediaUris.update { listOf(uri) }
     }
@@ -152,12 +109,32 @@ class PackageCreatorViewModel @Inject constructor(
         )
     }
 
+    fun loadBodyPartsList() {
+        viewModelScope.launch {
+            Log.d(PACKAGE_VIEWMODEL_TAG, "Loading body parts...")
+            loadBodyPartsList(
+                listService = listService,
+                _bodyPartsList = _bodyPartsList,
+                _filteredBodyPartsList = _filteredBodyPartsList,
+                tag = PACKAGE_VIEWMODEL_TAG
+            )
+            Log.d(
+                PACKAGE_VIEWMODEL_TAG,
+                "Body parts loaded. BodyParts: ${_bodyPartsList.value}, Filtered: ${_filteredBodyPartsList.value}"
+            )
+        }
+    }
+
     fun loadCondition() {
-        loadConditionList(
-            _conditionsList = _conditionsList,
-            listService = listService,
-            tag = PACKAGE_VIEWMODEL_TAG
-        )
+        viewModelScope.launch {
+            loadConditionList(
+                listService = listService,
+                _conditionsList = _conditionsList,
+                _filteredConditionsList = _filteredConditionsList,
+                tag = PACKAGE_VIEWMODEL_TAG
+            )
+            Log.d(PACKAGE_VIEWMODEL_TAG, "Conditions list loaded: ${_filteredConditionsList.value}")
+        }
     }
 
     fun loadPackagesList() {
@@ -178,65 +155,6 @@ class PackageCreatorViewModel @Inject constructor(
             },
             errorMessage = "Ups! Nie udało się pobrać listy użytkowników."
         )
-    }
-
-    fun onCreatePackageClick(navigate: (String) -> Unit) {
-        val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
-
-        launchCatching(
-            tag = PACKAGE_VIEWMODEL_TAG,
-            errorMessage = "Nie udało się utworzyć pakietu.",
-            onError = { message -> _message.emit(message) },
-            block = {
-                val equipmentFromExercises =
-                    exerciseService.getEquipmentIdsForExercises(combinedExercises)
-
-                val exercisePackage = ExercisePackage(
-                    name = _packageName.value.toString(),
-                    exerciseIds = _selectedExercises.value.toList(),
-                    warmUpIds = _selectedWarmUp.value.toList(),
-                    conditionIds = _selectedConditions.value.toList(),
-                    equipmentIds = equipmentFromExercises.values.flatten(),
-                    description = _packageDescription.value.toString()
-                )
-                exercisePackageService.createExercisePackage(
-                    exercisePackage,
-                    _selectedMediaUris.value
-                )
-                navigate(WizardScreen.CreatorWizard.route)
-                _message.update { "Pakiet ćwiczeń utworzony" }
-            })
-        navigate(WizardScreen.CreatorWizard.route)
-    }
-
-    fun onEditPackageClick(navigate: (String) -> Unit) {
-        val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
-
-        launchCatching(
-            tag = PACKAGE_VIEWMODEL_TAG,
-            errorMessage = "Nie udało się zaktualizować pakietu.",
-            onError = { message -> _message.emit(message) },
-            block = {
-                val equipmentFromExercises =
-                    exerciseService.getEquipmentIdsForExercises(combinedExercises)
-                val exercisePackage = ExercisePackage(
-                    id = _packageId.value.toString(),
-                    name = _packageName.value.toString(),
-                    exerciseIds = _selectedExercises.value.toList(),
-                    warmUpIds = _selectedWarmUp.value.toList(),
-                    conditionIds = _selectedConditions.value.toList(),
-                    equipmentIds = equipmentFromExercises.values.flatten(),
-                    description = _packageDescription.value.toString()
-                )
-                exercisePackageService.updateExercisePackage(
-                    exercisePackage,
-                    _selectedMediaUris.value
-                )
-
-                _message.update { "Pakiet ćwiczeń zaktualizowany" }
-                navigate(WizardScreen.CreatorWizard.route)
-            })
-        navigate(WizardScreen.CreatorWizard.route)
     }
 
     fun deletePackage(navigate: (String) -> Unit) {
@@ -279,6 +197,7 @@ class PackageCreatorViewModel @Inject constructor(
                     _selectedConditions.value = exercisePackage.conditionIds.toSet()
                     _selectedExercises.value = exercisePackage.exerciseIds.toSet()
                     _selectedWarmUp.value = exercisePackage.warmUpIds.toSet()
+                    _selectedBodyParts.value = exercisePackage.bodyPartIds.toSet()
                     _packageAuthor.value = exercisePackage.uid
                     _selectedMediaUris.value =
                         exercisePackage.mediaUrls.toList().map { Uri.parse(it) }
@@ -317,25 +236,52 @@ class PackageCreatorViewModel @Inject constructor(
         packageId,
         _selectedPackages,
         allowMultipleSelection = false,
-        itemType = "Package"
+        itemType = "Package",
+        tag = PACKAGE_VIEWMODEL_TAG
     )
 
     fun toggleExercises(exerciseId: String, multipleSelection: Boolean) = toggleItem(
         exerciseId,
         _selectedExercises,
         allowMultipleSelection = multipleSelection,
-        itemType = "Exercise"
+        itemType = "Exercise",
+        tag = PACKAGE_VIEWMODEL_TAG
     )
 
     fun toggleWarmUp(exerciseId: String) =
-        toggleItem(exerciseId, _selectedWarmUp, itemType = "WarmUp")
+        toggleItem(exerciseId, _selectedWarmUp, itemType = "WarmUp", tag = PACKAGE_VIEWMODEL_TAG)
 
     fun toggleCondition(conditionId: String, multipleSelection: Boolean) = toggleItem(
         conditionId,
         _selectedConditions,
         allowMultipleSelection = multipleSelection,
-        itemType = "Condition"
+        itemType = "Condition",
+        tag = PACKAGE_VIEWMODEL_TAG
     )
+
+    fun toggleBodyPart(bodyPartId: String, multipleSelection: Boolean) = toggleItem(
+        bodyPartId,
+        _selectedBodyParts,
+        allowMultipleSelection = multipleSelection,
+        itemType = "BodyPart",
+        tag = PACKAGE_VIEWMODEL_TAG
+    )
+
+    fun filterConditionsList(query: String) {
+        _filteredConditionsList.value = if (query.isEmpty()) {
+            _conditionsList.value
+        } else {
+            _conditionsList.value.filter { it.second.contains(query, ignoreCase = true) }
+        }
+    }
+
+    fun filterBodyPartsList(query: String) {
+        _filteredBodyPartsList.value = if (query.isEmpty()) {
+            _bodyPartsList.value
+        } else {
+            _bodyPartsList.value.filter { it.second.contains(query, ignoreCase = true) }
+        }
+    }
 
     fun toggleUser(userId: String) =
         toggleItem(userId, _selectedUsers, allowMultipleSelection = false, itemType = "User")
@@ -346,6 +292,127 @@ class PackageCreatorViewModel @Inject constructor(
 
     fun onEditPackageContinueClick(navigate: (String) -> Unit) {
         navigate(WizardScreen.EditPackageDetails.route)
+    }
+
+    private fun onPackageOperationClick(
+        navigate: (String) -> Unit,
+        context: Context,
+        isEdit: Boolean
+    ) {
+        val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
+        val title = _packageName.value.orEmpty()
+        val description = _packageDescription.value.orEmpty()
+        val selectedConditions = _selectedConditions.value.toList()
+        val selectedExercises = _selectedExercises.value.toList()
+
+        if (!Validator.validateFields(
+                title,
+                description,
+                selectedExercises,
+                selectedConditions,
+                titleError,
+                descriptionError,
+                conditionError,
+                exerciseError,
+                showMessage = { message -> _message.update { message } }
+            )
+        ) {
+            return
+        }
+
+        if (_selectedMediaUris.value.isNotEmpty()) {
+            _selectedMediaUris.value.forEach { uri ->
+                validateAndProcessMedia(
+                    uri = uri,
+                    context = context,
+                    onError = { errorMessage ->
+                        _message.update { errorMessage }
+                    },
+                    onSuccess = { processedUri ->
+                        handlePackageSave(navigate, processedUri, combinedExercises, isEdit)
+                    }
+                )
+            }
+        } else {
+            handlePackageSave(navigate, null, combinedExercises, isEdit)
+        }
+    }
+
+    fun onCreatePackageClick(navigate: (String) -> Unit, context: Context) {
+        onPackageOperationClick(navigate, context, isEdit = false)
+    }
+
+    fun onEditPackageClick(navigate: (String) -> Unit, context: Context) {
+        onPackageOperationClick(navigate, context, isEdit = true)
+    }
+
+    private fun handlePackageSave(
+        navigate: (String) -> Unit,
+        processedUri: Uri?,
+        combinedExercises: List<String>,
+        isEdit: Boolean
+    ) {
+        launchCatching(
+            tag = PACKAGE_VIEWMODEL_TAG,
+            errorMessage = if (isEdit) "Nie udało się zaktualizować pakietu." else "Nie udało się utworzyć pakietu.",
+            onError = { message -> _message.emit(message) },
+            block = {
+                val exercisePackage = prepareExercisePackage(processedUri, combinedExercises)
+                if (isEdit) {
+                    exercisePackageService.updateExercisePackage(
+                        exercisePackage,
+                        processedUri?.let { listOf(it) } ?: emptyList()
+                    )
+                    _message.update { "Pakiet ćwiczeń zaktualizowany." }
+                } else {
+                    exercisePackageService.createExercisePackage(
+                        exercisePackage,
+                        processedUri?.let { listOf(it) } ?: emptyList()
+                    )
+                    _message.update { "Pakiet ćwiczeń został utworzony." }
+                }
+                navigate(WizardScreen.CreatorWizard.route)
+            })
+    }
+
+    private suspend fun prepareExercisePackage(
+        processedUri: Uri?,
+        combinedExercises: List<String>
+    ): ExercisePackage {
+        val equipmentFromExercises =
+            exerciseService.getEquipmentIdsForExercises(combinedExercises)
+        return ExercisePackage(
+            id = (if (_packageId.value.isNullOrEmpty()) null else _packageId.value).toString(),
+            name = _packageName.value.orEmpty(),
+            exerciseIds = _selectedExercises.value.toList(),
+            warmUpIds = _selectedWarmUp.value.toList(),
+            conditionIds = _selectedConditions.value.toList(),
+            equipmentIds = equipmentFromExercises.values.flatten(),
+            bodyPartIds = _selectedBodyParts.value.toList(),
+            description = _packageDescription.value.orEmpty()
+        )
+    }
+
+    private fun validateAndProcessMedia(
+        uri: Uri,
+        context: Context,
+        onError: (String) -> Unit,
+        onSuccess: (Uri) -> Unit
+    ) {
+        viewModelScope.launch {
+            MediaProcessor.processMedia(
+                context = context,
+                uri = uri,
+                onError = { errorMessage ->
+                    _message.update { errorMessage }
+                    onError(errorMessage)
+                },
+                onSuccess = { processedUri ->
+                    addSelectedMedia(processedUri)
+                    onSuccess(processedUri)
+                }
+            )
+        }
     }
 
     companion object {

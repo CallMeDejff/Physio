@@ -1,6 +1,7 @@
 package com.dawidkubica.physio.screens.exercise.components
 
 import android.text.Html
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.ExoPlayer
 import com.dawidkubica.physio.models.Exercise
 import com.dawidkubica.physio.ui.theme.colorTertiary
 import com.dawidkubica.physio.ui.theme.typography
@@ -34,8 +37,7 @@ fun ExerciseCard(
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colorTertiary),
-        //elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
         modifier = Modifier
             .padding(8.dp)
             .animateContentSize()
@@ -81,6 +83,7 @@ fun ExerciseCard(
                 Text(
                     text = formattedDescription,
                     style = typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier
                         .clickable { isExpanded = !isExpanded }
                         .padding(vertical = 8.dp)

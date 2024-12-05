@@ -13,6 +13,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -91,53 +93,61 @@ fun AutoComplete(
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = colorPrimary,
-                unfocusedIndicatorColor = gray,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             )
         )
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = {
-                expanded = false
-                debounceState = false
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .background(color = Color.White)
-        ) {
-            val filteredItems = if (category.isNotEmpty()) {
-                itemList.filter {
-                    it.second.lowercase().contains(category.lowercase())
-                }.sortedBy { it.second }
-            } else {
-                itemList.sortedBy { it.second }
-            }.take(5)
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                    debounceState = false
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))            ) {
+                val filteredItems = if (category.isNotEmpty()) {
+                    itemList.filter {
+                        it.second.lowercase().contains(category.lowercase())
+                    }.sortedBy { it.second }
+                } else {
+                    itemList.sortedBy { it.second }
+                }.take(5)
 
-            filteredItems.forEach { item ->
-                val isSelected = selectedItems.contains(item.first)
-                DropdownMenuItem(
-                    onClick = {
-                        onToggleItem(item.first)
-                        category = ""
-                        expanded = false
-                        focusRequester.requestFocus()
-                    },
-                    text = {
-                        Text(
-                            text = item.second,
-                            style = typography.labelMedium,
-                            color = if (isSelected) {
-                                colorSecondary
-                            } else {
-                                colorPrimary
-                            }
-                        )
-                    }
-                )
+                filteredItems.forEach { item ->
+                    val isSelected = selectedItems.contains(item.first)
+                    DropdownMenuItem(
+                        colors = MenuItemColors(
+                            textColor = MaterialTheme.colorScheme.primary,
+                            trailingIconColor = MaterialTheme.colorScheme.primary,
+                            leadingIconColor=MaterialTheme.colorScheme.primary,
+                            disabledTextColor=MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            disabledTrailingIconColor=MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            disabledLeadingIconColor=MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        ),
+                        onClick = {
+                            onToggleItem(item.first)
+                            category = ""
+                            expanded = false
+                            focusRequester.requestFocus()
+                        },
+                        text = {
+                            Text(
+                                text = item.second,
+                                style = typography.labelMedium,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.secondary
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                }
+                            )
+                        }
+                    )
+                }
             }
-        }
+
 
         if (selectedItems.isNotEmpty()) {
             Text(

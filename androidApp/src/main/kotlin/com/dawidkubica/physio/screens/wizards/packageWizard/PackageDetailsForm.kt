@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +29,7 @@ import androidx.compose.material.icons.outlined.PermMedia
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -54,6 +57,8 @@ import com.dawidkubica.physio.screens.wizards.components.CustomAlertDialog
 import com.dawidkubica.physio.screens.wizards.components.TextEditorView
 import com.dawidkubica.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.dawidkubica.physio.ui.components.AutoCompleteDetailed
+import com.dawidkubica.physio.ui.components.FilterableItemSelector
+import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
@@ -66,10 +71,12 @@ fun PackageDetailsForm(
     isEditor: Boolean = false
 ) {
     val exercisesList by viewModel.exercisesList.collectAsState()
-    val conditionsList by viewModel.conditionsList.collectAsState()
+    val filteredConditionsList by viewModel.filteredConditionsList.collectAsState()
+    val filteredBodyPartsList by viewModel.filteredBodyPartsList.collectAsState()
     val selectedExercises by viewModel.selectedExercises.collectAsState()
     val selectedWarmUp by viewModel.selectedWarmUp.collectAsState()
     val selectedConditions by viewModel.selectedConditions.collectAsState()
+    val selectedBodyParts by viewModel.selectedBodyParts.collectAsState()
     val selectedMediaUris by viewModel.selectedMediaUris.collectAsState()
     val description by viewModel.packageDescription.collectAsState()
 
@@ -147,11 +154,20 @@ fun PackageDetailsForm(
             }
 
             item {
-                SelectFromListSection(
-                    exercisesList = conditionsList,
-                    selectedItems = selectedConditions,
-                    onToggleItem = { conditionId -> viewModel.toggleCondition(conditionId, true) },
-                    description = "Wybierz schorzenia dla pakietu"
+                ItemSelectorSection(
+                    conditionsList = filteredConditionsList,
+                    bodyPartsList = filteredBodyPartsList,
+                    selectedConditions = selectedConditions ,
+                    selectedBodyParts = selectedBodyParts,
+                    onToggleConditions = { conditionId -> viewModel.toggleCondition(conditionId, true)},
+                    onToggleBodyParts = { bodyPartId -> viewModel.toggleBodyPart(bodyPartId, true)},
+                    onSearch = { query ->
+                        viewModel.apply {
+                            filterBodyPartsList(query)
+                            filterConditionsList(query)
+                        }
+                    },
+                    description = "Wybierz schorzenie i części ciała"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -228,9 +244,9 @@ fun TextFieldSection(value: String, onValueChange: (String) -> Unit) {
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = Color.Transparent,
             focusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = colorPrimary,
-            unfocusedIndicatorColor = gray,
-            focusedPlaceholderColor = colorPrimary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+            focusedPlaceholderColor = MaterialTheme.colorScheme.primary,
         ),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
     )
@@ -262,6 +278,52 @@ fun SelectFromListSection(
                 itemList = exercisesList,
                 selectedItems = selectedItems,
                 onToggleItem = onToggleItem
+            )
+        }
+    }
+}
+
+@Composable
+fun ItemSelectorSection(
+    conditionsList: List<Pair<String, String>>,
+    bodyPartsList: List<Pair<String, String>>,
+    selectedConditions: Set<String>,
+    selectedBodyParts: Set<String>,
+    onToggleConditions: (String) -> Unit,
+    onToggleBodyParts: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    description: String
+) {
+    Box(
+        modifier = Modifier
+        .wrapContentHeight()
+        .animateContentSize()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = description,
+                style = typography.labelLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FilterableItemSelector(
+                itemList = bodyPartsList,
+                selectedItems = selectedBodyParts,
+                onToggleItem = onToggleBodyParts,
+                showSearchIcon = false
+            )
+
+            FilterableItemSelector(
+                itemList = conditionsList,
+                selectedItems = selectedConditions,
+                onToggleItem = onToggleConditions,
+                onSearch = onSearch
             )
         }
     }
@@ -310,13 +372,13 @@ fun SelectedMediaUris(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .background(Color.Red.copy(alpha = 0.7f), shape = CircleShape)
+                    .background(RedConfirmed, shape = CircleShape)
                     .clickable { onRemoveMedia(selectedMediaUri) }
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Remove media",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.surface
                 )
             }
         }
@@ -335,6 +397,6 @@ fun DeletePackageButton(showDialog: Boolean, onClick: () -> Unit) {
             contentDescription = "Delete package",
             tint = Color.Red
         )
-        Text(text = "Usuń pakiet", color = Color.Red, style = typography.labelLarge)
+        Text(text = "Usuń pakiet", color = RedConfirmed, style = typography.labelLarge)
     }
 }

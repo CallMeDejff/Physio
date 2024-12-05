@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -105,8 +106,8 @@ fun RowScope.AddItem(
     navController: NavHostController
 ) {
     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-    val background = if (selected) colorPrimary else Color.Transparent
-    val contentColor = if (selected) Color.White else Color.Black
+    val background = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val contentColor = if (selected) Color.White else MaterialTheme.colorScheme.onBackground
 
     Box(
         modifier = Modifier

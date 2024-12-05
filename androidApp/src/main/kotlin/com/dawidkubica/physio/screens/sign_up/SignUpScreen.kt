@@ -2,6 +2,7 @@ package com.dawidkubica.physio.screens.sign_up
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,17 +81,14 @@ fun SignUpScreen(
 
                 Card(
                     shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = ghost_white
-                    ),
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(top = 120.dp)
                         .constrainAs(signupForm) {
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                             bottom.linkTo(parent.bottom)
-
                         }
                 ) {
                     SignUpForm(

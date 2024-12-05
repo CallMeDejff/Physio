@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,11 +61,11 @@ fun DropdownMenu(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = 2.dp)
                         .border(2.dp, colorPrimary, shape = RoundedCornerShape(16.dp)),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(Color.White)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
                 ) {
                     DropdownMenuItem(
                         onClick = {
@@ -75,7 +76,7 @@ fun DropdownMenu(
                             Text(
                                 text = item,
                                 style = typography.labelMedium,
-                                color = colorPrimary,
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .align(Alignment.CenterHorizontally)
                                     .padding(horizontal = 16.dp, vertical = 8.dp),

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -61,14 +62,14 @@ fun GoogleSignIn(
             }
         },
         modifier = Modifier
-            .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(16.dp))
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), shape = RoundedCornerShape(16.dp))
             .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Icon(
             imageVector = GoogleIcon,
-            tint = Color.Gray,
+            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             contentDescription = "Google Sign In button",
             modifier = Modifier
                 .padding(top = 8.dp, bottom = 8.dp)

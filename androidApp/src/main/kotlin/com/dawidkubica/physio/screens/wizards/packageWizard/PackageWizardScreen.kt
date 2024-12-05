@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,12 +71,14 @@ fun PackageWizardScreen(
                 viewModel.loadExercises()
                 viewModel.loadCondition()
                 viewModel.loadUsersList()
+                viewModel.loadBodyPartsList()
             }
 
             else -> {
                 viewModel.loadExercises()
                 viewModel.loadCondition()
                 viewModel.loadUsersList()
+                viewModel.loadBodyPartsList()
             }
         }
     }
@@ -106,7 +109,7 @@ fun PackageWizardScreen(
 
             Card(
                 shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-                colors = CardDefaults.cardColors(containerColor = ghost_white),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(wizardForm) {
@@ -136,36 +139,25 @@ fun PackageWizardScreen(
                         bottom.linkTo(parent.bottom)
                     },
             ) {
-                val title = viewModel.packageName.value.toString()
-                val description = viewModel.packageDescription.value.toString()
-                val selectedCondition = viewModel.selectedConditions.value.toList()
-                val selectedExercises = viewModel.selectedExercises.value.toList()
-
                 Button(
                     onClick = {
-                        Log.d(
-                            "PackageWizardScreen",
-                            "isEditorNextStep: $isEditorNextStep, title: $title, description: $description, selectedCondition: $selectedCondition, selectedExercises: $selectedExercises"
-                        )
-
                         when {
                             assignToPerson -> viewModel.onAssignPackageClick(navigate)
                             isEditor -> viewModel.onEditPackageContinueClick(navigate)
                             isEditorNextStep -> {
-                                viewModel.onEditPackageClick(navigate)
+                                viewModel.onEditPackageClick(navigate, context)
                             }
-
-                            else -> viewModel.onCreatePackageClick(navigate)
+                            else -> viewModel.onCreatePackageClick(navigate, context)
                         }
                     },
                     modifier = Modifier
                         .weight(2f),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
                         text = if (assignToPerson) "Przypisz" else if (isEditor || isEditorNextStep) "Edytuj" else "Utwórz",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.surface,
                         style = typography.labelLarge,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -179,11 +171,11 @@ fun PackageWizardScreen(
                         .weight(1f),
                     shape = RoundedCornerShape(16.dp),
 
-                    colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
                         text = "Cofnij",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.surface,
                         style = typography.labelLarge,
                         modifier = Modifier.padding(8.dp)
                     )

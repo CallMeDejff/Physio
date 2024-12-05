@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,28 +22,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.Icon
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun PremiumLabel(
     modifier: Modifier = Modifier,
-    label: String
+    typography: TextStyle,
+    label: String,
+    border: Boolean = true
 ) {
     val gradientColors = listOf(Color.Magenta, Color.Cyan, Color.Magenta)
     val infiniteTransition = rememberInfiniteTransition()
 
-    val currentFontSizePx = with(LocalDensity.current) { typography.labelMedium.fontSize.toPx() }
-    val currentFontSizeDoublePx = currentFontSizePx * 15
+    val currentFontSizePx = with(LocalDensity.current) { typography?.fontSize?.toPx()  }
+    val currentFontSizeDoublePx = currentFontSizePx?.times(15)
 
     val animatedOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = currentFontSizeDoublePx,
+        targetValue = currentFontSizeDoublePx!!,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = 4000,
+                durationMillis = 8000,
                 easing = LinearEasing
             ),
             repeatMode = RepeatMode.Restart
@@ -52,27 +57,35 @@ fun PremiumLabel(
     val brush = Brush.linearGradient(
         colors = gradientColors,
         start = Offset(animatedOffset, 0f),
-        end = Offset(animatedOffset + currentFontSizeDoublePx, 0f),
+        end = Offset(animatedOffset + currentFontSizeDoublePx!!, 0f),
         tileMode = TileMode.Repeated
     )
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .border(
-                width = 1.dp,
-                brush = brush,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
+    val boxModifier = modifier
+        .padding(horizontal = 16.dp, vertical = 8.dp)
+        .then(
+            if (border) {
+                Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(
+                        width = 1.dp,
+                        brush = brush,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            } else {
+                Modifier
+            }
+        )
+
+    Box(modifier = boxModifier) {
         Text(
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(brush = brush)) {
                     append(label)
                 }
             },
-            style = typography.labelMedium
+            style = typography
         )
     }
 }

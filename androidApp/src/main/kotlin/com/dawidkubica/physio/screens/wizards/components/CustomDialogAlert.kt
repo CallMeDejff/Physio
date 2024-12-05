@@ -8,12 +8,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.colorSecondary
 
 @Composable
@@ -49,7 +51,7 @@ fun CustomAlertDialog(
             ) {
                 Text(
                     text = confirmButtonText,
-                    color = colorSecondary
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         },
@@ -64,7 +66,7 @@ fun CustomAlertDialog(
             ) {
                 Text(
                     text = dismissButtonText,
-                    color = Color.Red
+                    color = RedConfirmed
                 )
             }
         }

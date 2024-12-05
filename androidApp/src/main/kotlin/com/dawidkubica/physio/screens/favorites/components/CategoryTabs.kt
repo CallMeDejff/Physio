@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.models.Category
+import com.dawidkubica.physio.ui.components.PremiumLabel
 import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.typography
 
@@ -43,7 +45,7 @@ fun CategoryTabs(
         Modifier
             .height(56.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(PurpleGrey80)
+            .background(MaterialTheme.colorScheme.tertiary)
             .padding(4.dp)
     ) {
         if (categories.isNotEmpty()) {
@@ -62,7 +64,7 @@ fun CategoryTabs(
                     .shadow(4.dp, RoundedCornerShape(8.dp))
                     .width(tabWidth)
                     .fillMaxHeight()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
             )
 
             Row(
@@ -80,13 +82,20 @@ fun CategoryTabs(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = category.title,
-                            style = typography.headlineMedium,
-                            color = if (index == selectedIndex) Color.Black else Color.Gray,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        if (category.isPremium) {
+                            PremiumLabel(label = category.title, typography = typography.headlineMedium, border = false)
+                        } else {
+                            Text(
+                                text = category.title,
+                                style = typography.headlineMedium,
+                                color = if (index == selectedIndex)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }

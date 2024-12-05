@@ -164,7 +164,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatBold,
                 contentDescription = "Bold Control",
-                tint = if (boldSelected) Color.White else colorPrimary
+                tint = if (boldSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -175,7 +175,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatItalic,
                 contentDescription = "Italic Control",
-                tint = if (italicSelected) Color.White else colorPrimary
+                tint = if (italicSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -186,7 +186,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatUnderlined,
                 contentDescription = "Underline Control",
-                tint = if (underlineSelected) Color.White else colorPrimary
+                tint = if (underlineSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -197,7 +197,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.Title,
                 contentDescription = "Title Control",
-                tint = if (titleSelected) Color.White else colorPrimary
+                tint = if (titleSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -208,7 +208,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatSize,
                 contentDescription = "Subtitle Control",
-                tint = if (subtitleSelected) Color.White else colorPrimary
+                tint = if (subtitleSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -219,7 +219,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatColorText,
                 contentDescription = "Text Color Control",
-                tint = if (textColorSelected) Color.White else colorPrimary
+                tint = if (textColorSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -230,7 +230,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.AddLink,
                 contentDescription = "Link Control",
-                tint = colorPrimary
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -241,7 +241,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.FormatAlignLeft,
                 contentDescription = "Left Align Control",
-                tint = if (alignmentSelected == 1) Color.White else colorPrimary
+                tint = if (alignmentSelected == 1) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -252,7 +252,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.FormatAlignCenter,
                 contentDescription = "Center Align Control",
-                tint = if (alignmentSelected == 2) Color.White else colorPrimary
+                tint = if (alignmentSelected == 2) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -263,7 +263,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.FormatAlignRight,
                 contentDescription = "Right Align Control",
-                tint = if (alignmentSelected == 3) Color.White else colorPrimary
+                tint = if (alignmentSelected == 3) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
@@ -274,7 +274,7 @@ fun EditorControls(
             Icon(
                 imageVector = Icons.Default.Save,
                 contentDescription = "Save Control",
-                tint = colorPrimary
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -292,11 +292,11 @@ fun ControlWrapper(
             .clip(RoundedCornerShape(10.dp))
             .border(
                 width = 2.dp,
-                color = colorPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(10.dp)
             )
             .background(
-                color = if (selected) colorPrimary else Color.Transparent,
+                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable {

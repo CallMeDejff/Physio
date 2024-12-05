@@ -6,5 +6,6 @@ data class Category(
     val title: String,
     val icon: ImageVector?,
     val content: String,
-    val exercisePackages: List<ExercisePackage> = emptyList()
+    val exercisePackages: List<ExercisePackage> = emptyList(),
+    val isPremium: Boolean = false
 )

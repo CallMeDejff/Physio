@@ -60,7 +60,7 @@ fun PreviewScreen(
         when {
             isVideo -> {
                 Log.d("PreviewScreen", "Displaying video player for URL: $mediaUrl")
-                VideoPlayer(videoUrl = mediaUrl, onClick = {})
+                VideoPlayer(videoUrl = mediaUrl)
             }
 
             mediaType == "image" || !isVideo -> {

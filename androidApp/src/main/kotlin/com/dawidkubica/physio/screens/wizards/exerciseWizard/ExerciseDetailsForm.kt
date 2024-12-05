@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.PermMedia
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -63,6 +64,7 @@ import com.dawidkubica.physio.screens.wizards.components.SliderSelectorWithValue
 import com.dawidkubica.physio.screens.wizards.components.TextEditorView
 import com.dawidkubica.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.dawidkubica.physio.ui.components.AutoCompleteDetailed
+import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
@@ -139,7 +141,7 @@ fun ExerciseDetailsForm(
                 Text(
                     text = buildAnnotatedString {
                         append(if (isEditorNextStep) "Edytor istniejącego " else "Kreator nowego ")
-                        withStyle(style = SpanStyle(color = colorPrimary)) {
+                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                             append("ćwiczenia")
                         }
                     },
@@ -160,7 +162,7 @@ fun ExerciseDetailsForm(
                             text = "Tytuł ćwiczenia",
                             style = typography.labelMedium,
                             textAlign = TextAlign.Center,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     },
                     modifier = Modifier
@@ -169,9 +171,9 @@ fun ExerciseDetailsForm(
                     colors = TextFieldDefaults.colors(
                         unfocusedContainerColor = Color.Transparent,
                         focusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = colorPrimary,
-                        unfocusedIndicatorColor = gray,
-                        focusedPlaceholderColor = colorPrimary,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        focusedPlaceholderColor = MaterialTheme.colorScheme.primary,
                     ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions.Default
@@ -309,7 +311,7 @@ fun ExerciseDetailsForm(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .background(
-                                    Color.Red.copy(alpha = 0.7f),
+                                    RedConfirmed,
                                     shape = CircleShape
                                 )
                                 .clickable {
@@ -319,7 +321,7 @@ fun ExerciseDetailsForm(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Remove media",
-                                tint = Color.White,
+                                tint = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier
                                     .size(20.dp)
                                     .padding(4.dp)
@@ -342,11 +344,11 @@ fun ExerciseDetailsForm(
                         Icon(
                             imageVector = Icons.Outlined.DeleteOutline,
                             contentDescription = "Delete exercise",
-                            tint = Color.Red
+                            tint = RedConfirmed
                         )
                         Text(
                             text = "Usuń ćwiczenie",
-                            color = Color.Red,
+                            color = RedConfirmed,
                             style = typography.labelLarge,
                             modifier = Modifier.padding(4.dp)
                         )

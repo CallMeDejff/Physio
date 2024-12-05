@@ -32,7 +32,6 @@ fun NavGraphBuilder.searchNavGraph(navController: NavHostController) {
             val exerciseId = backStackEntry.arguments?.getString("exerciseId")
             val viewModel: ExerciseViewModel = hiltViewModel(backStackEntry)
             ExerciseScreen(
-                navController = navController,
                 viewModel = viewModel,
                 popBackStack = { navController.popBackStack() },
                 packageId = exerciseId

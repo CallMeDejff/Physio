@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -38,16 +39,16 @@ fun DiscoverCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(4.dp)
             .wrapContentHeight(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f))
     ) {
         Column {
 
             if (exercisePackages.isNotEmpty()) {
                 LazyRow(
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier.padding(0.dp)
                 ) {
                     items(exercisePackages) { exercisePackage ->
                         UserPackageCard(
@@ -56,7 +57,6 @@ fun DiscoverCard(
                             description = exercisePackage.description,
                             imageUrl = exercisePackage.mediaUrls.firstOrNull().toString(),
                             isPremium = exercisePackage.premium,
-                            increased = false,
                             onClick = onExerciseClick
                         )
                     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,22 +35,22 @@ fun MenuButtons(
                 modifier = Modifier
                     .border(
                         width = 2.dp,
-                        color = if (button.type == selectedTab) colorPrimary else button.borderColor,
+                        color = if (button.type == selectedTab) MaterialTheme.colorScheme.primary else button.borderColor,
                         shape = RoundedCornerShape(16.dp)
                     ),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (button.type == selectedTab) colorPrimary else Color.White
+                    containerColor = if (button.type == selectedTab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
                 )
             ) {
                 Icon(
                     imageVector = button.icon,
                     contentDescription = "${button.text} button",
-                    tint = if (selectedTab == button.type) Color.White else colorPrimary
+                    tint = if (selectedTab == button.type) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = button.text,
-                    color = if (selectedTab == button.type) Color.White else colorPrimary,
+                    color = if (selectedTab == button.type) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary,
                     style = typography.labelLarge,
                     modifier = Modifier.padding(4.dp)
                 )
@@ -66,5 +67,5 @@ data class ButtonItem(
 )
 
 enum class ButtonType {
-    WARMUP, EXERCISE, FAVORITES, ASSIGNED
+    WARMUP, EXERCISE
 }

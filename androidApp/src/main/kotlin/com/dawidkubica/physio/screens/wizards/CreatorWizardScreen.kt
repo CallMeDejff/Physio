@@ -11,6 +11,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +61,7 @@ fun CreatorWizardScreen(
 
         Card(
             shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
-            colors = CardDefaults.cardColors(containerColor = ghost_white),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = Modifier
                 .fillMaxWidth()
                 .constrainAs(wizardForm) {
@@ -83,23 +84,16 @@ fun CreatorWizardScreen(
                     bottom.linkTo(parent.bottom)
                 },
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text(
                 text = "Wyjdź z kreatora",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 style = typography.labelLarge,
                 modifier = Modifier.padding(8.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(1.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewWizardScreen() {
-    PhysioTheme {
     }
 }

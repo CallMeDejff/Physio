@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +33,7 @@ fun HorizontalPagerIndicator(
     selectedIndicatorSize: Dp = 8.dp,
     indicatorCornerRadius: Dp = 8.dp,
     indicatorPadding: Dp = 8.dp,
-    textColor: Color = Color.Gray
+    textColor: Color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
 ) {
     Row(
         horizontalArrangement = Arrangement.Center,

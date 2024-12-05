@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +28,7 @@ fun HeaderView(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = Color(0xff1c213f))
+            .background(color = MaterialTheme.colorScheme.primary)
     ) {
         Image(
             painter = centeredImage,

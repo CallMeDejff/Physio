@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Mail
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -45,11 +46,11 @@ fun ForgotPasswordForm(
             text = buildAnnotatedString {
                 val text = "Resetowanie hasła do konta Physio."
                 val styleNormal = SpanStyle(
-                    color = dark_gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha=0.8f),
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
                 )
                 val styleHighlight = SpanStyle(
-                    color = colorPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_medium))
                 )
                 append("Resetowanie hasła do konta ")
@@ -68,7 +69,7 @@ fun ForgotPasswordForm(
             text = "Jeżeli posiadasz konto w aplikacji Physio, na wskazany adres email zostanie wysłany link do zresetowania hasła razem z dalszymi instrukcjami.",
             style = typography.labelMedium,
             textAlign = TextAlign.Center,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
