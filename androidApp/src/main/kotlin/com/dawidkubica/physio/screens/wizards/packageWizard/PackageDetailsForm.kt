@@ -53,6 +53,7 @@ import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
 import com.dawidkubica.physio.screens.wizards.components.ActionButton
+import com.dawidkubica.physio.screens.wizards.components.CheckboxWithText
 import com.dawidkubica.physio.screens.wizards.components.CustomAlertDialog
 import com.dawidkubica.physio.screens.wizards.components.TextEditorView
 import com.dawidkubica.physio.screens.wizards.viewmodels.PackageCreatorViewModel
@@ -79,6 +80,7 @@ fun PackageDetailsForm(
     val selectedBodyParts by viewModel.selectedBodyParts.collectAsState()
     val selectedMediaUris by viewModel.selectedMediaUris.collectAsState()
     val description by viewModel.packageDescription.collectAsState()
+    val onlyUsersEntries by viewModel.onlyUserEntries.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
     val cropImageResultLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
@@ -129,6 +131,15 @@ fun PackageDetailsForm(
                 TextFieldSection(
                     value = viewModel.packageName.collectAsState().value ?: "",
                     onValueChange = { newName -> viewModel.updatePackageName(newName) }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item {
+                CheckboxWithText(
+                    isChecked = onlyUsersEntries,
+                    onCheckedChange = { viewModel.toggleOnlyUserEntries() },
+                    text = "Wyświetl tylko moje ćwiczenia"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -395,7 +406,7 @@ fun DeletePackageButton(showDialog: Boolean, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Outlined.DeleteOutline,
             contentDescription = "Delete package",
-            tint = Color.Red
+            tint = RedConfirmed
         )
         Text(text = "Usuń pakiet", color = RedConfirmed, style = typography.labelLarge)
     }

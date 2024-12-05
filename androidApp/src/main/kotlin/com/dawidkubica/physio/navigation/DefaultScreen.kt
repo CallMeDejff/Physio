@@ -35,7 +35,9 @@ import com.dawidkubica.physio.ui.theme.colorPrimary
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun DefaultScreen(navController: NavHostController = rememberNavController()) {
+fun DefaultScreen() {
+    val navController = rememberNavController()
+
     PhysioBarTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -118,6 +120,10 @@ fun RowScope.AddItem(
             .clickable(onClick = {
                 navController.navigate(screen.route) {
                     launchSingleTop = true
+                    restoreState = true
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
+                    }
                 }
             }),
     ) {

@@ -35,9 +35,6 @@ fun PackageAssigningForm(
     val usersList by viewModel.usersList.collectAsState()
     val selectedUsers by viewModel.selectedUsers.collectAsState()
 
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-
     Column(
         modifier = Modifier
             .fillMaxSize()

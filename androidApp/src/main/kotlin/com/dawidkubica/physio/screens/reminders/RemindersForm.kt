@@ -44,9 +44,8 @@ fun RemindersForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 60.dp)
-            .wrapContentHeight(Alignment.Top)
-            .padding(30.dp),
+            .padding(bottom = 50.dp, top = 10.dp)
+            .wrapContentHeight(Alignment.Top),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -81,7 +80,7 @@ fun RemindersForm(
         )
 
         DropdownMenu(
-            defaultTitle = "Wybierz pakiet ćwiczeń",
+            defaultTitle = "Pakiet ćwiczeń",
             items = listedPackages.toList(),
             selectedItem = selectedPackage,
             onItemSelected = onPackageSelected

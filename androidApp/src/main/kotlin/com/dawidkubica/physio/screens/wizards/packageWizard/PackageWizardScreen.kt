@@ -68,14 +68,14 @@ fun PackageWizardScreen(
 
             isEditorNextStep -> {
                 viewModel.getPackageDetails()
-                viewModel.loadExercises()
+                viewModel.loadExercises(false)
                 viewModel.loadCondition()
                 viewModel.loadUsersList()
                 viewModel.loadBodyPartsList()
             }
 
             else -> {
-                viewModel.loadExercises()
+                viewModel.loadExercises(false)
                 viewModel.loadCondition()
                 viewModel.loadUsersList()
                 viewModel.loadBodyPartsList()
@@ -157,7 +157,7 @@ fun PackageWizardScreen(
                 ) {
                     Text(
                         text = if (assignToPerson) "Przypisz" else if (isEditor || isEditorNextStep) "Edytuj" else "Utwórz",
-                        color = MaterialTheme.colorScheme.surface,
+                        color = Color.White,
                         style = typography.labelLarge,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -175,7 +175,7 @@ fun PackageWizardScreen(
                 ) {
                     Text(
                         text = "Cofnij",
-                        color = MaterialTheme.colorScheme.surface,
+                        color = Color.White,
                         style = typography.labelLarge,
                         modifier = Modifier.padding(8.dp)
                     )

@@ -75,7 +75,7 @@ fun TimePicker(onTimeSelected: (String) -> Unit) {
             .padding(16.dp)
             .fillMaxWidth()
             .clickable { showDialog = true }
-            .border(1.dp, MaterialTheme.colorScheme.background.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
             .padding(8.dp)
     ) {
         Text(

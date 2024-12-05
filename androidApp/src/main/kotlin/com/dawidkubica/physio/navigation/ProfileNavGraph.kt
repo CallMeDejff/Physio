@@ -5,6 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dawidkubica.physio.core.navigate
+import com.dawidkubica.physio.core.popUp
 import com.dawidkubica.physio.screens.change_password.ChangePasswordScreen
 import com.dawidkubica.physio.screens.change_password.ChangePasswordViewModel
 import com.dawidkubica.physio.screens.edit_user.EditUserScreen
@@ -21,7 +23,7 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
             val viewModel: EditUserViewModel = hiltViewModel(backStackEntry)
 
             EditUserScreen(
-                popBackStack = { navController.popBackStack() },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel
             )
         }
@@ -29,8 +31,8 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
         composable(route = ProfileScreen.ChangePasswordReauthorization.route) { backStackEntry ->
             val viewModel: ChangePasswordViewModel = hiltViewModel(backStackEntry)
             ChangePasswordScreen(
-                popBackStack = { navController.popBackStack() },
-                navigate = { popUp -> navController.navigate(popUp) },
+                popBackStack = { popUp(navController) },
+                navigate = { route -> navigate(navController, route) },
                 viewModel = viewModel,
                 reauthentication = true,
             )
@@ -39,8 +41,8 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
         composable(route = ProfileScreen.ChangePassword.route) { backStackEntry ->
             val viewModel: ChangePasswordViewModel = hiltViewModel(backStackEntry)
             ChangePasswordScreen(
-                popBackStack = { navController.popBackStack() },
-                navigate = { popUp -> navController.navigate(popUp) },
+                popBackStack = { popUp(navController) },
+                navigate = { route -> navigate(navController, route) },
                 viewModel = viewModel,
                 reauthentication = false,
             )

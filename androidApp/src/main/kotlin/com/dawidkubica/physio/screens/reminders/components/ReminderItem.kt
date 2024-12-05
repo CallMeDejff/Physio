@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.models.Reminder
+import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 @Composable
@@ -80,7 +81,7 @@ fun ReminderItem(
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = "Delete Reminder",
-                        tint = MaterialTheme.colorScheme.error
+                        tint = RedConfirmed
                     )
                 }
             }

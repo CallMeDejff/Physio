@@ -38,10 +38,6 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
                     userPackages.favoritePackages as List<ExercisePackage>
                 _userAssignedPackagesList.value =
                     userPackages.assignedPackages as List<ExercisePackage>
-                Log.d(
-                    tag,
-                    "Fetched favorite packages: ${userPackages.favoritePackages.size}, assigned packages: ${userPackages.assignedPackages.size}"
-                )
             }
         )
     }
@@ -50,7 +46,6 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
         viewModelScope.launch {
             val remindersList = accountService.getRemindersForUser()
             _reminders.value = remindersList
-            Log.d(tag, "Fetched reminders: ${_reminders.value}")
         }
     }
 
@@ -59,7 +54,6 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
             tag = tag,
             errorMessage = "Nie udało się pobrać danych użytkownika",
             block = {
-                _isLoading.update { true }
                 val user = accountService.getUserInfo()
                 _userName.value = user?.name ?: ""
                 _userLastname.value = user?.lastname ?: ""
@@ -69,9 +63,6 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
                 _userAssignedPackages.value = user?.assignedPackages ?: emptyList()
                 _userFavoritePackages.value = user?.favoritePackages ?: emptyList()
                 _provider.value = user?.provider ?: ""
-
-                Log.d(tag, "Fetched user information: $user")
-                _isLoading.update { false }
             }
         )
     }

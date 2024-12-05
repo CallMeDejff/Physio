@@ -61,15 +61,8 @@ class SearchViewModel @Inject constructor(
             errorMessage = "Ups! Nie udało się pobrać listy sprzętów.",
             onError = { message -> _message.emit(message) },
             block = {
-                _isLoading.value = true
                 _equipmentList.value = listService.getEquipments()
                 _filteredEquipmentList.value = _equipmentList.value
-                Log.d(
-                    SEARCH_VIEW_MODEL_TAG,
-                    "loadEquipmentList:Equipment list loaded, item count: ${_equipmentList.value.size}"
-                )
-                _isLoading.value = false
-
             })
     }
 
@@ -79,14 +72,8 @@ class SearchViewModel @Inject constructor(
             errorMessage = "Ups! Nie udało się pobrać listy schorzeń.",
             onError = { message -> _message.emit(message) },
             block = {
-                _isLoading.value = true
                 _conditionsList.value = listService.getConditions()
                 _filteredConditionsList.value = _conditionsList.value
-                Log.d(
-                    SEARCH_VIEW_MODEL_TAG,
-                    "loadConditionList:Conditions list loaded, item count: ${_conditionsList.value.size}"
-                )
-                _isLoading.value = false
             })
     }
 
@@ -96,14 +83,8 @@ class SearchViewModel @Inject constructor(
             errorMessage = "Ups! Nie udało się pobrać listy filtrów.",
             onError = { message -> _message.emit(message) },
             block = {
-                _isLoading.value = true
                 _bodyPartsList.value = listService.getBodyParts()
                 _filteredBodyPartsList.value = _bodyPartsList.value
-                Log.d(
-                    SEARCH_VIEW_MODEL_TAG,
-                    "loadBodyPartsList:Conditions list loaded, item count: ${_filteredBodyPartsList.value.size}"
-                )
-                _isLoading.value = false
             })
     }
 
@@ -156,13 +137,6 @@ class SearchViewModel @Inject constructor(
                 if (matchingPackages.isNotEmpty()) {
                     _matchingPackages.value = matchingPackages
                     _filteredPackagesList.value = _matchingPackages.value
-
-                    matchingPackages.forEach { pkg ->
-                        Log.d(
-                            SEARCH_VIEW_MODEL_TAG,
-                            "searchForMatchingPackages: Found package: ID = ${pkg.id}, Name = ${pkg.name}, Description = ${pkg.description}, isPremium = ${pkg.premium}"
-                        )
-                    }
                 } else {
                     _matchingPackages.value = emptyList()
                     _filteredPackagesList.value = _matchingPackages.value

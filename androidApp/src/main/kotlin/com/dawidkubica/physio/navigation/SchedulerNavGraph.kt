@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dawidkubica.physio.core.popUp
 import com.dawidkubica.physio.screens.reminders.ReminderViewModel
 import com.dawidkubica.physio.screens.reminders.ScheduleReminderScreen
 
@@ -19,7 +20,7 @@ fun NavGraphBuilder.schedulerNavGraph(navController: NavHostController) {
             val viewModel: ReminderViewModel = hiltViewModel(backStackEntry)
 
             ScheduleReminderScreen(
-                popBackStack = { navController.popBackStack() },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel
             )
         }

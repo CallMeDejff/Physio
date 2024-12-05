@@ -93,6 +93,19 @@ class PackageCreatorViewModel @Inject constructor(
     private val conditionError = MutableStateFlow<String?>(null)
     private val exerciseError = MutableStateFlow<String?>(null)
 
+    init {
+        observeOnlyUserEntries()
+    }
+
+    private fun observeOnlyUserEntries() {
+        viewModelScope.launch {
+            _onlyUserEntries.collect { userEntriesOnly ->
+                Log.d(PACKAGE_VIEWMODEL_TAG, "Only user entries changed: $userEntriesOnly")
+                loadExercises(userEntriesOnly)
+            }
+        }
+    }
+
     fun addSelectedMedia(uri: Uri) {
         _selectedMediaUris.update { listOf(uri) }
     }
@@ -101,17 +114,19 @@ class PackageCreatorViewModel @Inject constructor(
         _selectedMediaUris.update { it.filter { existingUri -> existingUri != uri } }
     }
 
-    fun loadExercises() {
+    fun loadExercises(
+    userEntriesOnly: Boolean,
+    ) {
         loadExercisesList(
             _exercisesList = _exercisesList,
             listService = listService,
-            tag = PACKAGE_VIEWMODEL_TAG
+            tag = PACKAGE_VIEWMODEL_TAG,
+            userEntriesOnly = userEntriesOnly
         )
     }
 
     fun loadBodyPartsList() {
         viewModelScope.launch {
-            Log.d(PACKAGE_VIEWMODEL_TAG, "Loading body parts...")
             loadBodyPartsList(
                 listService = listService,
                 _bodyPartsList = _bodyPartsList,
@@ -184,10 +199,6 @@ class PackageCreatorViewModel @Inject constructor(
             block = {
                 _isLoading.value = true
                 val selectedPackageId = _selectedPackages.value.first()
-                Log.d(
-                    PACKAGE_VIEWMODEL_TAG,
-                    "Selected package ID from getPackageDetails: $selectedPackageId"
-                )
                 val packageDetails = exercisePackageService.getPackage(selectedPackageId)
                 packageDetails?.let { exercisePackage ->
                     _packageId.value = exercisePackage.id
@@ -202,7 +213,6 @@ class PackageCreatorViewModel @Inject constructor(
                     _selectedMediaUris.value =
                         exercisePackage.mediaUrls.toList().map { Uri.parse(it) }
                 }
-                Log.d(PACKAGE_VIEWMODEL_TAG, "Package details loaded: ${packageDetails}}")
                 _isLoading.value = false
             })
     }
@@ -215,15 +225,19 @@ class PackageCreatorViewModel @Inject constructor(
         launchCatching(
             tag = PACKAGE_VIEWMODEL_TAG,
             block = {
-                Log.d(PACKAGE_VIEWMODEL_TAG, "User ID: ${_selectedUsers.value.first()}")
-                Log.d(PACKAGE_VIEWMODEL_TAG, "Package ID: ${_selectedPackages.value.first()}")
-
-                exercisePackageService.assignPackageToUser(
+                val assignResult = exercisePackageService.assignPackageToUser(
                     userId = _selectedUsers.value.first(),
                     packageId = _selectedPackages.value.first()
                 )
-                navigate(WizardScreen.CreatorWizard.route)
-                _message.update { "Pakiet ćwiczeń został przypisany" }
+
+                if (assignResult.isSuccess) {
+                    navigate(WizardScreen.CreatorWizard.route)
+                    _message.update { "Pakiet ćwiczeń został przypisany" }
+                } else {
+                    val status = assignResult.exceptionOrNull().toString()
+                    _message.update { status }
+                }
+
             }
         )
     }

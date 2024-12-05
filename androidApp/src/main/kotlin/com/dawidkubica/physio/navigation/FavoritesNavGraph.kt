@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dawidkubica.physio.core.popUp
 import com.dawidkubica.physio.screens.exercise.ExerciseScreen
 import com.dawidkubica.physio.screens.exercise.ExerciseViewModel
 import com.dawidkubica.physio.screens.favorites.FavoritesScreen
@@ -26,7 +27,7 @@ fun NavGraphBuilder.favoritesNavGraph(navController: NavHostController) {
             val viewModel: ExerciseViewModel = hiltViewModel(backStackEntry)
             ExerciseScreen(
                 viewModel = viewModel,
-                popBackStack = { navController.popBackStack() },
+                popBackStack = { popUp(navController) },
                 packageId = exerciseId
             )
         }

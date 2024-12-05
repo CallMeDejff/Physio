@@ -64,9 +64,24 @@ class ExerciseCreatorViewModel @Inject constructor(
     private val _nonPublic = MutableStateFlow<Boolean?>(false)
     val nonPublic: StateFlow<Boolean?> = _nonPublic
 
+
+
     private val titleError = MutableStateFlow<String?>(null)
     private val descriptionError = MutableStateFlow<String?>(null)
     private val equipmentError = MutableStateFlow<String?>(null)
+
+    init {
+        observeOnlyUserEntries()
+    }
+
+    private fun observeOnlyUserEntries() {
+        viewModelScope.launch {
+            _onlyUserEntries.collect { userEntriesOnly ->
+                Log.d(EXERCISE_VIEWMODEL_TAG, "Only user entries changed: $userEntriesOnly")
+                loadExercises(userEntriesOnly)
+            }
+        }
+    }
 
     fun validateFields(
         title: String,
@@ -121,11 +136,15 @@ class ExerciseCreatorViewModel @Inject constructor(
 
     fun hasSelectedExercise(): Boolean = _selectedExercises.value.isNotEmpty()
 
-    fun loadExercises() {
+    fun loadExercises(
+        userEntriesOnly: Boolean,
+    ) {
+        Log.d(EXERCISE_VIEWMODEL_TAG, "loadExercises called with userEntriesOnly: $userEntriesOnly")
         loadExercisesList(
             _exercisesList = _exercisesList,
             listService = listService,
-            tag = EXERCISE_VIEWMODEL_TAG
+            tag = EXERCISE_VIEWMODEL_TAG,
+            userEntriesOnly = userEntriesOnly
         )
     }
 

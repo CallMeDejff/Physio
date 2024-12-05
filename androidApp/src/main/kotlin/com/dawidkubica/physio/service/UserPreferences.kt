@@ -55,10 +55,6 @@ class UserPreferences @Inject constructor(context: Context) {
             putString(ACCOUNT_PROVIDER, provider)
             apply()
         }
-        Log.d(
-            "SharedPreferences",
-            "setUser() called: ${getUserUid()}, ${getUserName()}, ${getUserLicenseNumber()}, ${getUserType()}, ${getAccountProvider()}"
-        )
     }
 
     fun clearData() {

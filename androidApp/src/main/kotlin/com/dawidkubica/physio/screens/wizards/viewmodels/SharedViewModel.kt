@@ -1,12 +1,22 @@
 package com.dawidkubica.physio.screens.wizards.viewmodels
 
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.service.services.ListService
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 abstract class SharedViewModel : PhysioAppViewModel() {
+
+    protected val _onlyUserEntries = MutableStateFlow<Boolean>(false)
+    val onlyUserEntries: StateFlow<Boolean> = _onlyUserEntries
+
+    fun toggleOnlyUserEntries() {
+        _onlyUserEntries.value = !_onlyUserEntries.value
+    }
 
     protected suspend fun loadConditionList(
         listService: ListService,
@@ -52,6 +62,7 @@ abstract class SharedViewModel : PhysioAppViewModel() {
 
     protected fun loadExercisesList(
         listService: ListService,
+        userEntriesOnly: Boolean,
         _exercisesList: MutableStateFlow<List<Pair<String, String>>>,
         tag: String
     ) {
@@ -60,10 +71,8 @@ abstract class SharedViewModel : PhysioAppViewModel() {
             errorMessage = "Nie udało się pobrać listy ćwiczeń.",
             onError = { message -> _message.emit(message) },
             block = {
-                _isLoading.value = true
-                _exercisesList.value = listService.getExercises()
-                Log.d(tag, "Exercises list loaded, item count: ${_exercisesList.value.size}")
-                _isLoading.value = false
+                _exercisesList.value = listService.getExercises(userEntriesOnly = userEntriesOnly)
+                Log.d(tag, "Exercises list loaded, item count: ${_exercisesList.value.size}, only user entries: $userEntriesOnly")
             }
         )
     }

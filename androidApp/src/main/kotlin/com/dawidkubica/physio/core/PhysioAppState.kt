@@ -1,7 +1,21 @@
 package com.dawidkubica.physio.core
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 
+@Composable
+fun rememberPhysioAppState(): PhysioAppState {
+    val navController = rememberNavController()
+    return remember {
+        PhysioAppState(navController)
+    }
+}
+
+class PhysioAppState(
+    val navController: NavHostController
+)
 
 fun popUp(navController: NavHostController) {
     navController.popBackStack()

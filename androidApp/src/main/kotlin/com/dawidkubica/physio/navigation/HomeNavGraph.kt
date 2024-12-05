@@ -6,10 +6,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.dawidkubica.physio.core.navigate
 import com.dawidkubica.physio.core.navigateAndPopUp
+import com.dawidkubica.physio.core.popUp
 import com.dawidkubica.physio.screens.exercise.ExerciseScreen
 import com.dawidkubica.physio.screens.exercise.ExerciseViewModel
 import com.dawidkubica.physio.screens.favorites.FavoritesScreen
+import com.dawidkubica.physio.screens.favorites.FavoritesViewModel
 import com.dawidkubica.physio.screens.profile.ProfileScreen
 import com.dawidkubica.physio.screens.profile.ProfileViewModel
 import com.dawidkubica.physio.screens.reminders.ReminderViewModel
@@ -29,8 +32,12 @@ fun HomeNavGraph(navController: NavHostController) {
             route = Graph.HOME,
             startDestination = BottomBarScreen.Home.route
         ) {
-            composable(route = BottomBarScreen.Home.route) {
-                FavoritesScreen(navController = navController)
+            composable(route = BottomBarScreen.Home.route) {backStackEntry ->
+                val viewModel: FavoritesViewModel = hiltViewModel(backStackEntry)
+                FavoritesScreen(
+                    navController = navController,
+                    viewModel = viewModel
+                )
             }
 
             composable(route = "${BottomBarScreen.Home.route}/{exerciseId}") { backStackEntry ->
@@ -38,7 +45,7 @@ fun HomeNavGraph(navController: NavHostController) {
                 val viewModel: ExerciseViewModel = hiltViewModel(backStackEntry)
                 ExerciseScreen(
                     viewModel = viewModel,
-                    popBackStack = { navController.popBackStack() },
+                    popBackStack = { popUp(navController) },
                     packageId = exerciseId
                 )
             }
@@ -47,7 +54,7 @@ fun HomeNavGraph(navController: NavHostController) {
                 val viewModel: SearchViewModel = hiltViewModel(backStackEntry)
                 SearchScreen(
                     navController = navController,
-                    navigate = { popUp -> navController.navigate(popUp) },
+                    navigate = { route -> navigate(navController, route) },
                     viewModel = viewModel
                 )
             }
@@ -55,7 +62,7 @@ fun HomeNavGraph(navController: NavHostController) {
             composable(route = BottomBarScreen.Scheduler.route) { backStackEntry ->
                 val viewModel: ReminderViewModel = hiltViewModel(backStackEntry)
                 SchedulerScreen(
-                    navigate = { popUp -> navController.navigate(popUp) },
+                    navigate = { route -> navigate(navController, route) },
                     viewModel = viewModel
                 )
             }
@@ -66,7 +73,7 @@ fun HomeNavGraph(navController: NavHostController) {
                     openAndPopUp = { route, popUp ->
                         navigateAndPopUp(navController, route, popUp)
                     },
-                    navigate = { popUp -> navController.navigate(popUp) },
+                    navigate = { route -> navigate(navController, route) },
                     viewModel = viewModel
                 )
             }

@@ -1,6 +1,7 @@
 package com.dawidkubica.physio.screens.reminders
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.ghost_white
 import com.dawidkubica.physio.ui.theme.typography
@@ -56,16 +58,11 @@ fun ScheduleReminderScreen(
     }
 
     if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = colorPrimary)
-        }
+        FullScreenLoader()
     } else {
-        ConstraintLayout {
+        ConstraintLayout(
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+        ) {
             val (header, remindersForm, navigationButtons) = createRefs()
 
             HeaderView(
@@ -112,7 +109,8 @@ fun ScheduleReminderScreen(
                         viewModel.scheduleReminder(
                             dayOfWeek = selectedDay.value,
                             time = selectedTime.value,
-                            topic = selectedPackage.value
+                            topic = selectedPackage.value,
+                            popBackStack = popBackStack
                         )
                     },
                     modifier = Modifier.weight(2f),

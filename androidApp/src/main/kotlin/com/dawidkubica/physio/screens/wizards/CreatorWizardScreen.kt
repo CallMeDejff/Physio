@@ -88,7 +88,7 @@ fun CreatorWizardScreen(
         ) {
             Text(
                 text = "Wyjdź z kreatora",
-                color = MaterialTheme.colorScheme.surface,
+                color = Color.White,
                 style = typography.labelLarge,
                 modifier = Modifier.padding(8.dp)
             )

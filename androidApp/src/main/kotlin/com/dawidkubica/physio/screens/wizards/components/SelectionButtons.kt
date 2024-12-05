@@ -36,7 +36,7 @@ fun SelectionButton(
     ) {
         Text(
             text = buttonType.displayName,
-            color = MaterialTheme.colorScheme.surface,
+            color = Color.White,
             style = typography.labelLarge,
             modifier = Modifier.padding(8.dp)
         )

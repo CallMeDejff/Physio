@@ -44,7 +44,7 @@ fun DropdownMenu(
                 .align(Alignment.Center)
                 .fillMaxWidth()
                 .clickable { expanded = true }
-                .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
                 .padding(8.dp)
                 .padding(vertical = 8.dp),
             textAlign = TextAlign.Center
@@ -62,7 +62,7 @@ fun DropdownMenu(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 2.dp)
-                        .border(2.dp, colorPrimary, shape = RoundedCornerShape(16.dp)),
+                        .border(2.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)

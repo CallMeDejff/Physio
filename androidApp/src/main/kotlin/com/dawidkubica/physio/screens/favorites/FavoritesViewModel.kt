@@ -43,14 +43,12 @@ class FavoritesViewModel @Inject constructor(
         launchCatching(
             tag = FAVORITES_VIEW_MODEL_TAG,
             block = {
-                _isLoading.update { true }
                 val userPackages = exercisePackageService.getUserExercisePackages()
                 _userFavoritePackagesList.value =
                     userPackages.favoritePackages as List<ExercisePackage>
                 _userAssignedPackagesList.value =
                     userPackages.assignedPackages as List<ExercisePackage>
                 fetchCategories()
-                _isLoading.update { false }
             }
         )
     }
@@ -63,11 +61,9 @@ class FavoritesViewModel @Inject constructor(
         launchCatching(
             tag = FAVORITES_VIEW_MODEL_TAG,
             block = {
-                _isLoading.update { true }
                 val reminders = accountService.getRemindersForUser()
                 _reminders.value = reminders
                 _nextReminder.value = getNextReminder(reminders)
-                _isLoading.update { false }
             }
         )
     }
@@ -136,7 +132,6 @@ class FavoritesViewModel @Inject constructor(
 
 
     private fun fetchCategories() {
-        _isLoading.update { true }
         _fetchedCategories.value = listOf(
             Category(
                 "Ulubione",
@@ -157,8 +152,6 @@ class FavoritesViewModel @Inject constructor(
                 isPremium = true
             ),
         )
-        Log.d(FAVORITES_VIEW_MODEL_TAG, "Fetched categories: ${_fetchedCategories.value}")
-        _isLoading.update { false }
     }
 
     private fun fetchUserType() {

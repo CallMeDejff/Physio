@@ -90,9 +90,9 @@ class ListServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getExercises(): List<Pair<String, String>> {
+    override suspend fun getExercises(userEntriesOnly: Boolean): List<Pair<String, String>> {
         val currentUserId = auth.currentUserId
-        return cacheManager.getCachedExercisesList() ?: try {
+        return try {
             val exercisesDocument =
                 firestore.collection(SUMMARY_COLLECTION).document("exercises").get().await()
 
@@ -105,10 +105,13 @@ class ListServiceImpl @Inject constructor(
                 val nonPublic = entry["nonPublic"] as? Boolean ?: false
                 val uid = entry["uid"] as? String
 
-                if (!nonPublic || (nonPublic && uid == currentUserId)) {
-                    if (id != null && title != null) id to title else null
-                } else {
-                    null
+                when {
+                    userEntriesOnly -> {
+                        if (uid == currentUserId && id != null && title != null) id to title else null
+                    }
+                    else -> {
+                        if ((uid == currentUserId || !nonPublic) && id != null && title != null) id to title else null
+                    }
                 }
             }
 

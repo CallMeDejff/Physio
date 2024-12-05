@@ -58,10 +58,8 @@ open class PhysioAppViewModel : ViewModel() {
                 selectedItems.toMutableSet().apply {
                     if (contains(itemId)) {
                         remove(itemId)
-                        Log.d(tag, "$itemType removed: $itemId")
                     } else {
                         add(itemId)
-                        Log.d(tag, "$itemType added: $itemId")
                     }
                 }
             } else {

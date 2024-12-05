@@ -123,7 +123,7 @@ fun ExercisesView(
                 state = pagerState,
                 flingBehavior = PagerDefaults.flingBehavior(
                     state = pagerState,
-                    pagerSnapDistance = PagerSnapDistance.atMost(0)
+                    pagerSnapDistance = PagerSnapDistance.atMost(1)
                 ),
                 contentPadding = PaddingValues(horizontal = 4.dp),
                 pageSpacing = 0.dp

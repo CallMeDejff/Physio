@@ -7,6 +7,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dawidkubica.physio.core.navigate
+import com.dawidkubica.physio.core.popUp
 import com.dawidkubica.physio.screens.exercise.ExerciseScreen
 import com.dawidkubica.physio.screens.exercise.ExerciseViewModel
 import com.dawidkubica.physio.screens.search.SearchScreen
@@ -23,7 +25,7 @@ fun NavGraphBuilder.searchNavGraph(navController: NavHostController) {
             val viewModel: SearchViewModel = hiltViewModel(backStackEntry)
             SearchScreen(
                 navController = navController,
-                navigate = { popUp -> navController.navigate(popUp) },
+                navigate = { route -> navigate(navController, route) },
                 viewModel = viewModel
             )
         }
@@ -33,7 +35,7 @@ fun NavGraphBuilder.searchNavGraph(navController: NavHostController) {
             val viewModel: ExerciseViewModel = hiltViewModel(backStackEntry)
             ExerciseScreen(
                 viewModel = viewModel,
-                popBackStack = { navController.popBackStack() },
+                popBackStack = { popUp(navController) },
                 packageId = exerciseId
             )
         }

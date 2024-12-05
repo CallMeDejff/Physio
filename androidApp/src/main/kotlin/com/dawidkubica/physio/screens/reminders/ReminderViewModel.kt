@@ -42,10 +42,8 @@ class ReminderViewModel @Inject constructor(
 
     private fun initializeData() {
         viewModelScope.launch {
-            _isLoading.update { true }
             fetchUserPackages(exercisePackageService, REMINDER_VIEWMODEL_TAG)
             fetchReminders(accountService, REMINDER_VIEWMODEL_TAG)
-            _isLoading.update { false }
 
             combine(
                 _userAssignedPackagesList,
@@ -57,12 +55,11 @@ class ReminderViewModel @Inject constructor(
                 packagesSet
             }.collect { packages ->
                 _listedPackages.value = packages
-                Log.d(REMINDER_VIEWMODEL_TAG, "Listed packages: ${_listedPackages.value}")
             }
         }
     }
 
-    fun scheduleReminder(dayOfWeek: String, time: String, topic: String) {
+    fun scheduleReminder(popBackStack: () -> Unit, dayOfWeek: String, time: String, topic: String) {
         _isLoading.update { true }
         if (isReminderAlreadyScheduled(mapDayOfWeekToShort(dayOfWeek), topic)) {
             _message.update { "Przypomnienie już istnieje dla tego dnia i tematu." }
@@ -83,6 +80,7 @@ class ReminderViewModel @Inject constructor(
             }
             _isLoading.update { false }
             _message.update { "Przypomnienie zostało dodane." }
+            popBackStack()
         }
     }
 
@@ -99,13 +97,11 @@ class ReminderViewModel @Inject constructor(
         val hour = timeParts[0].toInt()
         val minute = timeParts[1].toInt()
 
-        Log.d(REMINDER_VIEWMODEL_TAG, "scheduleNotification: Scheduling weekly reminder: $reminder")
         scheduleWeeklyReminder(dayOfWeekInt, hour, minute, reminderId, reminder.topic)
     }
 
     fun onDeleteReminderClick(reminderId: String) {
         viewModelScope.launch {
-            Log.d(REMINDER_VIEWMODEL_TAG, "Deleting reminder with ID: $reminderId")
             accountService.deleteReminderForUser(reminderId)
             workManager.cancelAllWorkByTag(reminderId)
             fetchReminders(accountService, REMINDER_VIEWMODEL_TAG)
@@ -149,11 +145,6 @@ class ReminderViewModel @Inject constructor(
         val data = Data.Builder()
             .putString("topic", topic)
             .build()
-
-        Log.d(
-            REMINDER_VIEWMODEL_TAG,
-            "scheduleWeeklyReminder: Scheduling reminder: $reminderId, calling ReminderWorker"
-        )
 
         val constraints = Constraints.Builder()
             .setRequiresBatteryNotLow(false)

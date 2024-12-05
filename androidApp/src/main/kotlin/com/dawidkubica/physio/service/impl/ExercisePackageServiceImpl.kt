@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.models.UserPackages
+import com.dawidkubica.physio.service.AuthError
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.AuthenticationService
 import com.dawidkubica.physio.service.services.CacheManager
@@ -292,7 +293,7 @@ class ExercisePackageServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun assignPackageToUser(userId: String, packageId: String) {
+    override suspend fun assignPackageToUser(userId: String, packageId: String): Result<Unit> {
         try {
             val exercisePackageDocRef =
                 firestore.collection(EXERCISE_PACKAGES_COLLECTION).document(packageId)
@@ -301,7 +302,7 @@ class ExercisePackageServiceImpl @Inject constructor(
 
             if (exercisePackage == null) {
                 Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "ExercisePackage not found with ID: $packageId")
-                return
+                return Result.failure(AuthError("Wystąpił błąd przy przypisywaniu pakietu."))
             }
 
             if (exercisePackage.assignedTo.contains(userId)) {
@@ -309,14 +310,16 @@ class ExercisePackageServiceImpl @Inject constructor(
                     EXERCISE_PACKAGE_SERVICE_TAG,
                     "User $userId is already assigned to package $packageId"
                 )
-                return
+                return Result.failure(AuthError("Użytkownik posiada już ten pakiet ćwiczeń."))
             }
             accountService.assignPackageToUser(userId, packageId)
             val updatedAssignedTo = exercisePackage.assignedTo + userId
             exercisePackageDocRef.update("assignedTo", updatedAssignedTo).await()
             Log.d(EXERCISE_PACKAGE_SERVICE_TAG, "Package $packageId assigned to user $userId")
+            return Result.success(Unit)
         } catch (e: Exception) {
             Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error assigning package to user", e)
+            return Result.failure(AuthError("Wystąpił błąd przy przypisywaniu pakietu."))
         }
     }
 

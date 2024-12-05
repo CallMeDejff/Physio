@@ -6,6 +6,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dawidkubica.physio.core.navigate
+import com.dawidkubica.physio.core.popUp
 import com.dawidkubica.physio.screens.wizards.CreatorWizardScreen
 import com.dawidkubica.physio.screens.wizards.exerciseWizard.ExerciseWizardScreen
 import com.dawidkubica.physio.screens.wizards.packageWizard.PackageWizardScreen
@@ -23,8 +25,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
         composable(route = WizardScreen.CreatorWizard.route) { backStackEntry ->
             val viewModel: CreatorWizardViewModel = hiltViewModel(backStackEntry)
             CreatorWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel
             )
         }
@@ -32,8 +34,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
         composable(route = WizardScreen.AssignPackage.route) { backStackEntry ->
             val viewModel: PackageCreatorViewModel = hiltViewModel(backStackEntry)
             PackageWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 assignToPerson = true,
                 viewModel = viewModel
             )
@@ -42,8 +44,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
         composable(route = WizardScreen.CreatePackage.route) { backStackEntry ->
             val viewModel: PackageCreatorViewModel = hiltViewModel(backStackEntry)
             PackageWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 assignToPerson = false,
                 viewModel = viewModel
             )
@@ -52,8 +54,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
         composable(route = WizardScreen.CreateExerciseDetailsScreen.route) { backStackEntry ->
             val viewModel: ExerciseCreatorViewModel = hiltViewModel(backStackEntry)
             ExerciseWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel,
                 isEditor = false
             )
@@ -62,8 +64,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
         composable(route = WizardScreen.EditExerciseScreen.route) { backStackEntry ->
             val viewModel: ExerciseCreatorViewModel = hiltViewModel(backStackEntry)
             ExerciseWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel,
                 isEditor = true,
                 isEditorNextStep = false
@@ -76,8 +78,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
                     navController.previousBackStackEntry!!
                 ) else hiltViewModel()
             ExerciseWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel,
                 isEditor = false,
                 isEditorNextStep = true
@@ -87,8 +89,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
         composable(route = WizardScreen.EditPackage.route) { backStackEntry ->
             val viewModel: PackageCreatorViewModel = hiltViewModel(backStackEntry)
             PackageWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel,
                 assignToPerson = false,
                 isEditor = true
@@ -101,8 +103,8 @@ fun NavGraphBuilder.wizardsNavGraph(navController: NavHostController) {
                     navController.previousBackStackEntry!!
                 ) else hiltViewModel()
             PackageWizardScreen(
-                navigate = { popUp -> navController.navigate(popUp) },
-                popBackStack = { navController.popBackStack() },
+                navigate = { route -> navigate(navController, route) },
+                popBackStack = { popUp(navController) },
                 viewModel = viewModel,
                 assignToPerson = false,
                 isEditor = false,

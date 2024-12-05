@@ -33,8 +33,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +57,7 @@ import com.dawidkubica.physio.screens.favorites.components.CategoryTabs
 import com.dawidkubica.physio.screens.favorites.components.DiscoverCard
 import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.typography
 
@@ -71,7 +74,7 @@ fun FavoritesScreen(
     val userName by viewModel.userName.collectAsState()
     val nextReminder by viewModel.nextReminder.collectAsState()
 
-    var selectedCategoryIndex by remember { mutableStateOf(0) }
+    var selectedCategoryIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->
@@ -83,7 +86,7 @@ fun FavoritesScreen(
     }
 
     if (isLoading) {
-        LoadingView()
+        FullScreenLoader()
     } else {
         Surface(
             modifier = Modifier
@@ -180,18 +183,6 @@ fun ReminderSection(nextReminder: Reminder?) {
                 deletable = false,
             )
         }
-    }
-}
-
-@Composable
-fun LoadingView() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
     }
 }
 
@@ -299,4 +290,5 @@ fun DiscoverSection(
         }
     }
 }
+
 

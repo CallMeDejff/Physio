@@ -49,6 +49,7 @@ import com.dawidkubica.physio.screens.exercise.components.DescriptionView
 import com.dawidkubica.physio.screens.exercise.components.ExercisesView
 import com.dawidkubica.physio.screens.exercise.components.PreviewScreen
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 
@@ -176,7 +177,7 @@ fun BottomSheetContent(
             .padding(8.dp)
     ) {
         if (isLoading) {
-            LoadingIndicator()
+            FullScreenLoader()
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -203,18 +204,6 @@ fun BottomSheetContent(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
 

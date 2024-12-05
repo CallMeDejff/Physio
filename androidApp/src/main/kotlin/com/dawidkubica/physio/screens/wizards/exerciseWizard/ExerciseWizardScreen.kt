@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
 import com.dawidkubica.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.ghost_white
 import com.dawidkubica.physio.ui.theme.typography
@@ -63,7 +64,7 @@ fun ExerciseWizardScreen(
                 viewModel.loadCondition()
             }
 
-            isEditor -> viewModel.loadExercises()
+            isEditor -> viewModel.loadExercises(false)
             else -> {
                 viewModel.loadEquipmentList()
                 viewModel.loadCondition()
@@ -72,7 +73,7 @@ fun ExerciseWizardScreen(
     }
 
     if (isLoading) {
-        LoadingScreen()
+        FullScreenLoader()
     } else {
         WizardContent(
             navigate = navigate,
@@ -82,18 +83,6 @@ fun ExerciseWizardScreen(
             isEditor = isEditor,
             isEditorNextStep = isEditorNextStep
         )
-    }
-}
-
-@Composable
-fun LoadingScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -214,7 +203,7 @@ fun NavigationButtons(
         ) {
             Text(
                 text = buttonText,
-                color = MaterialTheme.colorScheme.surface,
+                color = Color.White,
                 style = typography.labelLarge,
                 modifier = Modifier.padding(8.dp)
             )
@@ -230,7 +219,7 @@ fun NavigationButtons(
         ) {
             Text(
                 text = "Cofnij",
-                color = MaterialTheme.colorScheme.surface,
+                color = Color.White,
                 style = typography.labelLarge,
                 modifier = Modifier.padding(8.dp)
             )
