@@ -313,43 +313,35 @@ class PackageCreatorViewModel @Inject constructor(
         context: Context,
         isEdit: Boolean
     ) {
-        val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
-        val title = _packageName.value.orEmpty()
-        val description = _packageDescription.value.orEmpty()
-        val selectedConditions = _selectedConditions.value.toList()
-        val selectedExercises = _selectedExercises.value.toList()
+        launchCatching(
+            tag = PACKAGE_VIEWMODEL_TAG,
+            onError = { message -> _message.update { message } },
+            block = {
+                val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
+                val title = _packageName.value.orEmpty()
+                val description = _packageDescription.value.orEmpty()
+                val selectedConditions = _selectedConditions.value.toList()
+                val selectedExercises = _selectedExercises.value.toList()
 
-        if (!Validator.validateFields(
-                title,
-                description,
-                selectedExercises,
-                selectedConditions,
-                titleError,
-                descriptionError,
-                conditionError,
-                exerciseError,
-                showMessage = { message -> _message.update { message } }
-            )
-        ) {
-            return
-        }
-
-        if (_selectedMediaUris.value.isNotEmpty()) {
-            _selectedMediaUris.value.forEach { uri ->
-                validateAndProcessMedia(
-                    uri = uri,
-                    context = context,
-                    onError = { errorMessage ->
-                        _message.update { errorMessage }
-                    },
-                    onSuccess = { processedUri ->
-                        handlePackageSave(navigate, processedUri, combinedExercises, isEdit)
-                    }
+                val isValid = Validator.validateFields(
+                    title = title,
+                    description = description,
+                    selectedExercises = selectedExercises,
+                    selectedConditions = selectedConditions,
+                    uniqueTitle = true,
+                    titleError = titleError,
+                    descriptionError = descriptionError,
+                    conditionError = conditionError,
+                    exerciseError = exerciseError,
+                    listService = listService,
+                    showMessage = { message -> _message.update { message } }
                 )
+                if (!isValid) {
+                    return@launchCatching
+                }
+                handlePackageSave(navigate, null, combinedExercises, isEdit)
             }
-        } else {
-            handlePackageSave(navigate, null, combinedExercises, isEdit)
-        }
+        )
     }
 
     fun onCreatePackageClick(navigate: (String) -> Unit, context: Context) {
@@ -405,28 +397,6 @@ class PackageCreatorViewModel @Inject constructor(
             bodyPartIds = _selectedBodyParts.value.toList(),
             description = _packageDescription.value.orEmpty()
         )
-    }
-
-    private fun validateAndProcessMedia(
-        uri: Uri,
-        context: Context,
-        onError: (String) -> Unit,
-        onSuccess: (Uri) -> Unit
-    ) {
-        viewModelScope.launch {
-            MediaProcessor.processMedia(
-                context = context,
-                uri = uri,
-                onError = { errorMessage ->
-                    _message.update { errorMessage }
-                    onError(errorMessage)
-                },
-                onSuccess = { processedUri ->
-                    addSelectedMedia(processedUri)
-                    onSuccess(processedUri)
-                }
-            )
-        }
     }
 
     companion object {

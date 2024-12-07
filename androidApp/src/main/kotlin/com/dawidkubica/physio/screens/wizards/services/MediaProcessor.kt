@@ -15,57 +15,58 @@ object MediaProcessor {
     suspend fun processMedia(
         context: Context,
         uri: Uri,
+        setProcessing: (Boolean) -> Unit,
         onError: (String) -> Unit,
         onSuccess: (Uri) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
-            try {
-                if (uri.toString().startsWith(FIREBASE_MEDIA_PREFIX)) {
-                    android.util.Log.d("MediaProcessor", "Media URL comes from Firestore - processing stopped.")
-                    onSuccess(uri)
-                    return@withContext
-                }
+        if (uri.toString().startsWith(FIREBASE_MEDIA_PREFIX)) {
+            onSuccess(uri)
+            return
+        }
 
-                val filePath = uriToFilePath(context, uri) ?: run {
-                    onError("Nie udało się uzyskać ścieżki do pliku.")
-                    return@withContext
+        setProcessing(true)
+        try {
+            withContext(Dispatchers.IO) {
+                val filePath = copyToCacheDir(context, uri) ?: run {
+                    throw IllegalStateException("Nie udało się uzyskać ścieżki do pliku.")
                 }
 
                 val infoCommand = "-i $filePath"
                 val session = FFmpegKit.execute(infoCommand)
 
-                if (session.returnCode?.isValueSuccess == true) {
-                    val logs = session.allLogsAsString
-                    val duration = extractDuration(logs)
-                    val resolution = extractResolution(logs)
-
-                    if (duration != null && duration > 300) {
-                        onError("Wideo jest zbyt długie (maksymalna długość to 5 minut).")
-                        return@withContext
-                    }
-
-                    if (resolution != null && (resolution.first > 1920 || resolution.second > 1080)) {
-                        val outputFile = File(context.cacheDir, "converted_video.mp4").absolutePath
-                        val command =
-                            "-i $filePath -vf scale=1920:1080 -c:v libx264 -preset fast -crf 23 -c:a aac $outputFile"
-
-                        val convertSession = FFmpegKit.execute(command)
-                        if (convertSession.returnCode?.isValueSuccess == true) {
-                            android.util.Log.d("MediaProcessor", "Video could not be converted.")
-                            onSuccess(Uri.fromFile(File(outputFile)))
-                        } else {
-                            onError("Nie udało się przekonwertować wideo.")
-                        }
-                    } else {
-                        onSuccess(uri)
-                        android.util.Log.d("MediaProcessor", "Video converted.")
-                    }
-                } else {
-                    onError("Nie udało się uzyskać informacji o wideo.")
+                val logs = session.allLogsAsString
+                if (logs.contains("Error") || session.failStackTrace != null) {
+                    throw IllegalStateException("Nie udało się uzyskać informacji o wideo. Logi: $logs")
                 }
-            } catch (e: Exception) {
-                onError("Wystąpił błąd podczas przetwarzania pliku: ${e.message}")
+
+                val duration = extractDuration(logs)
+                val resolution = extractResolution(logs)
+
+                if (duration != null && duration > 300) {
+                    throw IllegalArgumentException("Wideo jest zbyt długie (maksymalna długość to 5 minut).")
+                }
+
+                if (resolution != null && (resolution.first > 1920 || resolution.second > 1080)) {
+                    val outputFile = File(context.cacheDir, "converted_video.mp4").absolutePath
+                    val command =
+                        "-i $filePath -vf scale=1920:1080 -c:v libx264 -preset fast -crf 23 -c:a aac $outputFile"
+
+                    val convertSession = FFmpegKit.execute(command)
+
+                    val convertLogs = convertSession.allLogsAsString
+                    if (convertLogs.contains("Error") || convertSession.failStackTrace != null) {
+                        throw IllegalStateException("Nie udało się przekonwertować wideo. Logi: $convertLogs")
+                    }
+
+                    onSuccess(Uri.fromFile(File(outputFile)))
+                } else {
+                    onSuccess(uri)
+                }
             }
+        } catch (e: Exception) {
+            onError(e.message ?: "Nieznany błąd.")
+        } finally {
+            setProcessing(false)
         }
     }
 
@@ -88,6 +89,19 @@ object MediaProcessor {
             (hours.toInt() * 3600 + minutes.toInt() * 60 + seconds.toDouble().toInt())
         }
     }
+
+    private fun copyToCacheDir(context: Context, uri: Uri): String? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val file = File(context.cacheDir, uri.lastPathSegment ?: "temp_video.mp4")
+            file.outputStream().use { inputStream.copyTo(it) }
+            file.absolutePath
+        } catch (e: Exception) {
+            android.util.Log.e("MediaProcessor", "Error copying file to cache dir", e)
+            null
+        }
+    }
+
 
     private fun extractResolution(logs: String): Pair<Int, Int>? {
         val resolutionRegex = Regex("(\\d{3,4})x(\\d{3,4})")

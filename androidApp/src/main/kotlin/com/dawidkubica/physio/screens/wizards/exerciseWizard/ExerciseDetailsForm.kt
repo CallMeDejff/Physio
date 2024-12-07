@@ -8,7 +8,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.PermMedia
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -91,7 +94,7 @@ fun ExerciseDetailsForm(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
-            viewModel.addSelectedMedia(context, uri)
+            viewModel.addSelectedMedia(uri)
         }
     }
 
@@ -99,6 +102,7 @@ fun ExerciseDetailsForm(
     var previewMediaUri by remember { mutableStateOf<Uri?>(null) }
     var showPreviewDialog by remember { mutableStateOf(false) }
     var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
+    val isVideoProcessing by viewModel.isVideoProcessing.collectAsState()
 
     LaunchedEffect(selectedMediaUris) {
         if (selectedMediaUris.isNotEmpty()) {
@@ -287,47 +291,76 @@ fun ExerciseDetailsForm(
                             .size(100.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .clickable {
-                                previewMediaUri = selectedMediaUri
-                                showPreviewDialog = true
+                                if (!isVideoProcessing) {
+                                    previewMediaUri = selectedMediaUri
+                                    showPreviewDialog = true
+                                }
                             }
                     ) {
-                        if (mediaType == "image" || thumbnail == null) {
-                            AsyncImage(
-                                model = selectedMediaUri,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else if (thumbnail != null) {
-                            Image(
-                                bitmap = thumbnail!!.asImageBitmap(),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
+                        when {
+                            isVideoProcessing -> {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Przetwarzanie wideo...",
+                                        style = typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+
+                            mediaType == "image" || thumbnail == null -> {
+                                AsyncImage(
+                                    model = selectedMediaUri,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+
+                            else -> {
+                                Image(
+                                    bitmap = thumbnail!!.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
                         }
 
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .background(
-                                    RedConfirmed,
-                                    shape = CircleShape
-                                )
-                                .clickable {
-                                    viewModel.removeMediaUri(selectedMediaUri)
-                                }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Remove media",
-                                tint = MaterialTheme.colorScheme.surface,
+                        if (!isVideoProcessing) {
+                            Box(
                                 modifier = Modifier
-                                    .size(20.dp)
-                                    .padding(4.dp)
-                            )
+                                    .align(Alignment.TopEnd)
+                                    .background(
+                                        RedConfirmed,
+                                        shape = CircleShape
+                                    )
+                                    .clickable {
+                                        viewModel.removeMediaUri(selectedMediaUri)
+                                    }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Usuń multimedia",
+                                    tint = MaterialTheme.colorScheme.surface,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .padding(4.dp)
+                                )
+                            }
                         }
                     }
+
                 }
             }
 

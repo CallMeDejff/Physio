@@ -46,6 +46,7 @@ fun ExerciseWizardScreen(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
+    val isUploading by viewModel.isUploading.collectAsState()
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->
@@ -81,6 +82,7 @@ fun ExerciseWizardScreen(
             viewModel = viewModel,
             context = context,
             isEditor = isEditor,
+            isUploading = isUploading,
             isEditorNextStep = isEditorNextStep
         )
     }
@@ -92,6 +94,7 @@ fun WizardContent(
     popBackStack: () -> Unit,
     viewModel: ExerciseCreatorViewModel,
     context: Context,
+    isUploading: Boolean,
     isEditor: Boolean,
     isEditorNextStep: Boolean
 ) {
@@ -128,6 +131,7 @@ fun WizardContent(
         }
 
         NavigationButtons(
+            isUploading = isUploading,
             onCreateOrEditClick = {
                 val title = viewModel.exerciseTitle.value.toString()
                 val description = viewModel.exerciseDescription.value.toString()
@@ -143,14 +147,26 @@ fun WizardContent(
                     }
 
                     isEditorNextStep -> {
-                        if (viewModel.validateFields(title, description, selectedEquipment)) {
-                            viewModel.onUpdateExerciseClick(context, navigate)
+                        viewModel.validateFields(
+                            title = title,
+                            description = description,
+                            selectedEquipment = selectedEquipment
+                        ) { isValid ->
+                            if (isValid) {
+                                viewModel.onUpdateExerciseClick(context, navigate)
+                            }
                         }
                     }
 
                     else -> {
-                        if (viewModel.validateFields(title, description, selectedEquipment)) {
-                            viewModel.onCreateExerciseClick(context, navigate)
+                        viewModel.validateFields(
+                            title = title,
+                            description = description,
+                            selectedEquipment = selectedEquipment
+                        ) { isValid ->
+                            if (isValid) {
+                                viewModel.onCreateExerciseClick(context, navigate)
+                            }
                         }
                     }
                 }
@@ -185,10 +201,11 @@ fun ExerciseFormSelector(
 
 @Composable
 fun NavigationButtons(
+    modifier: Modifier = Modifier,
     onCreateOrEditClick: () -> Unit,
     onBackClick: () -> Unit,
+    isUploading: Boolean = false,
     buttonText: String,
-    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
@@ -201,12 +218,16 @@ fun NavigationButtons(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(
-                text = buttonText,
-                color = Color.White,
-                style = typography.labelLarge,
-                modifier = Modifier.padding(8.dp)
-            )
+            if (isUploading) {
+                CircularProgressIndicator(color = Color.White)
+            } else {
+                Text(
+                    text = buttonText,
+                    color = Color.White,
+                    style = typography.labelLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.size(8.dp))

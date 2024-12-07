@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
 import com.dawidkubica.physio.screens.wizards.viewmodels.PackageCreatorViewModel
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.ghost_white
 import com.dawidkubica.physio.ui.theme.typography
@@ -84,14 +85,7 @@ fun PackageWizardScreen(
     }
 
     if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        FullScreenLoader()
     } else {
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {

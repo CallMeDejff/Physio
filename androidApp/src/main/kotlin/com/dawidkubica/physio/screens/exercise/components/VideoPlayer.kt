@@ -61,7 +61,7 @@ fun VideoPlayer(
     val trackSelector = DefaultTrackSelector(context).apply {
         setParameters(
             buildUponParameters()
-                .setMaxVideoSize(1920, 1080)
+                //.setMaxVideoSize(1920, 1080)
                 .setForceHighestSupportedBitrate(true)
         )
     }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +45,7 @@ fun ExerciseEditorForm(
             Text(
                 text = buildAnnotatedString {
                     append("Edytor istniejącego ")
-                    withStyle(style = SpanStyle(color = colorPrimary)) {
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                         append("ćwiczenia.")
                     }
                 },
