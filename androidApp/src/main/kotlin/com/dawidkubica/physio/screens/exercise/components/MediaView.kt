@@ -53,7 +53,7 @@ fun MediaView(
                 "video" -> {
                     VideoPlayer(
                         videoUrl = mediaUrl,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 
@@ -73,10 +73,9 @@ fun MediaView(
                 tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(2.dp)
+                    .padding(8.dp)
                     .size(48.dp)
                     .clickable { onMediaClick(mediaUrl) }
-                    .padding(4.dp)
             )
         }
     } else {
@@ -86,7 +85,7 @@ fun MediaView(
                 .height(200.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("Multimedia niedostepne")
+            Text("Multimedia niedostępne")
         }
     }
 }

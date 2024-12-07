@@ -76,6 +76,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     kapt("com.github.bumptech.glide:compiler:4.12.0")
     implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
+    implementation("androidx.compose.ui:ui-graphics:1.7.5")
 
 
     implementation(libs.converter.gson)
