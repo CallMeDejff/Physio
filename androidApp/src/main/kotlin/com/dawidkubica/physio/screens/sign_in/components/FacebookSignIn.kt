@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.facebook.CallbackManager
@@ -74,7 +73,6 @@ fun FacebookSignIn(
                         override fun onSuccess(result: LoginResult) {
                             val token = result.accessToken.token
                             Log.d("FacebookSignIn", "Facebook login success. Access token: $token")
-
                             onAuthComplete(token)
                         }
                     })

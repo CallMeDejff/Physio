@@ -33,9 +33,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.colorSecondary
-import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
 import kotlinx.coroutines.delay
 

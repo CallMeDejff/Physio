@@ -47,6 +47,25 @@ class AccountServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun searchUser(userId: String): User? {
+        return try {
+            val querySnapshot = firestore.collection(USERS_COLLECTION)
+                .whereEqualTo("uid", userId)
+                .get()
+                .await()
+
+            if (!querySnapshot.isEmpty) {
+                val document = querySnapshot.documents.first()
+                document.toObject(User::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error searching user: ${e.message}")
+            null
+        }
+    }
+
     override suspend fun getUserInfo(): User? {
         return safeFirestoreCall {
             val documentSnapshot = firestore.collection(USERS_COLLECTION)
@@ -159,9 +178,13 @@ class AccountServiceImpl @Inject constructor(
                 return@safeFirestoreCall
             }
 
-            val updatedAssignedPackages = user.assignedPackages.filter { it != packageId }
-            userDocRef.update("assignedPackages", updatedAssignedPackages).await()
-            Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId removed from user $userId")
+            if (user.assignedPackages.contains(packageId)) {
+                val updatedAssignedPackages = user.assignedPackages.toList().filter { it != packageId }
+                userDocRef.update("assignedPackages", updatedAssignedPackages).await()
+                Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId removed from user $userId")
+            } else {
+                Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId not found in user's assigned packages: ${user.assignedPackages.toList()}")
+            }
         }
     }
 

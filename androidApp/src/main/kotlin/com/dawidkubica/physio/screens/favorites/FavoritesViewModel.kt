@@ -1,8 +1,7 @@
 package com.dawidkubica.physio.screens.favorites
 
-import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
+import android.content.Context
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Category
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.models.Reminder
@@ -11,11 +10,10 @@ import com.dawidkubica.physio.screens.profile.UserSharedViewModel
 import com.dawidkubica.physio.service.UserPreferences
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.ExercisePackageService
-import com.dawidkubica.physio.ui.icons.Clinical_notes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -23,7 +21,8 @@ import javax.inject.Inject
 class FavoritesViewModel @Inject constructor(
     private val exercisePackageService: ExercisePackageService,
     private val accountService: AccountService,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    @ApplicationContext private val context: Context
 ) : UserSharedViewModel() {
 
     private val _fetchedCategories = MutableStateFlow<List<Category>>(emptyList())
@@ -37,6 +36,7 @@ class FavoritesViewModel @Inject constructor(
         fetchUserPackages()
         fetchUserType()
         fetchReminders()
+        fetchDiscoverPackages()
     }
 
     private fun fetchUserPackages() {
@@ -51,6 +51,15 @@ class FavoritesViewModel @Inject constructor(
                 fetchCategories()
             }
         )
+    }
+
+    private fun fetchDiscoverPackages() {
+        launchCatching(
+            tag = FAVORITES_VIEW_MODEL_TAG,
+            block = {
+                val packages = exercisePackageService.getDiscoverSectionPackages()
+                _discoverPackagesList.value = packages
+            })
     }
 
     fun onAddExerciseClick(navigate: (String) -> Unit) {
@@ -116,39 +125,34 @@ class FavoritesViewModel @Inject constructor(
         return calendar.timeInMillis
     }
 
-
     private fun mapDayOfWeekToCalendar(dayOfWeek: String): Int {
+        val daysOfWeek = context.resources.getStringArray(R.array.days_of_week_full)
+
         return when (dayOfWeek) {
-            "Poniedziałek" -> Calendar.MONDAY
-            "Wtorek" -> Calendar.TUESDAY
-            "Środa" -> Calendar.WEDNESDAY
-            "Czwartek" -> Calendar.THURSDAY
-            "Piątek" -> Calendar.FRIDAY
-            "Sobota" -> Calendar.SATURDAY
-            "Niedziela" -> Calendar.SUNDAY
+            daysOfWeek[0] -> Calendar.MONDAY
+            daysOfWeek[1] -> Calendar.TUESDAY
+            daysOfWeek[2] -> Calendar.WEDNESDAY
+            daysOfWeek[3] -> Calendar.THURSDAY
+            daysOfWeek[4] -> Calendar.FRIDAY
+            daysOfWeek[5] -> Calendar.SATURDAY
+            daysOfWeek[6] -> Calendar.SUNDAY
             else -> Calendar.MONDAY
         }
     }
 
-
     private fun fetchCategories() {
+
         _fetchedCategories.value = listOf(
             Category(
-                "Ulubione",
-                Icons.Outlined.FavoriteBorder,
-                "Treść dla kategorii 1",
+                context.getString(R.string.category_favorites),
                 _userFavoritePackagesList.value
             ),
             Category(
-                "Przypisane",
-                Clinical_notes,
-                "Treść dla kategorii 2",
+                context.getString(R.string.category_assigned),
                 _userAssignedPackagesList.value
             ),
             Category(
-                "Premium",
-                Clinical_notes,
-                "Treść dla kategorii 3",
+                context.getString(R.string.category_premium),
                 isPremium = true
             ),
         )

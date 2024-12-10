@@ -1,6 +1,5 @@
 package com.dawidkubica.physio.screens.profile
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -10,7 +9,6 @@ import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 abstract class UserSharedViewModel : PhysioAppViewModel() {
@@ -25,6 +23,8 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
     protected val _isEmailVerified = MutableStateFlow(false)
     protected val _provider = MutableStateFlow("")
     protected val _userAssignedPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
+    protected val _discoverPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
+    val discoverPackagesList: MutableStateFlow<List<ExercisePackage>> = _discoverPackagesList
     val _userFavoritePackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     val _reminders = MutableLiveData<List<Reminder>>()
     val reminders: LiveData<List<Reminder>> = _reminders

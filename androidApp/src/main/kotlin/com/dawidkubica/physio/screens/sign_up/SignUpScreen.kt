@@ -2,7 +2,6 @@ package com.dawidkubica.physio.screens.sign_up
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,15 +22,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.dawidkubica.physio.navigation.Graph
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
-import com.dawidkubica.physio.ui.theme.ghost_white
 
 @Composable
 fun SignUpScreen(
     openAndPopUp: (String, String) -> Unit,
-    navController: NavHostController,
     modifier: Modifier = Modifier,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
@@ -80,10 +76,12 @@ fun SignUpScreen(
                 )
 
                 Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
                     shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp),
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
                         .padding(top = 120.dp)
                         .constrainAs(signupForm) {
                             start.linkTo(parent.start)

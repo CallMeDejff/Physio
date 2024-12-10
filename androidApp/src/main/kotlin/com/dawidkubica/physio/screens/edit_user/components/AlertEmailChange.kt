@@ -15,11 +15,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorSecondary
 
 @Composable
 fun AlertEmailChange(
@@ -29,11 +29,15 @@ fun AlertEmailChange(
     onDismiss: () -> Unit
 ) {
     val emailState = remember { mutableStateOf(TextFieldValue("")) }
+    val confirmText = stringResource(id = R.string.change_data_confirm)
+    val dismissText = stringResource(id = R.string.no)
+    val emailLabel = stringResource(id = R.string.email_label)
+    val titleText = stringResource(id = R.string.confirmation)
 
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { onDismiss() },
-            title = { Text("Potwierdzenie") },
+            title = { Text(titleText) },
             text = {
                 Column(
                     modifier = Modifier
@@ -46,7 +50,7 @@ fun AlertEmailChange(
                     OutlinedTextField(
                         value = emailState.value,
                         onValueChange = { emailState.value = it },
-                        label = { Text("Adres Email") },
+                        label = { Text(emailLabel) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -57,7 +61,7 @@ fun AlertEmailChange(
                     showDialog.value = false
                 }) {
                     Text(
-                        text = "Zmieniam dane",
+                        text = confirmText,
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -68,7 +72,7 @@ fun AlertEmailChange(
                     onDismiss()
                 }) {
                     Text(
-                        text = "Nie",
+                        text = dismissText,
                         color = RedConfirmed
                     )
                 }

@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.screens.wizards.viewmodels.DescriptionUpdatable
-import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
@@ -108,6 +107,7 @@ fun TextEditorView(
                     .weight(8f),
                 state = state,
                 colors = RichTextEditorDefaults.richTextEditorColors(containerColor = Color.Transparent),
+                shape = RichTextEditorDefaults.outlinedShape
             )
         }
     }

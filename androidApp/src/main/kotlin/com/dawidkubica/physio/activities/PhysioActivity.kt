@@ -20,6 +20,7 @@ import com.dawidkubica.physio.core.Constants.FIRESTORE_PORT
 import com.dawidkubica.physio.core.Constants.LOCALHOST
 import com.dawidkubica.physio.core.Constants.STORAGE_PORT
 import com.dawidkubica.physio.core.PhysioApp
+import com.dawidkubica.physio.service.UserPreferences
 import com.dawidkubica.physio.service.services.StorageSampleDataService
 import com.facebook.CallbackManager
 import com.google.firebase.Firebase
@@ -36,6 +37,8 @@ class PhysioActivity : ComponentActivity() {
 
     @Inject
     lateinit var storageSampleDataService: StorageSampleDataService
+    @Inject
+    lateinit var sharedPreferences: UserPreferences
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private val callbackManager = CallbackManager.Factory.create()
@@ -45,7 +48,7 @@ class PhysioActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            PhysioApp(navController = navController)
+            PhysioApp(navController = navController, userPreferences = sharedPreferences)
         }
 
         requestPermissionLauncher = registerForActivityResult(

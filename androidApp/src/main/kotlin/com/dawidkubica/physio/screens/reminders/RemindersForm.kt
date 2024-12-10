@@ -1,6 +1,5 @@
 package com.dawidkubica.physio.screens.reminders
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,17 +10,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.screens.reminders.components.DropdownMenu
 import com.dawidkubica.physio.screens.reminders.components.TimePicker
 import com.dawidkubica.physio.ui.theme.typography
@@ -36,10 +35,7 @@ fun RemindersForm(
     onPackageSelected: (String) -> Unit,
 ) {
     val listedPackages by viewModel.listedPackages.collectAsState()
-    val reminders by viewModel.reminders.observeAsState(emptyList())
-    val daysOfWeek =
-        listOf("Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela")
-
+    val daysOfWeek = stringArrayResource(id = R.array.days_of_week_full).toList()
 
     Column(
         modifier = Modifier
@@ -50,14 +46,14 @@ fun RemindersForm(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Ustal swój harmonogram ćwiczeń dla każdego pakietu",
+            text = stringResource(id = R.string.reminders_form_title),
             style = typography.labelLarge,
             modifier = Modifier.padding(top = 10.dp),
             textAlign = TextAlign.Center
         )
 
         DropdownMenu(
-            defaultTitle = "Wybierz dzień tygodnia",
+            defaultTitle = stringResource(id = R.string.reminders_form_select_day),
             items = daysOfWeek,
             selectedItem = selectedDay,
             onItemSelected = onDaySelected,
@@ -66,7 +62,7 @@ fun RemindersForm(
         TimePicker(onTimeSelected = onTimeSelected)
 
         Text(
-            text = "Wybierz pakiet ćwiczeń",
+            text = stringResource(id = R.string.reminders_form_select_package),
             style = typography.labelLarge,
             modifier = Modifier.padding(top = 8.dp),
             textAlign = TextAlign.Center
@@ -80,7 +76,7 @@ fun RemindersForm(
         )
 
         DropdownMenu(
-            defaultTitle = "Pakiet ćwiczeń",
+            defaultTitle = stringResource(id = R.string.reminders_form_select_package),
             items = listedPackages.toList(),
             selectedItem = selectedPackage,
             onItemSelected = onPackageSelected

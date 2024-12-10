@@ -1,9 +1,7 @@
 package com.dawidkubica.physio.screens.wizards.viewmodels
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.models.Exercise
 import com.dawidkubica.physio.navigation.WizardScreen
@@ -80,7 +78,6 @@ class ExerciseCreatorViewModel @Inject constructor(
     private fun observeOnlyUserEntries() {
         viewModelScope.launch {
             _onlyUserEntries.collect { userEntriesOnly ->
-                Log.d(EXERCISE_VIEWMODEL_TAG, "Only user entries changed: $userEntriesOnly")
                 loadExercises(userEntriesOnly)
             }
         }

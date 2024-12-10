@@ -29,13 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import com.dawidkubica.physio.screens.exercise.ExerciseViewModel
 import com.dawidkubica.physio.ui.icons.Person_celebrate
 import com.dawidkubica.physio.ui.icons.Self_improvement
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.colorSecondary
 
 @SuppressLint("UnrememberedMutableInteractionSource", "UnusedBoxWithConstraintsScope")
 @Composable

@@ -21,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
@@ -43,9 +42,10 @@ fun DescriptionView(
     titleSize: TextUnit = 24.sp,
     subtitleSize: TextUnit = 18.sp,
 ) {
-    val context = LocalContext.current
     val packageName = viewModel.packageName.collectAsState()
     val packageDescription = viewModel.packageDescription.collectAsState()
+    val packageAuthor = viewModel.packageAuthor.collectAsState()
+    val packageAuthorLicense = viewModel.packageAuthorLicense.collectAsState()
 
     Box(
         modifier = Modifier
@@ -74,6 +74,17 @@ fun DescriptionView(
             Text(
                 text = spannedToAnnotatedString(decodedDescription, titleSize, subtitleSize),
                 style = typography.labelMedium
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Text(
+                text = "Autor: " + packageAuthor.value.toString(),
+                style = typography.labelSmall
+            )
+            Text(
+                text = "Licencja: " + packageAuthorLicense.value.toString(),
+                style = typography.labelSmall
             )
         }
     }

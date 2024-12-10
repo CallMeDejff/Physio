@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.models.User
 import com.dawidkubica.physio.navigation.WizardScreen
-import com.dawidkubica.physio.screens.wizards.services.MediaProcessor
 import com.dawidkubica.physio.screens.wizards.services.Validator
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.AuthenticationService

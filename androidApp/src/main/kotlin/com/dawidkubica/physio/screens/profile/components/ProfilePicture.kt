@@ -7,10 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Verified
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dawidkubica.physio.ui.theme.GreenConfirmed
-import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun ProfilePicture(

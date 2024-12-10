@@ -1,5 +1,6 @@
 package com.dawidkubica.physio.screens.reminders.components
 
+import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -19,18 +20,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
+
 @Composable
 fun ReminderItem(
     reminder: Reminder,
     deletable: Boolean,
     onDelete: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -65,7 +68,7 @@ fun ReminderItem(
                     style = typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                val fullDay = mapShortDayToFull(reminder.dayOfWeek)
+                val fullDay = mapShortDayToFull(context, reminder.dayOfWeek)
                 Text(
                     text = "$fullDay - ${reminder.time}",
                     style = typography.labelMedium,
@@ -89,15 +92,12 @@ fun ReminderItem(
     }
 }
 
-private fun mapShortDayToFull(shortDay: String): String {
-    return when (shortDay) {
-        "PN" -> "Poniedziałek"
-        "WT" -> "Wtorek"
-        "ŚR" -> "Środa"
-        "CZ" -> "Czwartek"
-        "PT" -> "Piątek"
-        "SB" -> "Sobota"
-        "ND" -> "Niedziela"
-        else -> "Poniedziałek"
-    }
+fun mapShortDayToFull(context: Context, shortDay: String): String {
+    val shortDays = context.resources.getStringArray(R.array.days_of_week)
+    val fullDays = context.resources.getStringArray(R.array.days_of_week_full)
+
+    val index = shortDays.indexOf(shortDay)
+    return if (index != -1) fullDays[index] else fullDays[0]
 }
+
+

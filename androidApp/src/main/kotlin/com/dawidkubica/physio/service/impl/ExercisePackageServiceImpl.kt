@@ -31,24 +31,39 @@ class ExercisePackageServiceImpl @Inject constructor(
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
 
-    override suspend fun getExercisePackages(): List<ExercisePackage> {
-        return cacheManager.getCachedExercisePackages() ?: try {
-            val querySnapshot = firestore.collection(EXERCISE_PACKAGES_COLLECTION)
+    override suspend fun getDiscoverSectionPackages(): List<ExercisePackage> {
+        return try {
+            val discoverDocument = firestore.collection(SUMMARY_COLLECTION)
+                .document("discover_section")
                 .get()
                 .await()
 
-            val exercisePackagesList = querySnapshot.documents.mapNotNull { doc ->
-                doc.toObject(ExercisePackage::class.java)
+            val exercisePackageMaps = discoverDocument["discover_section"] as? List<Map<String, String>>
+            val exercisePackageIds = exercisePackageMaps?.mapNotNull { it["id"] } ?: emptyList()
+            Log.d(EXERCISE_PACKAGE_SERVICE_TAG, "Package IDs found: $exercisePackageIds")
+
+            if (exercisePackageIds.isEmpty()) {
+                Log.w(EXERCISE_PACKAGE_SERVICE_TAG, "No package IDs found in 'discover_section'.")
+                return emptyList()
             }
 
-            cacheManager.setCachedExercisePackages(exercisePackagesList)
-            exercisePackagesList
+            val exercisePackages = exercisePackageIds.mapNotNull { packageId ->
+                try {
+                    val packageSnapshot = firestore.collection(EXERCISE_PACKAGES_COLLECTION)
+                        .document(packageId)
+                        .get()
+                        .await()
+
+                    val exercisePackage = packageSnapshot.toObject(ExercisePackage::class.java)
+                    exercisePackage
+                } catch (e: Exception) {
+                    Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error fetching package with ID: $packageId", e)
+                    null
+                }
+            }
+            exercisePackages
         } catch (e: Exception) {
-            Log.e(
-                EXERCISE_PACKAGE_SERVICE_TAG,
-                "getExercisePackages:Error getting exercise packages",
-                e
-            )
+            Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error fetching discover section packages", e)
             emptyList()
         }
     }
@@ -249,16 +264,19 @@ class ExercisePackageServiceImpl @Inject constructor(
         equipmentIds: List<String>
     ): List<ExercisePackage> {
         return try {
-            val allPackages = getExercisePackages()
-            val matchingPackages = allPackages.filter { exercisePackage ->
-                val conditionsMatch =
-                    conditionIds.isEmpty() || exercisePackage.conditionIds.any { it in conditionIds }
-                val equipmentMatch =
-                    equipmentIds.isEmpty() || exercisePackage.equipmentIds.any { it in equipmentIds }
-                conditionsMatch && equipmentMatch
-            }
+            val query = firestore.collection(EXERCISE_PACKAGES_COLLECTION)
 
-            matchingPackages
+            val conditionFilteredQuery = if (conditionIds.isNotEmpty()) {
+                query.whereArrayContainsAny("conditionIds", conditionIds)
+            } else query
+
+            val equipmentFilteredQuery = if (equipmentIds.isNotEmpty()) {
+                conditionFilteredQuery.whereArrayContainsAny("equipmentIds", equipmentIds)
+            } else conditionFilteredQuery
+
+            val result = equipmentFilteredQuery.get().await()
+
+            result.documents.mapNotNull { it.toObject(ExercisePackage::class.java) }
         } catch (e: Exception) {
             Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error finding matching exercise packages", e)
             emptyList()
@@ -332,12 +350,7 @@ class ExercisePackageServiceImpl @Inject constructor(
             val exercisePackageSnapshot = exercisePackageDocRef.get().await()
             val exercisePackage = exercisePackageSnapshot.toObject(ExercisePackage::class.java)
 
-            if (exercisePackage == null) {
-                Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "ExercisePackage not found with ID: $packageId")
-                return
-            }
-
-            val updatedAssignedTo = exercisePackage.assignedTo.filter { it != userId }
+            val updatedAssignedTo = exercisePackage?.assignedTo?.filter { it != userId }
             exercisePackageDocRef.update("assignedTo", updatedAssignedTo).await()
 
             Log.d(EXERCISE_PACKAGE_SERVICE_TAG, "Package $packageId removed from user $userId")

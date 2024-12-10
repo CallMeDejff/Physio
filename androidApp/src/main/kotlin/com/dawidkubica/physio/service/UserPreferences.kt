@@ -3,6 +3,9 @@ package com.dawidkubica.physio.service
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import com.dawidkubica.physio.models.ThemeMode
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class UserPreferences @Inject constructor(context: Context) {
@@ -10,20 +13,24 @@ class UserPreferences @Inject constructor(context: Context) {
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
 
-    fun getUserUid(): String {
-        return sharedPreferences.getString(USER_UID_KEY, "") ?: ""
+    private val _themeModeFlow = MutableStateFlow(getThemeMode())
+    val themeModeFlow: StateFlow<ThemeMode> = _themeModeFlow
+
+    fun setThemeMode(mode: ThemeMode) {
+        with(sharedPreferences.edit()) {
+            putString("theme_mode", mode.name)
+            apply()
+        }
+        _themeModeFlow.value = mode
+    }
+
+    fun getThemeMode(): ThemeMode {
+        val modeName = sharedPreferences.getString("theme_mode", ThemeMode.SYSTEM.name)
+        return ThemeMode.valueOf(modeName ?: ThemeMode.SYSTEM.name)
     }
 
     fun getUserName(): String {
         return sharedPreferences.getString(USER_NAME_KEY, "") ?: ""
-    }
-
-    fun getUserLastname(): String {
-        return sharedPreferences.getString(USER_LASTNAME_KEY, "") ?: ""
-    }
-
-    fun getUserLicenseNumber(): Int {
-        return sharedPreferences.getInt(USER_LICENSE_NUMBER_KEY, 0)
     }
 
     fun getAccountProvider(): String {

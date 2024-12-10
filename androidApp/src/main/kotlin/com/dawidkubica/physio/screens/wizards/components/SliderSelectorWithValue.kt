@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.dawidkubica.physio.ui.theme.colorPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

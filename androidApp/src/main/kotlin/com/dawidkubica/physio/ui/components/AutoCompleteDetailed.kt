@@ -37,8 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.models.User
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
 import kotlinx.coroutines.delay
 

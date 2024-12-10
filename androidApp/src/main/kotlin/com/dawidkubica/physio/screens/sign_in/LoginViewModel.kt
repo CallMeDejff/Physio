@@ -1,9 +1,9 @@
 package com.dawidkubica.physio.screens.sign_in
 
 import android.content.Context
-import android.util.Log
 import androidx.credentials.Credential
 import androidx.credentials.CustomCredential
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.navigation.AuthScreen
 import com.dawidkubica.physio.navigation.Graph
@@ -12,12 +12,14 @@ import com.dawidkubica.physio.service.services.AuthenticationService
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authenticationService: AuthenticationService
+    private val authenticationService: AuthenticationService,
+    @ApplicationContext private val context: Context
 ) : PhysioAppViewModel() {
 
     private var email: String = ""
@@ -26,17 +28,13 @@ class LoginViewModel @Inject constructor(
     private fun dataValidation(): Result<Unit> {
         return when {
             email.isEmpty() -> {
-                _message.update { "Podaj adres email" }
-                Log.e(LOGIN_VIEW_MODEL_TAG, "dataValidation:failure - Email address missing")
+                _message.update { context.getString(R.string.login_missing_email) }
                 Result.failure(Exception("Email address missing"))
             }
-
             password.isEmpty() -> {
-                _message.update { "Podaj hasło" }
-                Log.e(LOGIN_VIEW_MODEL_TAG, "dataValidation:failure - Password missing")
+                _message.update { context.getString(R.string.login_missing_password) }
                 Result.failure(Exception("Password missing"))
             }
-
             else -> Result.success(Unit)
         }
     }
@@ -44,7 +42,7 @@ class LoginViewModel @Inject constructor(
     fun onSignInWithFacebook(token: String, openAndPopUp: (String, String) -> Unit) {
         launchCatching(
             tag = LOGIN_VIEW_MODEL_TAG,
-            errorMessage = "Ups! Logowanie kontem Facebook nie powiodło się.",
+            errorMessage = context.getString(R.string.facebook_login_failed),
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.update { true }
@@ -64,7 +62,7 @@ class LoginViewModel @Inject constructor(
     fun onSignInWithGoogle(credential: Credential, openAndPopUp: (String, String) -> Unit) {
         launchCatching(
             tag = LOGIN_VIEW_MODEL_TAG,
-            errorMessage = "Logowanie za pomocą konta Google nie powiodło się",
+            errorMessage = context.getString(R.string.google_login_failed),
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.update { true }
@@ -79,37 +77,28 @@ class LoginViewModel @Inject constructor(
                         onFailure = { _isLoading.update { false } }
                     )
                 } else {
-                    Log.e(
-                        LOGIN_VIEW_MODEL_TAG,
-                        "An error occured when logging in with Google account"
-                    )
                     _isLoading.update { false }
                 }
             }
         )
     }
 
-    fun onSignInClick(openAndPopUp: (String, String) -> Unit, context: Context) {
+    fun onSignInClick(openAndPopUp: (String, String) -> Unit) {
         val validationResult = dataValidation()
         if (validationResult.isSuccess) {
             _isLoading.update { true }
             launchCatching(
                 tag = LOGIN_VIEW_MODEL_TAG,
-                errorMessage = "Ups! Logowanie nie powiodło się.",
+                errorMessage = context.getString(R.string.login_failed),
                 onError = { message -> _message.emit(message) },
                 block = {
                     val signInResult = authenticationService.signIn(email, password, context)
                     if (signInResult.isSuccess) {
-                        val currentUserId = authenticationService.currentUserId
-                        Log.i(
-                            LOGIN_VIEW_MODEL_TAG,
-                            "onSignInClick: logged in user id: $currentUserId"
-                        )
                         _isLoading.update { false }
                         openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                     } else {
                         val authError = signInResult.exceptionOrNull() as? AuthError
-                        _message.emit(authError?.message ?: "Logowanie nie powiodło się")
+                        _message.emit(authError?.message ?: context.getString(R.string.login_failed))
                         _isLoading.update { false }
                     }
                 }
@@ -137,3 +126,4 @@ class LoginViewModel @Inject constructor(
         private const val LOGIN_VIEW_MODEL_TAG = "LoginViewModel"
     }
 }
+

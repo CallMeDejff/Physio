@@ -1,9 +1,7 @@
 package com.dawidkubica.physio.screens.profile.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -32,11 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.ui.theme.GreenConfirmed
-import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -46,11 +43,10 @@ fun UserInfoBox(
     userEmail: String,
     userType: Int,
     userLicenseNumber: String,
-    userAssignedPackages: Int,
-    userFavoritePackages: Int,
     emailVerified: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -94,17 +90,21 @@ fun UserInfoBox(
                 Spacer(modifier = Modifier.size(4.dp))
 
                 if (userType == 1) {
-                    UserInfoText(label = "Numer licencji:", value = userLicenseNumber)
+                    UserInfoText(
+                        label = context.getString(R.string.license_number),
+                        value = userLicenseNumber
+                    )
                 }
 
                 UserInfoText(
                     icon = if (emailVerified) Icons.Outlined.Done else Icons.Outlined.DoNotDisturbOn,
-                    label = "Konto zweryfikowane: "
+                    label = context.getString(R.string.verified_account)
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun PremiumStatusBox(

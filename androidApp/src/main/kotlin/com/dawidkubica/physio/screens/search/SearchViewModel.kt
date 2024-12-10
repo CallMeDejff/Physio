@@ -1,12 +1,14 @@
 package com.dawidkubica.physio.screens.search
 
-import android.util.Log
+import android.content.Context
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.navigation.WizardScreen
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import com.dawidkubica.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val listService: ListService,
-    private val exercisePackageService: ExercisePackageService
+    private val exercisePackageService: ExercisePackageService,
+    @ApplicationContext private val context: Context
 ) : PhysioAppViewModel() {
 
     private val _isLoadingResults = MutableStateFlow(false)
@@ -55,39 +58,6 @@ class SearchViewModel @Inject constructor(
         navigate(WizardScreen.CreatorWizard.route)
     }
 
-    fun loadEquipmentList() {
-        launchCatching(
-            tag = SEARCH_VIEW_MODEL_TAG,
-            errorMessage = "Ups! Nie udało się pobrać listy sprzętów.",
-            onError = { message -> _message.emit(message) },
-            block = {
-                _equipmentList.value = listService.getEquipments()
-                _filteredEquipmentList.value = _equipmentList.value
-            })
-    }
-
-    fun loadConditionList() {
-        launchCatching(
-            tag = SEARCH_VIEW_MODEL_TAG,
-            errorMessage = "Ups! Nie udało się pobrać listy schorzeń.",
-            onError = { message -> _message.emit(message) },
-            block = {
-                _conditionsList.value = listService.getConditions()
-                _filteredConditionsList.value = _conditionsList.value
-            })
-    }
-
-    fun loadBodyPartsList() {
-        launchCatching(
-            tag = SEARCH_VIEW_MODEL_TAG,
-            errorMessage = "Ups! Nie udało się pobrać listy filtrów.",
-            onError = { message -> _message.emit(message) },
-            block = {
-                _bodyPartsList.value = listService.getBodyParts()
-                _filteredBodyPartsList.value = _bodyPartsList.value
-            })
-    }
-
     fun filterPackagesList(query: String) {
         _filteredPackagesList.value = if (query.isEmpty()) {
             _matchingPackages.value
@@ -120,11 +90,43 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    fun loadEquipmentList() {
+        launchCatching(
+            tag = SEARCH_VIEW_MODEL_TAG,
+            errorMessage = context.getString(R.string.error_load_equipment),
+            onError = { message -> _message.emit(message) },
+            block = {
+                _equipmentList.value = listService.getEquipments()
+                _filteredEquipmentList.value = _equipmentList.value
+            })
+    }
+
+    fun loadConditionList() {
+        launchCatching(
+            tag = SEARCH_VIEW_MODEL_TAG,
+            errorMessage = context.getString(R.string.error_load_conditions),
+            onError = { message -> _message.emit(message) },
+            block = {
+                _conditionsList.value = listService.getConditions()
+                _filteredConditionsList.value = _conditionsList.value
+            })
+    }
+
+    fun loadBodyPartsList() {
+        launchCatching(
+            tag = SEARCH_VIEW_MODEL_TAG,
+            errorMessage = context.getString(R.string.error_load_body_parts),
+            onError = { message -> _message.emit(message) },
+            block = {
+                _bodyPartsList.value = listService.getBodyParts()
+                _filteredBodyPartsList.value = _bodyPartsList.value
+            })
+    }
 
     fun searchForMatchingPackages() {
         launchCatching(
             tag = SEARCH_VIEW_MODEL_TAG,
-            errorMessage = "Wystąpił błąd podczas wyszukiwania pakietów.",
+            errorMessage = context.getString(R.string.error_search_packages),
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoadingResults.value = true
@@ -140,11 +142,7 @@ class SearchViewModel @Inject constructor(
                 } else {
                     _matchingPackages.value = emptyList()
                     _filteredPackagesList.value = _matchingPackages.value
-                    Log.d(
-                        SEARCH_VIEW_MODEL_TAG,
-                        "searchForMatchingPackages: No matching packages found"
-                    )
-                    _message.emit("Nie znaleziono żadnych dopasowań")
+                    _message.emit(context.getString(R.string.no_matching_packages))
                 }
                 _isLoadingResults.value = false
             }

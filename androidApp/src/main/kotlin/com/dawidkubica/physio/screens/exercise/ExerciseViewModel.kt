@@ -1,8 +1,6 @@
 package com.dawidkubica.physio.screens.exercise
 
-import android.content.Context
 import android.util.Log
-import androidx.media3.exoplayer.ExoPlayer
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.Exercise
 import com.dawidkubica.physio.models.StorageResult
@@ -35,6 +33,9 @@ class ExerciseViewModel @Inject constructor(
     private val _packageAuthor = MutableStateFlow<String?>("")
     val packageAuthor: StateFlow<String?> = _packageAuthor
 
+    private val _packageAuthorLicense = MutableStateFlow<String?>("")
+    val packageAuthorLicense: StateFlow<String?> = _packageAuthorLicense
+
     private val _packageDescription = MutableStateFlow<String?>("")
     val packageDescription: StateFlow<String?> = _packageDescription
 
@@ -53,6 +54,9 @@ class ExerciseViewModel @Inject constructor(
     private val _exercisesList = MutableStateFlow<List<String>>(emptyList())
     val exercisesList: StateFlow<List<String>> = _exercisesList
 
+    private val _listAssignedUsers = MutableStateFlow<List<String>>(emptyList())
+    val listAssignedUsers: StateFlow<List<String>> = _listAssignedUsers
+
     private val _fetchedExercises = MutableStateFlow<List<Exercise>>(emptyList())
     val fetchedExercises: StateFlow<List<Exercise>> = _fetchedExercises
 
@@ -65,8 +69,23 @@ class ExerciseViewModel @Inject constructor(
     private val _isPremium = MutableStateFlow<Boolean?>(false)
     val isPremium: StateFlow<Boolean?> = _isPremium
 
-    fun clearMediaUrl() {
-        _mediaUris.value = null
+    fun checkUserAssigned(): Boolean {
+        if(_listAssignedUsers.value.toList().contains(accountService.currentUserId.toString())) {
+            Log.d(EXERCISE_VIEW_MODEL, "User is assigned to package: + ${_listAssignedUsers.value.toList()}")
+            return true
+        } else return false
+    }
+
+    fun removeFromUserAssigned(packageId: String) {
+        launchCatching(
+            tag = EXERCISE_VIEW_MODEL,
+            onError = { message -> _message.emit(message) },
+            block = {
+                _isLoading.update { true }
+                exercisePackageService.removePackageFromUser(accountService.currentUserId, packageId)
+                _message.update { "Pakiet odpięty od uzytkownika" }
+                _isLoading.update { false }
+            })
     }
 
     fun getExercisePackage(exercisePackageId: String) {
@@ -76,6 +95,7 @@ class ExerciseViewModel @Inject constructor(
             tag = EXERCISE_VIEW_MODEL,
             block = {
                 _isLoading.update { true }
+                var authorId: String = ""
                 val exercisePackage = exercisePackageService.getExercisePackage(exercisePackageId)
                 Log.d(
                     EXERCISE_VIEW_MODEL,
@@ -91,6 +111,8 @@ class ExerciseViewModel @Inject constructor(
                     _warmUpList.value = exPackage.warmUpIds
                     _exercisesList.value = exPackage.exerciseIds
                     _isPremium.value = exPackage.premium
+                    _listAssignedUsers.value = exPackage.assignedTo
+                    authorId = exPackage.uid
                     _mediaUris.value = exPackage.mediaUrls.firstOrNull().toString()
                 }
                 val exercises = try {
@@ -115,9 +137,9 @@ class ExerciseViewModel @Inject constructor(
                 _fetchedWarmUps.value = warmups
                 _fetchedExercises.value = exercises
 
-                Log.d(EXERCISE_VIEW_MODEL, "Fetched exercises: $exercises")
-                Log.d(EXERCISE_VIEW_MODEL, "Fetched warmups: $warmups")
-
+                val author = accountService.searchUser(authorId)
+                _packageAuthor.value = (author?.name + " " + author?.lastname) ?: ""
+                _packageAuthorLicense.value = (author?.licenseNumber ?: "").toString()
                 _isLoading.update { false }
             }
         )

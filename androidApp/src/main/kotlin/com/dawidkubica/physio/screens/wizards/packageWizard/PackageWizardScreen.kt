@@ -1,9 +1,7 @@
 package com.dawidkubica.physio.screens.wizards.packageWizard
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,14 +14,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -32,8 +28,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
 import com.dawidkubica.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.dawidkubica.physio.ui.components.FullScreenLoader
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.ghost_white
 import com.dawidkubica.physio.ui.theme.typography
 
 @SuppressLint("StateFlowValueCalledInComposition")

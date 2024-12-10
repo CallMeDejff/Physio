@@ -19,10 +19,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.dawidkubica.physio.screens.wizards.components.CheckboxWithText
 import com.dawidkubica.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.dawidkubica.physio.ui.components.AutoCompleteDetailed
-import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -33,7 +31,6 @@ fun ExerciseEditorForm(
 ) {
     val selectedExercise by viewModel.selectedExercises.collectAsState()
     val exercisesList by viewModel.exercisesList.collectAsState()
-    val onlyUsersEntries by viewModel.onlyUserEntries.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -69,12 +66,6 @@ fun ExerciseEditorForm(
                         text = "Podaj tytuł ćwiczenia",
                         style = typography.labelLarge,
                         modifier = Modifier.height(32.dp)
-                    )
-
-                    CheckboxWithText(
-                        isChecked = onlyUsersEntries,
-                        onCheckedChange = { viewModel.toggleOnlyUserEntries() },
-                        text = "Wyświetl tylko moje ćwiczenia"
                     )
 
                     AutoCompleteDetailed(

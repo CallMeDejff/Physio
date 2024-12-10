@@ -12,3 +12,4 @@ data class Exercise(
     val mediaUrls: List<String> = emptyList(),
     val mediaType: String = "",
 )
+

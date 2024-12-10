@@ -1,8 +1,11 @@
 package com.dawidkubica.physio.screens.forgot_password
 
+import android.content.Context
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -10,6 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ForgotPasswordViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
+    @ApplicationContext private val context: Context
 ) : PhysioAppViewModel() {
 
     private val _email = MutableStateFlow("")
@@ -18,11 +22,11 @@ class ForgotPasswordViewModel @Inject constructor(
     fun callForgotPassword(email: String, popBackStack: () -> Unit) {
         launchCatching(
             tag = FORGOT_PASSWORD_VIEW_MODEL_TAG,
-            errorMessage = "Nie udało się wysłać maila z linkiem do zmiany hasła.",
+            errorMessage = context.getString(R.string.forgot_password_error),
             onError = { message -> _message.emit(message) },
             block = {
                 authenticationService.resetPassword(email)
-                _message.emit("Link do zmiany hasła został wysłany na podany adres email.")
+                _message.emit(context.getString(R.string.forgot_password_success))
                 popBackStack()
             }
         )

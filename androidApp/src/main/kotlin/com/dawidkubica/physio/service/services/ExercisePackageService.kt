@@ -6,7 +6,7 @@ import com.dawidkubica.physio.models.UserPackages
 
 interface ExercisePackageService {
     suspend fun assignPackageToUser(userId: String, packageId: String): Result<Unit>
-    suspend fun getExercisePackages(): List<ExercisePackage>
+    suspend fun getDiscoverSectionPackages(): List<ExercisePackage>
     suspend fun createExercisePackage(exercisePackage: ExercisePackage, mediaUris: List<Uri>)
     suspend fun deleteExercisePackage(exercisePackage: ExercisePackage)
     suspend fun getPackage(packageId: String): ExercisePackage?

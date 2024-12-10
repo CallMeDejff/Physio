@@ -41,7 +41,6 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                         popUp
                     )
                 },
-                navController = navController
             )
         }
 

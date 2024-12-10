@@ -19,7 +19,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.dawidkubica.physio.ui.components.AutoCompleteDetailed
-import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable

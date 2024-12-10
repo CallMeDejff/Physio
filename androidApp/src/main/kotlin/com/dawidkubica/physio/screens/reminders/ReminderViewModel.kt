@@ -1,5 +1,6 @@
 package com.dawidkubica.physio.screens.reminders
 
+import android.content.Context
 import android.icu.util.Calendar
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -8,14 +9,15 @@ import androidx.work.Data
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.navigation.CalendarScreen
 import com.dawidkubica.physio.screens.profile.UserSharedViewModel
 import com.dawidkubica.physio.screens.reminders.components.ReminderWorker
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.ExercisePackageService
-import com.dawidkubica.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -28,13 +30,20 @@ import javax.inject.Inject
 class ReminderViewModel @Inject constructor(
     private val exercisePackageService: ExercisePackageService,
     private val accountService: AccountService,
-    private val listService: ListService
+    @ApplicationContext private val context: Context
 ) : UserSharedViewModel() {
-
 
     private val workManager = WorkManager.getInstance()
     private val _listedPackages = MutableStateFlow<Set<String>>(emptySet())
     val listedPackages: StateFlow<Set<String>> = _listedPackages
+
+    private val fullDaysOfWeek: List<String> by lazy {
+        context.resources.getStringArray(R.array.days_of_week_full).toList()
+    }
+
+    private val shortDaysOfWeek: List<String> by lazy {
+        context.resources.getStringArray(R.array.days_of_week).toList()
+    }
 
     init {
         initializeData()
@@ -61,13 +70,14 @@ class ReminderViewModel @Inject constructor(
 
     fun scheduleReminder(popBackStack: () -> Unit, dayOfWeek: String, time: String, topic: String) {
         _isLoading.update { true }
-        if (isReminderAlreadyScheduled(mapDayOfWeekToShort(dayOfWeek), topic)) {
-            _message.update { "Przypomnienie już istnieje dla tego dnia i tematu." }
+        val shortDay = mapFullDayToShort(dayOfWeek)
+
+        if (isReminderAlreadyScheduled(shortDay, topic)) {
+            _message.update { context.getString(R.string.reminder_already_exists) }
             _isLoading.update { false }
             return
         }
 
-        val shortDay = mapDayOfWeekToShort(dayOfWeek)
         val reminder = Reminder(dayOfWeek = shortDay, time = time, topic = topic)
 
         Log.d(REMINDER_VIEWMODEL_TAG, "scheduleReminder: Scheduling reminder: $reminder")
@@ -79,7 +89,7 @@ class ReminderViewModel @Inject constructor(
                 fetchReminders(accountService, REMINDER_VIEWMODEL_TAG)
             }
             _isLoading.update { false }
-            _message.update { "Przypomnienie zostało dodane." }
+            _message.update { context.getString(R.string.reminder_added) }
             popBackStack()
         }
     }
@@ -92,7 +102,7 @@ class ReminderViewModel @Inject constructor(
     }
 
     private fun scheduleNotification(reminder: Reminder, reminderId: String) {
-        val dayOfWeekInt = mapDayOfWeekToCalendar(reminder.dayOfWeek)
+        val dayOfWeekInt = mapShortDayToCalendar(reminder.dayOfWeek)
         val timeParts = reminder.time.split(":")
         val hour = timeParts[0].toInt()
         val minute = timeParts[1].toInt()
@@ -108,32 +118,23 @@ class ReminderViewModel @Inject constructor(
         }
     }
 
-    private fun mapDayOfWeekToCalendar(dayOfWeek: String): Int {
-        return when (dayOfWeek) {
-            "PN" -> Calendar.MONDAY
-            "WT" -> Calendar.TUESDAY
-            "ŚR" -> Calendar.WEDNESDAY
-            "CZ" -> Calendar.THURSDAY
-            "PT" -> Calendar.FRIDAY
-            "SB" -> Calendar.SATURDAY
-            "ND" -> Calendar.SUNDAY
+    private fun mapShortDayToCalendar(shortDay: String): Int {
+        return when (shortDay) {
+            shortDaysOfWeek[0] -> Calendar.MONDAY
+            shortDaysOfWeek[1] -> Calendar.TUESDAY
+            shortDaysOfWeek[2] -> Calendar.WEDNESDAY
+            shortDaysOfWeek[3] -> Calendar.THURSDAY
+            shortDaysOfWeek[4] -> Calendar.FRIDAY
+            shortDaysOfWeek[5] -> Calendar.SATURDAY
+            shortDaysOfWeek[6] -> Calendar.SUNDAY
             else -> Calendar.MONDAY
         }
     }
 
-    private fun mapDayOfWeekToShort(dayOfWeek: String): String {
-        return when (dayOfWeek) {
-            "Poniedziałek" -> "PN"
-            "Wtorek" -> "WT"
-            "Środa" -> "ŚR"
-            "Czwartek" -> "CZ"
-            "Piątek" -> "PT"
-            "Sobota" -> "SB"
-            "Niedziela" -> "ND"
-            else -> "PN"
-        }
+    private fun mapFullDayToShort(fullDay: String): String {
+        val index = fullDaysOfWeek.indexOf(fullDay)
+        return if (index != -1) shortDaysOfWeek[index] else shortDaysOfWeek[0]
     }
-
 
     private fun scheduleWeeklyReminder(
         dayOfWeek: Int,
@@ -160,7 +161,6 @@ class ReminderViewModel @Inject constructor(
             .build()
         workManager.enqueue(workRequest)
     }
-
 
     private fun calculateInitialDelay(dayOfWeek: Int, hour: Int, minute: Int): Long {
         val now = Calendar.getInstance()
@@ -191,3 +191,4 @@ class ReminderViewModel @Inject constructor(
         private const val REMINDER_VIEWMODEL_TAG = "ReminderViewModel"
     }
 }
+

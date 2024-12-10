@@ -5,27 +5,17 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Discount
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,21 +24,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Category
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.models.Reminder
@@ -58,7 +45,6 @@ import com.dawidkubica.physio.screens.favorites.components.DiscoverCard
 import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
 import com.dawidkubica.physio.ui.components.FullScreenLoader
-import com.dawidkubica.physio.ui.theme.PurpleGrey80
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -69,7 +55,7 @@ fun FavoritesScreen(
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
     val categories by viewModel.fetchedCategories.collectAsState()
-    val discoverPackages by viewModel._userFavoritePackagesList.collectAsState()
+    val discoverPackages by viewModel.discoverPackagesList.collectAsState()
     val userType by viewModel.userType.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val nextReminder by viewModel.nextReminder.collectAsState()
@@ -141,9 +127,6 @@ fun FavoritesScreen(
                         WizardAccessButton(
                             navController = navController,
                             viewModel = viewModel,
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(8.dp)
                         )
                     }
                 }
@@ -156,12 +139,12 @@ fun FavoritesScreen(
 fun GreetingSection(userName: String) {
     Column {
         Text(
-            text = " Cześć, $userName 👋",
+            text = stringResource(id = R.string.greeting_user, userName),
             style = typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = " Co dzisiaj zamierzasz ćwiczyć?",
+            text = stringResource(id = R.string.greeting_what_to_train),
             style = typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -220,8 +203,6 @@ fun CategorySection(
 
             selectedCategory?.let { category ->
                 CategoryCard(
-                    title = category.title,
-                    icon = category.icon!!,
                     exercisePackages = category.exercisePackages,
                     onExerciseClick = onExerciseClick
                 )
@@ -256,16 +237,14 @@ fun DiscoverSection(
 
             Box(
                 modifier = Modifier
-                    //.shadow(2.dp, RoundedCornerShape(8.dp))
                     .fillMaxWidth(0.98f)
                     .height(52.dp)
-                    //.border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surface)
                     .align(Alignment.Start),
             ) {
                 Column {
                     Text(
-                        text = " Odkryj coś nowego: ",
+                        text = stringResource(id = R.string.discover_section_title),
                         style = typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         maxLines = 1,
@@ -274,7 +253,7 @@ fun DiscoverSection(
                             .align(Alignment.Start)
                     )
                     Text(
-                        text = " Co dzisiaj zamierzasz ćwiczyć?",
+                        text = stringResource(id = R.string.greeting_what_to_train),
                         style = typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
@@ -290,5 +269,6 @@ fun DiscoverSection(
         }
     }
 }
+
 
 

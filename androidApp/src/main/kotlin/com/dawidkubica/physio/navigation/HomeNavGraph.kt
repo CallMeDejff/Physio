@@ -19,15 +19,12 @@ import com.dawidkubica.physio.screens.reminders.ReminderViewModel
 import com.dawidkubica.physio.screens.reminders.SchedulerScreen
 import com.dawidkubica.physio.screens.search.SearchScreen
 import com.dawidkubica.physio.screens.search.SearchViewModel
-import com.dawidkubica.physio.ui.theme.PhysioBarTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeNavGraph(navController: NavHostController) {
-
-    PhysioBarTheme {
-        NavHost(
+     NavHost(
             navController = navController,
             route = Graph.HOME,
             startDestination = BottomBarScreen.Home.route
@@ -53,7 +50,6 @@ fun HomeNavGraph(navController: NavHostController) {
             composable(route = BottomBarScreen.Search.route) { backStackEntry ->
                 val viewModel: SearchViewModel = hiltViewModel(backStackEntry)
                 SearchScreen(
-                    navController = navController,
                     navigate = { route -> navigate(navController, route) },
                     viewModel = viewModel
                 )
@@ -83,6 +79,6 @@ fun HomeNavGraph(navController: NavHostController) {
             wizardsNavGraph(navController = navController)
             profileNavGraph(navController = navController)
             schedulerNavGraph(navController = navController)
-        }
+
     }
 }

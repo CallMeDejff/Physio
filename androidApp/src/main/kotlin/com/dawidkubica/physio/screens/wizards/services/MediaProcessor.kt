@@ -3,7 +3,6 @@ package com.dawidkubica.physio.screens.wizards.services
 import android.content.Context
 import android.net.Uri
 import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -46,7 +45,7 @@ object MediaProcessor {
                     throw IllegalArgumentException("Wideo jest zbyt długie (maksymalna długość to 5 minut).")
                 }
 
-                if (resolution != null && (resolution.first > 1920 || resolution.second > 1080)) {
+                if (resolution != null && (resolution.first > 2000 || resolution.second > 1200)) {
                     val outputFile = File(context.cacheDir, "converted_video.mp4").absolutePath
                     val command =
                         "-i $filePath -vf scale=1920:1080 -c:v libx264 -preset fast -crf 23 -c:a aac $outputFile"

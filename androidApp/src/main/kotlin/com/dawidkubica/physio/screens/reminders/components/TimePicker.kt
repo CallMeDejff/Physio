@@ -1,7 +1,6 @@
 package com.dawidkubica.physio.screens.reminders.components
 
 import android.annotation.SuppressLint
-import android.widget.TimePicker
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -13,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -22,10 +22,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.ui.theme.typography
-import androidx.compose.material3.TimePicker
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,24 +47,22 @@ fun TimePicker(onTimeSelected: (String) -> Unit) {
                     onTimeSelected(selectedTime)
                     showDialog = false
                 }) {
-                    Text("OK")
+                    Text(stringResource(id = R.string.time_picker_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Anuluj")
+                    Text(stringResource(id = R.string.time_picker_cancel))
                 }
             },
             title = {
-                Text("Wybierz godzinę")
+                Text(stringResource(id = R.string.time_picker_title))
             },
             text = {
                 TimePicker(
                     state = timePickerState,
                     layoutType = TimePickerDefaults.layoutType(),
-                    colors = TimePickerDefaults.colors(
-
-                    )
+                    colors = TimePickerDefaults.colors()
                 )
             }
         )
@@ -79,7 +77,11 @@ fun TimePicker(onTimeSelected: (String) -> Unit) {
             .padding(8.dp)
     ) {
         Text(
-            text = if (selectedTime.isEmpty()) "Wybierz godzinę" else "Wybrana godzina: $selectedTime",
+            text = if (selectedTime.isEmpty()) {
+                stringResource(id = R.string.time_picker_select_time)
+            } else {
+                stringResource(id = R.string.time_picker_selected_time, selectedTime)
+            },
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(vertical = 8.dp),
@@ -87,3 +89,4 @@ fun TimePicker(onTimeSelected: (String) -> Unit) {
         )
     }
 }
+

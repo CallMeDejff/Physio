@@ -34,12 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
-import com.dawidkubica.physio.ui.theme.colorPrimary
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -52,7 +54,7 @@ fun SchedulerScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val reminders by viewModel.reminders.observeAsState(emptyList())
 
-    val daysOfWeek = listOf("PN", "WT", "ŚR", "CZ", "PT", "SB", "ND")
+    val daysOfWeek = stringArrayResource(id = R.array.days_of_week).toList()
     var selectedDay by remember { mutableIntStateOf(0) }
 
     val pagerState = rememberPagerState(pageCount = { daysOfWeek.size })
@@ -94,15 +96,15 @@ fun SchedulerScreen(
                 Column {
                     Text(
                         text = buildAnnotatedString {
-                            append(" Zaplanuj swój ")
+                            append(stringResource(id = R.string.scheduler_title) + " ")
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("harmonogram.")
+                                append(stringResource(id = R.string.scheduler_title_highlight))
                             }
                         },
                         style = typography.headlineLarge,
                     )
                     Text(
-                        text = " Dodaj przypomnienia dla swoich pakietów",
+                        text = stringResource(id = R.string.scheduler_subtitle),
                         style = typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
@@ -160,7 +162,7 @@ fun SchedulerScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Brak wyników",
+                                        text = stringResource(id = R.string.no_results),
                                         style = typography.labelMedium,
                                         color = Color.Gray
                                     )

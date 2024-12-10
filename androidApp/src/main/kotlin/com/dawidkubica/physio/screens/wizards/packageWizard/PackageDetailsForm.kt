@@ -60,8 +60,6 @@ import com.dawidkubica.physio.screens.wizards.viewmodels.PackageCreatorViewModel
 import com.dawidkubica.physio.ui.components.AutoCompleteDetailed
 import com.dawidkubica.physio.ui.components.FilterableItemSelector
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable

@@ -11,11 +11,15 @@ import com.dawidkubica.physio.R
 class ReminderWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        val topic = inputData.getString("topic") ?: "Twoja sesja"
+        val topic = inputData.getString("topic")
+            ?: applicationContext.getString(R.string.default_session_topic)
 
         Log.d("ReminderWorker", "Powiadomienie: $topic")
 
-        sendNotification("Czas na ćwiczenia!", "Nie zapomnij o swojej sesji z $topic!")
+        val title = applicationContext.getString(R.string.notification_title)
+        val message = applicationContext.getString(R.string.notification_message, topic)
+
+        sendNotification(title, message)
         return Result.success()
     }
 

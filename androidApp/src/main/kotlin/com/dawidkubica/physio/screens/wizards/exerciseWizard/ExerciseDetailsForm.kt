@@ -68,8 +68,6 @@ import com.dawidkubica.physio.screens.wizards.components.TextEditorView
 import com.dawidkubica.physio.screens.wizards.viewmodels.ExerciseCreatorViewModel
 import com.dawidkubica.physio.ui.components.AutoCompleteDetailed
 import com.dawidkubica.physio.ui.theme.RedConfirmed
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable

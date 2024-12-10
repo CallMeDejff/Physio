@@ -4,7 +4,7 @@ data class ExercisePackage(
     val id: String = "",
     val uid: String = "",
     val name: String = "",
-    val premium: Boolean = true,
+    val premium: Boolean = false,
     val conditionIds: List<String> = emptyList(),
     val equipmentIds: List<String> = emptyList(),
     val bodyPartIds: List<String> = emptyList(),

@@ -23,7 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dawidkubica.physio.R
 import com.dawidkubica.physio.screens.sign_in.components.LabeledTextField
-import com.dawidkubica.physio.ui.theme.colorPrimary
 
 @Composable
 fun EditUserForm(
@@ -58,24 +57,24 @@ fun EditUserForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp, bottom = 20.dp),
-            text = "Edytuj swoje dane.",
+            text = stringResource(id = R.string.edit_user_data_screen),
             textAlign = TextAlign.Center,
             fontSize = 22.sp,
         )
 
         LabeledTextField(
-            label = "Imię",
+            label = stringResource(id = R.string.name_label),
             valueState = nameState,
-            placeholder = "Imię",
+            placeholder = stringResource(id = R.string.name_placeholder),
             leadingIcon = Icons.Outlined.AccountBox,
             keyboardType = KeyboardType.Text,
             isPassword = false
         )
 
         LabeledTextField(
-            label = "Nazwisko",
+            label = stringResource(id = R.string.lastname_label),
             valueState = lastnameState,
-            placeholder = "Nazwisko",
+            placeholder = stringResource(id = R.string.lastname_placeholder),
             leadingIcon = Icons.Outlined.Person,
             keyboardType = KeyboardType.Text,
             isPassword = false
@@ -91,12 +90,12 @@ fun EditUserForm(
             )
 
             Text(
-                text = "Jestem fizjoterapeutą zarejestrowanym w KIF",
+                text = stringResource(id = R.string.license_checkbox),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
                 style = TextStyle(
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha=0.7f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
                 )
@@ -105,9 +104,9 @@ fun EditUserForm(
 
         if (userType == 1 || isLicenseChecked.value) {
             LabeledTextField(
-                label = "Numer licencji",
+                label = stringResource(id = R.string.license_number),
                 valueState = licenseNumberState,
-                placeholder = "Numer licencji",
+                placeholder = stringResource(id = R.string.license_number),
                 leadingIcon = Icons.Outlined.Badge,
                 keyboardType = KeyboardType.Number,
                 isPassword = false

@@ -30,15 +30,12 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.dawidkubica.physio.ui.theme.PhysioBarTheme
-import com.dawidkubica.physio.ui.theme.colorPrimary
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SuspiciousIndentation")
 @Composable
 fun DefaultScreen() {
     val navController = rememberNavController()
 
-    PhysioBarTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
@@ -59,7 +56,6 @@ fun DefaultScreen() {
         ) {
             HomeNavGraph(navController = navController)
         }
-    }
 }
 
 @Composable

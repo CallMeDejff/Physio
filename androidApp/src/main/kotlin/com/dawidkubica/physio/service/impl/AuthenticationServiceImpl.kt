@@ -256,28 +256,48 @@ class AuthenticationServiceImpl @Inject constructor(
         setUserInfo(currentUserId)
     }
 
-    override suspend fun signUp(email: String, password: String): Result<Unit> {
+    override suspend fun signUp(email: String, password: String, context: Context): Result<Unit> {
         return try {
             val signUpResult = Firebase.auth.createUserWithEmailAndPassword(email, password).await()
             if (signUpResult.user != null) {
+                val userId = signUpResult.user?.uid
+                Log.d(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:success:$userId")
+
                 Firebase.auth.signInWithEmailAndPassword(email, password).await()
                 Log.d(
                     AUTHENTICATION_SERVICE_TAG,
-                    "createUserWithEmail:success:${Firebase.auth.currentUser?.uid}"
+                    "signInAfterSignUp:success:${Firebase.auth.currentUser?.uid}"
                 )
-                Result.success(Unit)
+
+                val userInfo = setUserInfo(userId ?: "")
+                if (userInfo != null) {
+                    Result.success(Unit)
+                } else {
+                    Log.e(AUTHENTICATION_SERVICE_TAG, "Failed to set user info")
+                    Result.failure(AuthError("Nie udało się ustawić informacji o użytkowniku"))
+                }
             } else {
-                Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:failure - no user returned")
-                Result.failure(Exception("Rejestracja nie powiodła się"))
+                Log.e(
+                    AUTHENTICATION_SERVICE_TAG,
+                    "createUserWithEmail:failure - no user returned"
+                )
+                Result.failure(AuthError("Rejestracja nie powiodła się"))
             }
-        } catch (e: FirebaseNetworkException) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "signUp:failure", e)
-            Result.failure(e)
         } catch (e: FirebaseAuthException) {
+            val errorCode = e.errorCode
+            val errorMessage =
+                authErrors[errorCode]?.let { context.getString(it) } ?: e.message ?: "Nieznany błąd"
             Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:failure", e)
-            Result.failure(e)
+            Result.failure(AuthError(errorMessage, errorCode))
+        } catch (e: FirebaseNetworkException) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:network error", e)
+            Result.failure(AuthError("Błąd sieci. Sprawdź swoje połączenie.", "NETWORK_ERROR"))
+        } catch (e: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:unknown error", e)
+            Result.failure(AuthError("Wystąpił nieoczekiwany błąd.", null))
         }
     }
+
 
     override suspend fun signOut() {
         Log.d(

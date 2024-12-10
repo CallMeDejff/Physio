@@ -2,7 +2,6 @@ package com.dawidkubica.physio.screens.sign_in
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,13 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
-import com.dawidkubica.physio.ui.theme.PhysioTheme
-import com.dawidkubica.physio.ui.theme.ghost_white
 
 @Composable
 fun LoginScreen(
@@ -95,7 +91,7 @@ fun LoginScreen(
                             onLoginClick = {
                                 viewModel.updateEmail(emailState.value.text)
                                 viewModel.updatePassword(passwordState.value.text)
-                                viewModel.onSignInClick(openAndPopUp, context)
+                                viewModel.onSignInClick(openAndPopUp)
                             },
                             onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
                             onForgotPasswordClick = { viewModel.onForgotPasswordClick(navigate = navigate) },

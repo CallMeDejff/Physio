@@ -25,15 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.ghost_white
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -138,7 +137,7 @@ fun EditUserScreen(
                 ) {
                     Text(
                         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-                        text = "Zapisz zmiany",
+                        text = stringResource(id = R.string.save_changes),
                         color = MaterialTheme.colorScheme.surface,
                         style = typography.labelLarge
                     )
@@ -155,7 +154,7 @@ fun EditUserScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
-                        text = "Cofnij",
+                        text = stringResource(id = R.string.go_back),
                         color = MaterialTheme.colorScheme.surface,
                         style = typography.labelLarge,
                         modifier = Modifier.padding(8.dp)

@@ -23,7 +23,7 @@ interface AuthenticationService {
         onFailure: (Exception) -> Unit
     )
 
-    suspend fun signUp(email: String, password: String): Result<Unit>
+    suspend fun signUp(email: String, password: String, context: Context): Result<Unit>
     suspend fun signOut()
     suspend fun updateEmail(email: String)
     suspend fun verifyEmail()

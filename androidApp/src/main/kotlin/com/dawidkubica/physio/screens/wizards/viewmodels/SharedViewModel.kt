@@ -1,13 +1,11 @@
 package com.dawidkubica.physio.screens.wizards.viewmodels
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.service.services.ListService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 abstract class SharedViewModel : PhysioAppViewModel() {
 

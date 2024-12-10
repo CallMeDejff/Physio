@@ -9,12 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.ui.theme.colorSecondary
 
 @Composable
@@ -26,12 +25,12 @@ fun AlertEmailVerification(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val emailState = remember { mutableStateOf(TextFieldValue("")) }
+    val context = LocalContext.current
 
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { onDismiss() },
-            title = { Text("Potwierdzenie") },
+            title = { Text(context.getString(R.string.email_verification_title)) },
             text = {
                 Column(
                     modifier = Modifier

@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -38,8 +37,7 @@ import com.dawidkubica.physio.R
 import com.dawidkubica.physio.screens.sign_in.components.FacebookSignIn
 import com.dawidkubica.physio.screens.sign_in.components.GoogleSignIn
 import com.dawidkubica.physio.screens.sign_in.components.LabeledTextField
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.dark_gray
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -53,7 +51,6 @@ fun LoginForm(
     onSignUpClick: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -63,23 +60,8 @@ fun LoginForm(
         Text(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 10.dp,),
-            text = buildAnnotatedString {
-                val text = "Zaloguj się do swojego konta."
-                val styleNormal = SpanStyle(
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                    fontFamily = FontFamily(Font(R.font.helvetica_neue_regular))
-                )
-                val styleHighlight = SpanStyle(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontFamily = FontFamily(Font(R.font.helvetica_neue_medium))
-                )
-                append("Zaloguj się do ")
-                addStyle(styleNormal, 0, "Zaloguj się do ".length)
-
-                append("swojego konta.")
-                addStyle(styleHighlight, "Zaloguj się do ".length, text.length)
-            },
+                .padding(top = 10.dp),
+            text = stringResource(id = R.string.login_prompt),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
         )
@@ -87,9 +69,9 @@ fun LoginForm(
         Spacer(modifier = Modifier.height(10.dp))
 
         LabeledTextField(
-            label = "Adres Email",
+            label = stringResource(id = R.string.email_label),
             valueState = emailState,
-            placeholder = "Adres Email",
+            placeholder = stringResource(id = R.string.email_placeholder),
             leadingIcon = Icons.Outlined.Mail,
             keyboardType = KeyboardType.Email
         )
@@ -97,9 +79,9 @@ fun LoginForm(
         Spacer(modifier = Modifier.height(20.dp))
 
         LabeledTextField(
-            label = "Hasło",
+            label = stringResource(id = R.string.password_label),
             valueState = passwordState,
-            placeholder = "Hasło",
+            placeholder = stringResource(id = R.string.password_placeholder),
             leadingIcon = Icons.Outlined.Password,
             keyboardType = KeyboardType.Password,
             isPassword = true
@@ -109,12 +91,10 @@ fun LoginForm(
 
         ClickableText(
             text = AnnotatedString(
-                "Zapomniałem hasła",
+                stringResource(id = R.string.forgot_password),
                 SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
             ),
-            onClick = {
-                onForgotPasswordClick()
-            },
+            onClick = { onForgotPasswordClick() },
             style = TextStyle(textAlign = TextAlign.End),
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,14 +103,7 @@ fun LoginForm(
         )
 
         if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            FullScreenLoader()
         } else {
             Box(
                 modifier = Modifier
@@ -147,7 +120,7 @@ fun LoginForm(
                     ) {
                         Text(
                             modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-                            text = "Zaloguj",
+                            text = stringResource(id = R.string.login_button),
                             color = MaterialTheme.colorScheme.surface,
                             style = typography.labelLarge
                         )
@@ -156,7 +129,7 @@ fun LoginForm(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "lub zaloguj się za pomocą:",
+                        text = stringResource(id = R.string.login_with),
                         color = MaterialTheme.colorScheme.onBackground.copy(0.7f),
                         fontFamily = FontFamily(Font(R.font.helvetica_neue_regular)),
                         fontSize = 18.sp,
@@ -193,7 +166,7 @@ fun LoginForm(
                         fontSize = 18.sp
                     )
                 ) {
-                    append("Nie posiadasz konta? ")
+                    append(stringResource(id = R.string.no_account) + " ")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -202,7 +175,7 @@ fun LoginForm(
                         fontSize = 18.sp
                     )
                 ) {
-                    append("Zarejestruj się")
+                    append(stringResource(id = R.string.sign_up))
                 }
             },
             onClick = { onSignUpClick() },
@@ -210,7 +183,6 @@ fun LoginForm(
             modifier = Modifier
                 .fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(30.dp))
     }
 }

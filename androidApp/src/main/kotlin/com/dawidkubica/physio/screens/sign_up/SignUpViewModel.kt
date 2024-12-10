@@ -1,13 +1,17 @@
 package com.dawidkubica.physio.screens.sign_up
 
+import android.content.Context
 import android.util.Log
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.Provider
 import com.dawidkubica.physio.models.User
 import com.dawidkubica.physio.navigation.AuthScreen
 import com.dawidkubica.physio.navigation.Graph
+import com.dawidkubica.physio.service.AuthError
 import com.dawidkubica.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -15,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    private val authenticationService: AuthenticationService
+    private val authenticationService: AuthenticationService,
+    @ApplicationContext private val context: Context
 ) : PhysioAppViewModel() {
 
     var name: String = ""
@@ -62,13 +67,13 @@ class SignUpViewModel @Inject constructor(
         val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
         return when {
             email.isEmpty() -> {
-                _signupMessage.update { "Podaj adres email" }
+                _signupMessage.update { context.getString(R.string.signup_missing_email) }
                 Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Email address missing")
                 Result.failure(Exception("Email address missing"))
             }
 
             !email.matches(emailPattern.toRegex()) -> {
-                _signupMessage.update { "Sprawdź czy na pewno podałeś prawdziwy adres email" }
+                _signupMessage.update { context.getString(R.string.signup_invalid_email) }
                 Log.e(
                     SIGNUP_VIEWMODEL_TAG,
                     "dataValidation:failure - Email address pattern mismatch"
@@ -77,25 +82,25 @@ class SignUpViewModel @Inject constructor(
             }
 
             name.isEmpty() -> {
-                _signupMessage.update { "Podaj imię" }
+                _signupMessage.update { context.getString(R.string.signup_missing_name) }
                 Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Name missing")
                 Result.failure(Exception("Name missing"))
             }
 
             lastname.isEmpty() -> {
-                _signupMessage.update { "Podaj nazwisko" }
+                _signupMessage.update { context.getString(R.string.signup_missing_lastname) }
                 Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Lastname missing")
                 Result.failure(Exception("Lastname missing"))
             }
 
             password.equals(repeatedPassword).not() -> {
-                _signupMessage.update { "Czy na pewno oba hasła są takie same?" }
+                _signupMessage.update { context.getString(R.string.signup_password_mismatch) }
                 Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - passwords mismatch")
                 Result.failure(Exception("passwords mismatch"))
             }
 
             password.isEmpty() -> {
-                _signupMessage.update { "Podaj hasło" }
+                _signupMessage.update { context.getString(R.string.signup_missing_password) }
                 Log.e(SIGNUP_VIEWMODEL_TAG, "dataValidation:failure - Password missing")
                 Result.failure(Exception("Password missing"))
             }
@@ -122,20 +127,13 @@ class SignUpViewModel @Inject constructor(
     private fun callUserSignUp(openAndPopUp: (String, String) -> Unit) {
         launchCatching(
             tag = SIGNUP_VIEWMODEL_TAG,
-            errorMessage = "Ups! Tworzenie konta nie powiodło się.",
-            onError = { message -> _message.emit(message) },
+            errorMessage = context.getString(R.string.signup_error),
+            onError = { message -> _signupMessage.emit(message) },
             block = {
-                val resultSignUp = authenticationService.signUp(email, password)
+                val resultSignUp = authenticationService.signUp(email, password, context)
                 if (resultSignUp.isSuccess) {
-                    Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success")
                     val userId = authenticationService.currentUserId
-                    Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:success:currentUserId:$userId")
-
-                    val userType = if (licenseNumber == 0) {
-                        0
-                    } else {
-                        1
-                    }
+                    val userType = if (licenseNumber == 0) 0 else 1
 
                     val newUser = User(
                         uid = userId,
@@ -146,13 +144,12 @@ class SignUpViewModel @Inject constructor(
                         userType = userType,
                         provider = Provider.Physio.providerId
                     )
-                    Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:$newUser")
 
                     authenticationService.createUser(newUser)
-                    Log.d(SIGNUP_VIEWMODEL_TAG, "callCreateNewUser:success")
                     openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
                 } else {
-                    Log.d(SIGNUP_VIEWMODEL_TAG, "resultSignUp:failed")
+                    val authError = resultSignUp.exceptionOrNull() as? AuthError
+                    _signupMessage.emit(authError?.message ?: context.getString(R.string.signup_error))
                     updateRepeatedPassword("")
                     updatePassword("")
                 }

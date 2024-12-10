@@ -45,25 +45,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.ExercisePackage
-import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.search.components.ExercisePackageCard
 import com.dawidkubica.physio.ui.components.FilterableItemSelector
 import com.dawidkubica.physio.ui.components.FullScreenLoader
-import com.dawidkubica.physio.ui.theme.PurpleGrey80
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.gray
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun SearchScreen(
-    navController: NavController,
     navigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel
@@ -113,7 +109,6 @@ fun SearchScreen(
     }
 }
 
-
 @Composable
 fun SearchContent(
     searchText: String,
@@ -151,27 +146,25 @@ fun SearchContent(
                 matchingPackages = matchingPackages,
                 navigate = navigate
             )
-
         }
     }
 }
-
 
 @Composable
 fun SearchHeader() {
     Column {
         Text(
             text = buildAnnotatedString {
-                append(" Znajdź swój ")
+                append(stringResource(id = R.string.search_header_main) + " ")
                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                    append("pakiet ćwiczeń.")
+                    append(stringResource(id = R.string.search_header_highlight))
                 }
             },
             style = typography.headlineLarge.copy(color = MaterialTheme.colorScheme.onBackground)
         )
 
         Text(
-            text = " Szukaj po schorzeniu, części ciała, nazwie...",
+            text = stringResource(id = R.string.search_subheader),
             style = typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -206,7 +199,7 @@ fun SearchFilters(
                 onValueChange = onSearchTextChanged,
                 placeholder = {
                     Text(
-                        text = "Wpisz nazwę pakietu...",
+                        text = stringResource(id = R.string.search_placeholder),
                         style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground),
                         maxLines = 1
                     )
@@ -248,13 +241,13 @@ fun SearchFilters(
                     } else {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "search button",
+                            contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Szukaj",
+                            text = stringResource(id = R.string.search_button),
                             color = Color.White,
                             style = typography.labelLarge
                         )
@@ -270,42 +263,14 @@ fun SearchFilters(
                     shape = RoundedCornerShape(16.dp),
                 ) {
                     Icon(
-                        if (isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,
-                        contentDescription = "Expand",
+                        imageVector = if (isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,
+                        contentDescription = null,
                         tint = Color.White,
                     )
                 }
             }
         }
     }
-}
-
-@Composable
-fun FilterSection(viewModel: SearchViewModel) {
-    FilterableItemSelector(
-        itemList = viewModel.filteredConditionsList.collectAsState().value,
-        selectedItems = viewModel.selectedConditions.collectAsState().value,
-        onToggleItem = viewModel::toggleCondition,
-        showSearchIcon = false
-    )
-    FilterableItemSelector(
-        itemList = viewModel.filteredBodyPartsList.collectAsState().value,
-        selectedItems = viewModel.selectedBodyParts.collectAsState().value,
-        onToggleItem = viewModel::toggleBodyPart,
-        showSearchIcon = false
-    )
-    FilterableItemSelector(
-        itemList = viewModel.filteredEquipmentList.collectAsState().value,
-        selectedItems = viewModel.selectedEquipment.collectAsState().value,
-        onToggleItem = viewModel::toggleEquipment,
-        onSearch = { query ->
-            viewModel.apply {
-                filterBodyPartsList(query)
-                filterEquipmentList(query)
-                filterConditionsList(query)
-            }
-        }
-    )
 }
 
 @Composable
@@ -338,7 +303,7 @@ fun SearchResults(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Brak wyników",
+                        text = stringResource(id = R.string.no_results),
                         style = typography.labelMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
@@ -346,5 +311,34 @@ fun SearchResults(
             }
         }
     }
+}
+
+
+@Composable
+fun FilterSection(viewModel: SearchViewModel) {
+    FilterableItemSelector(
+        itemList = viewModel.filteredConditionsList.collectAsState().value,
+        selectedItems = viewModel.selectedConditions.collectAsState().value,
+        onToggleItem = viewModel::toggleCondition,
+        showSearchIcon = false
+    )
+    FilterableItemSelector(
+        itemList = viewModel.filteredBodyPartsList.collectAsState().value,
+        selectedItems = viewModel.selectedBodyParts.collectAsState().value,
+        onToggleItem = viewModel::toggleBodyPart,
+        showSearchIcon = false
+    )
+    FilterableItemSelector(
+        itemList = viewModel.filteredEquipmentList.collectAsState().value,
+        selectedItems = viewModel.selectedEquipment.collectAsState().value,
+        onToggleItem = viewModel::toggleEquipment,
+        onSearch = { query ->
+            viewModel.apply {
+                filterBodyPartsList(query)
+                filterEquipmentList(query)
+                filterConditionsList(query)
+            }
+        }
+    )
 }
 

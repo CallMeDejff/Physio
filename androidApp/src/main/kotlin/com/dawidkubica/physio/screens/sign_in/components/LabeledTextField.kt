@@ -20,9 +20,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.gray
-import com.dawidkubica.physio.ui.theme.light_gray
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable

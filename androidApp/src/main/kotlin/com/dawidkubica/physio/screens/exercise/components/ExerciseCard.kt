@@ -1,7 +1,6 @@
 package com.dawidkubica.physio.screens.exercise.components
 
 import android.text.Html
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,9 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.media3.exoplayer.ExoPlayer
 import com.dawidkubica.physio.models.Exercise
-import com.dawidkubica.physio.ui.theme.colorTertiary
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable

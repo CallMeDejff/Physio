@@ -25,7 +25,6 @@ import com.dawidkubica.physio.screens.wizards.components.AdditionalButtons
 import com.dawidkubica.physio.screens.wizards.components.ButtonType
 import com.dawidkubica.physio.screens.wizards.components.SelectionButton
 import com.dawidkubica.physio.screens.wizards.viewmodels.CreatorWizardViewModel
-import com.dawidkubica.physio.ui.theme.colorPrimary
 
 @Composable
 fun CreatorWizardForm(

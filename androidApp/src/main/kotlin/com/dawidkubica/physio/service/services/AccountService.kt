@@ -9,6 +9,7 @@ interface AccountService {
     val currentUser: Flow<User?>
     val currentUserId: String
     suspend fun assignPackageToUser(userId: String, packageId: String)
+    suspend fun searchUser(userId: String): User?
     suspend fun getUserInfo(): User?
     suspend fun getUsersList(): List<User>?
     suspend fun toggleFavoritePackage(packageId: String): StorageResult?

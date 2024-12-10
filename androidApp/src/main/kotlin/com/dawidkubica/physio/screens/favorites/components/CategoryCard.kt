@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.models.ExercisePackage
@@ -24,8 +23,6 @@ import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun CategoryCard(
-    title: String,
-    icon: ImageVector,
     exercisePackages: List<ExercisePackage>,
     onExerciseClick: (String) -> Unit
 ) {
@@ -49,7 +46,6 @@ fun CategoryCard(
                     UserPackageCard(
                         id = exercisePackage.id,
                         name = exercisePackage.name,
-                        description = exercisePackage.description,
                         imageUrl = exercisePackage.mediaUrls.firstOrNull().toString(),
                         isPremium = exercisePackage.premium,
                         onClick = onExerciseClick

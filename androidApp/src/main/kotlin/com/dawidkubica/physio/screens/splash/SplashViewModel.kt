@@ -1,9 +1,6 @@
 package com.dawidkubica.physio.screens.splash
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.navigation.AuthScreen
 import com.dawidkubica.physio.navigation.Graph

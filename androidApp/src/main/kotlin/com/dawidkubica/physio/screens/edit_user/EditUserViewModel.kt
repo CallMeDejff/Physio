@@ -1,16 +1,20 @@
 package com.dawidkubica.physio.screens.edit_user
 
+import android.content.Context
 import android.util.Log
+import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.User
 import com.dawidkubica.physio.screens.profile.UserSharedViewModel
 import com.dawidkubica.physio.service.services.AccountService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class EditUserViewModel @Inject constructor(
     private val accountService: AccountService,
+    @ApplicationContext private val context: Context
 ) : UserSharedViewModel() {
 
     val userName: StateFlow<String> = _userName
@@ -32,7 +36,7 @@ class EditUserViewModel @Inject constructor(
     ) {
         launchCatching(
             tag = EDIT_USER_VIEW_MODEL_TAG,
-            errorMessage = "Nie udało się zaktualizować danych użytkownika.",
+            errorMessage = context.getString(R.string.error_update_user_data),
             onError = { message -> _message.emit(message) },
             block = {
                 val userId = accountService.currentUserId

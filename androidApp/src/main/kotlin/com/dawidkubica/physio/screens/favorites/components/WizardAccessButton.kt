@@ -9,18 +9,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dawidkubica.physio.screens.favorites.FavoritesViewModel
-import com.dawidkubica.physio.screens.search.SearchViewModel
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.ghost_white
 
 @Composable
 fun WizardAccessButton(
     navController: NavController,
     viewModel: FavoritesViewModel,
-    modifier: Modifier
 ) {
     FloatingActionButton(
         onClick = {
@@ -35,6 +32,6 @@ fun WizardAccessButton(
             .padding(16.dp)
             .padding(bottom = 60.dp)
     ) {
-        Icon(Icons.Outlined.Edit, contentDescription = "floating action button.")
+        Icon(Icons.Outlined.Edit, contentDescription = "floating action button.", tint = Color.White)
     }
 }

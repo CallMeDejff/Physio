@@ -2,7 +2,6 @@ package com.dawidkubica.physio.navigation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -24,7 +23,6 @@ fun NavGraphBuilder.searchNavGraph(navController: NavHostController) {
         composable(route = BottomBarScreen.Search.route) { backStackEntry ->
             val viewModel: SearchViewModel = hiltViewModel(backStackEntry)
             SearchScreen(
-                navController = navController,
                 navigate = { route -> navigate(navController, route) },
                 viewModel = viewModel
             )

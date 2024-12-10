@@ -18,14 +18,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
 import com.dawidkubica.physio.screens.wizards.viewmodels.CreatorWizardViewModel
-import com.dawidkubica.physio.ui.theme.PhysioTheme
-import com.dawidkubica.physio.ui.theme.colorPrimary
-import com.dawidkubica.physio.ui.theme.ghost_white
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
