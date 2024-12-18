@@ -21,7 +21,6 @@ import com.dawidkubica.physio.core.Constants.LOCALHOST
 import com.dawidkubica.physio.core.Constants.STORAGE_PORT
 import com.dawidkubica.physio.core.PhysioApp
 import com.dawidkubica.physio.service.UserPreferences
-import com.dawidkubica.physio.service.services.StorageSampleDataService
 import com.facebook.CallbackManager
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -35,8 +34,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PhysioActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var storageSampleDataService: StorageSampleDataService
     @Inject
     lateinit var sharedPreferences: UserPreferences
 
@@ -71,15 +68,10 @@ class PhysioActivity : ComponentActivity() {
 
         createNotificationChannel()
         //configureFirebaseServices()
-        insertSampleData()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d(
-            "PhysioActivity",
-            "onActivityResult called with requestCode: $requestCode, resultCode: $resultCode"
-        )
         callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -100,11 +92,5 @@ class PhysioActivity : ComponentActivity() {
         Firebase.auth.useEmulator(LOCALHOST, AUTH_PORT)
         Firebase.firestore.useEmulator(LOCALHOST, FIRESTORE_PORT)
         Firebase.storage.useEmulator(LOCALHOST, STORAGE_PORT)
-    }
-
-    private fun insertSampleData() {
-        lifecycleScope.launch {
-            storageSampleDataService.setSampleData()
-        }
     }
 }

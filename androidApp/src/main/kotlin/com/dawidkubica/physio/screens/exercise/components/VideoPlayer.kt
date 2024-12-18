@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Forward5
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Replay5
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,17 +56,19 @@ import kotlinx.coroutines.launch
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayer(
-    videoUrl: String,
-    onVideoSizeChanged: (Int, Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
+    videoUrl: String,
+    isPaused: Boolean = false,
+    onVideoSizeChanged: (Int, Int) -> Unit = { _, _ -> },
+    onReplay: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var isPlaying by remember { mutableStateOf(false) }
     var controlsVisible by remember { mutableStateOf(true) }
     var currentPosition by remember { mutableStateOf(0L) }
     var videoDuration by remember { mutableStateOf(0L) }
+    var isVideoEnded by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -84,6 +87,12 @@ fun VideoPlayer(
             .setTrackSelector(trackSelector)
             .build().apply {
                 addListener(object : Player.Listener {
+                    override fun onIsPlayingChanged(isPlayingState: Boolean) {
+                        if (playbackState == Player.STATE_ENDED) {
+                            isVideoEnded = true
+                        }
+                    }
+
                     override fun onVideoSizeChanged(videoSize: VideoSize) {
                         onVideoSizeChanged(videoSize.width, videoSize.height)
                     }
@@ -103,6 +112,15 @@ fun VideoPlayer(
         val mediaItem = MediaItem.fromUri(videoUrl)
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
+        if (!isPaused) exoPlayer.play()
+    }
+
+    LaunchedEffect(isPaused) {
+        if (isPaused) {
+            exoPlayer.pause()
+        } else {
+            exoPlayer.play()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -155,27 +173,38 @@ fun VideoPlayer(
             exit = fadeOut()
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                VideoControls(
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = {
-                        if (isPlaying) {
-                            exoPlayer.pause()
-                        } else {
+                if (isVideoEnded) {
+                    ReplayControl(
+                        onReplayClick = {
+                            exoPlayer.seekTo(0)
                             exoPlayer.play()
-                        }
-                        isPlaying = !isPlaying
-                        showControls()
-                    },
-                    onRewindClick = {
-                        exoPlayer.seekBack()
-                        showControls()
-                    },
-                    onForwardClick = {
-                        exoPlayer.seekForward()
-                        showControls()
-                    },
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                            isVideoEnded = false
+                            onReplay()
+                        },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    VideoControls(
+                        isPlaying = exoPlayer.isPlaying,
+                        onPlayPauseClick = {
+                            if (exoPlayer.isPlaying) {
+                                exoPlayer.pause()
+                            } else {
+                                exoPlayer.play()
+                            }
+                            showControls()
+                        },
+                        onRewindClick = {
+                            exoPlayer.seekBack()
+                            showControls()
+                        },
+                        onForwardClick = {
+                            exoPlayer.seekForward()
+                            showControls()
+                        },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
 
                 VideoProgressBar(
                     currentPosition = currentPosition,
@@ -188,6 +217,23 @@ fun VideoPlayer(
         }
     }
 }
+
+
+@Composable
+fun ReplayControl(
+    onReplayClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconButton(onClick = onReplayClick, modifier = modifier) {
+        Icon(
+            imageVector = Icons.Outlined.Replay,
+            contentDescription = "Replay Video",
+            tint = Color.White,
+            modifier = Modifier.size(64.dp)
+        )
+    }
+}
+
 
 @Composable
 fun VideoControls(

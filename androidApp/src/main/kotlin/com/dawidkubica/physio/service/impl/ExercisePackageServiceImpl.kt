@@ -284,7 +284,7 @@ class ExercisePackageServiceImpl @Inject constructor(
     }
 
     override suspend fun getUserExercisePackages(): UserPackages {
-        return cacheManager.getCachedUserPackages() ?: try {
+        return try {
             val user = accountService.getUserInfo()
 
             val favoritePackageIds = user?.favoritePackages ?: emptyList()
@@ -302,8 +302,6 @@ class ExercisePackageServiceImpl @Inject constructor(
                 favoritePackages = favoritePackages,
                 assignedPackages = assignedPackages
             )
-
-            cacheManager.setCachedUserPackages(userPackages)
             userPackages
         } catch (e: Exception) {
             Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error getting user exercise packages", e)

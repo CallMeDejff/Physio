@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -174,21 +175,23 @@ fun AutoCompleteDetailed(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             ) {
-                selectedItems.forEach { selectedItem ->
-                    val itemLabel = itemList.find { it.first == selectedItem }?.second
-                        ?: userList.find { it.uid == selectedItem }?.let {
-                            "${it.name} ${it.lastname} (${it.email})"
-                        } ?: "Nieznane"
+                item {
+                    selectedItems.forEach { selectedItem ->
+                        val itemLabel = itemList.find { it.first == selectedItem }?.second
+                            ?: userList.find { it.uid == selectedItem }?.let {
+                                "${it.name} ${it.lastname} (${it.email})"
+                            } ?: "Nieznane"
 
-                    RemovableItemCard(
-                        label = itemLabel,
-                        onRemove = { onToggleItem(selectedItem) }
-                    )
+                        RemovableItemCard(
+                            label = itemLabel,
+                            onRemove = { onToggleItem(selectedItem) }
+                        )
+                    }
                 }
             }
         }

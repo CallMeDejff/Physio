@@ -3,15 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
+        tools:ignore="SelectedPhotoAccess" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-
     <application
-
         android:name=".PhysioHiltApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -38,6 +38,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="false"
+            tools:replace="android:exported">
+        </activity>
 
         <meta-data
             tools:replace="android:value"
@@ -47,7 +53,6 @@
             tools:replace="android:value"
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
-
     </application>
 
 </manifest>

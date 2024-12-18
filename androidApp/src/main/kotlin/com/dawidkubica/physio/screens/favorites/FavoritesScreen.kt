@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,7 +47,10 @@ import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
 import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
+import androidx.compose.material3.pulltorefresh.*
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Indicator
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
     navController: NavController,
@@ -54,6 +58,7 @@ fun FavoritesScreen(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val categories by viewModel.fetchedCategories.collectAsState()
     val discoverPackages by viewModel.discoverPackagesList.collectAsState()
     val userType by viewModel.userType.collectAsState()
@@ -71,69 +76,76 @@ fun FavoritesScreen(
         }
     }
 
-    if (isLoading) {
-        FullScreenLoader()
-    } else {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 60.dp, top = 10.dp)
-                ) {
-                    item {
-                        GreetingSection(userName = userName)
-                    }
-
-                    item {
-                        ReminderSection(nextReminder = nextReminder)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
-                    item {
-                        CategorySection(
-                            categories = categories,
-                            selectedCategoryIndex = selectedCategoryIndex,
-                            onCategorySelected = { selectedCategoryIndex = it },
-                            onExerciseClick = { packageId ->
-                                navController.navigate("exercise_screen/${packageId}")
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
-                    item {
-                        DiscoverSection(
-                            discoverPackages = discoverPackages,
-                            onExerciseClick = { packageId ->
-                                navController.navigate("exercise_screen/${packageId}")
-                            }
-                        )
-                    }
-                }
-
-                if (userType == 1) {
-                    Box(
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refreshContent() },
+    ) {
+        if (isLoading) {
+            FullScreenLoader()
+        } else {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(8.dp)
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
                         modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(4.dp)
-                            .wrapContentSize()
+                            .fillMaxSize()
+                            .padding(bottom = 60.dp, top = 10.dp)
                     ) {
-                        WizardAccessButton(
-                            navController = navController,
-                            viewModel = viewModel,
-                        )
+                        item {
+                            GreetingSection(userName = userName)
+                        }
+
+                        item {
+                            ReminderSection(nextReminder = nextReminder)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        item {
+                            CategorySection(
+                                categories = categories,
+                                selectedCategoryIndex = selectedCategoryIndex,
+                                onCategorySelected = { selectedCategoryIndex = it },
+                                onExerciseClick = { packageId ->
+                                    navController.navigate("exercise_screen/${packageId}")
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        item {
+                            DiscoverSection(
+                                discoverPackages = discoverPackages,
+                                onExerciseClick = { packageId ->
+                                    navController.navigate("exercise_screen/${packageId}")
+                                }
+                            )
+                        }
+                    }
+
+                    if (userType == 1) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(4.dp)
+                                .wrapContentSize()
+                        ) {
+                            WizardAccessButton(
+                                navController = navController,
+                                viewModel = viewModel,
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
+
 
 @Composable
 fun GreetingSection(userName: String) {

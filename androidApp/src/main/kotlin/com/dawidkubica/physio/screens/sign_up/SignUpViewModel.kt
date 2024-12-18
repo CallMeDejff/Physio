@@ -37,6 +37,10 @@ class SignUpViewModel @Inject constructor(
     private val _signupMessage = MutableStateFlow<String?>(null)
     val signupMessage = _signupMessage.asStateFlow()
 
+    private val _showEmailVerificationDialog = MutableStateFlow(false)
+    val showEmailVerificationDialog = _showEmailVerificationDialog.asStateFlow()
+
+
     fun updateName(name: String) {
         this.name = name
     }
@@ -116,7 +120,6 @@ class SignUpViewModel @Inject constructor(
         if (validationResult.isSuccess) {
             _showProgress.update { true }
             callUserSignUp(openAndPopUp)
-            Log.d(SIGNUP_VIEWMODEL_TAG, "callUserSignUp:success")
         } else {
             _showProgress.update { false }
             updateRepeatedPassword("")
@@ -144,9 +147,12 @@ class SignUpViewModel @Inject constructor(
                         userType = userType,
                         provider = Provider.Physio.providerId
                     )
-
                     authenticationService.createUser(newUser)
-                    openAndPopUp(Graph.HOME, AuthScreen.SignUp.route)
+                    authenticationService.verifyEmail()
+                    authenticationService.signOut()
+
+                    _showEmailVerificationDialog.update { true }
+
                 } else {
                     val authError = resultSignUp.exceptionOrNull() as? AuthError
                     _signupMessage.emit(authError?.message ?: context.getString(R.string.signup_error))
@@ -159,6 +165,10 @@ class SignUpViewModel @Inject constructor(
 
     fun clearSignupMessage() {
         _signupMessage.update { null }
+    }
+
+    fun dismissEmailVerificationDialog() {
+        _showEmailVerificationDialog.update { false }
     }
 
     companion object {

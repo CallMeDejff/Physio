@@ -87,6 +87,9 @@ class PackageCreatorViewModel @Inject constructor(
     private val _selectedMediaUris = MutableStateFlow<List<Uri>>(emptyList())
     val selectedMediaUris: StateFlow<List<Uri>> = _selectedMediaUris
 
+    private val _isUploading = MutableStateFlow(false)
+    val isUploading: StateFlow<Boolean> = _isUploading
+
     private val titleError = MutableStateFlow<String?>(null)
     private val descriptionError = MutableStateFlow<String?>(null)
     private val conditionError = MutableStateFlow<String?>(null)
@@ -224,6 +227,7 @@ class PackageCreatorViewModel @Inject constructor(
         launchCatching(
             tag = PACKAGE_VIEWMODEL_TAG,
             block = {
+                _isLoading.update { true }
                 val assignResult = exercisePackageService.assignPackageToUser(
                     userId = _selectedUsers.value.first(),
                     packageId = _selectedPackages.value.first()
@@ -231,9 +235,11 @@ class PackageCreatorViewModel @Inject constructor(
 
                 if (assignResult.isSuccess) {
                     navigate(WizardScreen.CreatorWizard.route)
+                    _isLoading.update { false }
                     _message.update { "Pakiet ćwiczeń został przypisany" }
                 } else {
                     val status = assignResult.exceptionOrNull().toString()
+                    _isLoading.update { false }
                     _message.update { status }
                 }
 
@@ -316,14 +322,15 @@ class PackageCreatorViewModel @Inject constructor(
             tag = PACKAGE_VIEWMODEL_TAG,
             onError = { message -> _message.update { message } },
             block = {
+                _isLoading.update { true }
                 val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
-                val title = _packageName.value.orEmpty()
+                //val title = _packageName.value.orEmpty()
                 val description = _packageDescription.value.orEmpty()
                 val selectedConditions = _selectedConditions.value.toList()
                 val selectedExercises = _selectedExercises.value.toList()
 
                 val isValid = Validator.validateFields(
-                    title = title,
+                    //title = title,
                     description = description,
                     selectedExercises = selectedExercises,
                     selectedConditions = selectedConditions,
@@ -336,6 +343,7 @@ class PackageCreatorViewModel @Inject constructor(
                     showMessage = { message -> _message.update { message } }
                 )
                 if (!isValid) {
+                    _isLoading.update { false }
                     return@launchCatching
                 }
                 handlePackageSave(navigate, null, combinedExercises, isEdit)
@@ -366,14 +374,16 @@ class PackageCreatorViewModel @Inject constructor(
                 if (isEdit) {
                     exercisePackageService.updateExercisePackage(
                         exercisePackage,
-                        processedUri?.let { listOf(it) } ?: emptyList()
+                        _selectedMediaUris.value.toList()
                     )
+                    _isLoading.update { false }
                     _message.update { "Pakiet ćwiczeń zaktualizowany." }
                 } else {
                     exercisePackageService.createExercisePackage(
                         exercisePackage,
-                        processedUri?.let { listOf(it) } ?: emptyList()
+                        _selectedMediaUris.value.toList()
                     )
+                    _isLoading.update { false }
                     _message.update { "Pakiet ćwiczeń został utworzony." }
                 }
                 navigate(WizardScreen.CreatorWizard.route)
@@ -394,7 +404,8 @@ class PackageCreatorViewModel @Inject constructor(
             conditionIds = _selectedConditions.value.toList(),
             equipmentIds = equipmentFromExercises.values.flatten(),
             bodyPartIds = _selectedBodyParts.value.toList(),
-            description = _packageDescription.value.orEmpty()
+            description = _packageDescription.value.orEmpty(),
+            mediaUrls = _selectedMediaUris.value.toList().map { it.toString() },
         )
     }
 

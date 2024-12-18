@@ -27,12 +27,14 @@ import androidx.compose.material.icons.outlined.ArrowDropUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,7 +59,9 @@ import com.dawidkubica.physio.screens.search.components.ExercisePackageCard
 import com.dawidkubica.physio.ui.components.FilterableItemSelector
 import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
+import kotlinx.coroutines.flow.update
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navigate: (String) -> Unit,
@@ -69,13 +73,10 @@ fun SearchScreen(
     val isLoadingResults by viewModel.isLoadingResults.collectAsState()
     var searchText by remember { mutableStateOf("") }
     val packagesToShow by viewModel.filteredPackages.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.apply {
-            loadEquipmentList()
-            loadConditionList()
-            loadBodyPartsList()
-        }
+        viewModel.initializeData()
     }
 
     LaunchedEffect(viewModel.message) {
@@ -87,7 +88,10 @@ fun SearchScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refreshData() }
+    ) {
         if (isLoading) {
             FullScreenLoader()
         } else {
@@ -97,8 +101,7 @@ fun SearchScreen(
                 isLoadingResults = isLoadingResults,
                 onSearchClick = {
                     viewModel.apply {
-                        searchForMatchingPackages()
-                        filterPackagesList(searchText)
+                        searchForMatchingPackages(searchText)
                     }
                 },
                 matchingPackages = packagesToShow,

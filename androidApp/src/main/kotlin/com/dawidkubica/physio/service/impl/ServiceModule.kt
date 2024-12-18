@@ -9,8 +9,6 @@ import com.dawidkubica.physio.service.services.ExercisePackageService
 import com.dawidkubica.physio.service.services.ExerciseService
 import com.dawidkubica.physio.service.services.FileStorageService
 import com.dawidkubica.physio.service.services.ListService
-import com.dawidkubica.physio.service.services.StorageSampleDataService
-import com.dawidkubica.physio.service.services.StorageService
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Binds
 import dagger.Module
@@ -28,12 +26,6 @@ abstract class ServiceModule {
 
     @Binds
     abstract fun provideAuthenticationService(impl: AuthenticationServiceImpl): AuthenticationService
-
-    @Binds
-    abstract fun provideStorageService(impl: StorageServiceImpl): StorageService
-
-    @Binds
-    abstract fun provideSampleStorageDataService(impl: StorageSampleImpl): StorageSampleDataService
 
     @Binds
     abstract fun provideListService(impl: ListServiceImpl): ListService

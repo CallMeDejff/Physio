@@ -117,7 +117,8 @@
     <string name="notification_message">Nie zapomnij o swojej sesji z %1$s!</string>
     <string name="default_session_topic">Twoja sesja</string>
     <!-- Profile Screen Texts -->
-    <string name="profile_settings_panel">Panel ustawień</string>
+    <string name="profile_settings_panel">Panel </string>
+    <string name="profile_settings_panel_pt2">ustawień</string>
     <string name="profile_customize">Dostosuj wszystko pod siebie</string>
     <string name="edit_user_data">Edytuj dane użytkownika</string>
     <string name="change_email">Zmień adres email</string>
@@ -164,4 +165,8 @@
     <string name="change_data_confirm">Zmieniam dane</string>
     <string name="no">Nie</string>
     <string name="confirmation">Potwierdzenie</string>
+
+    <string name="verification_required_title">Potwierdzenie adresu e-mail</string>
+    <string name="verification_required_message">Twoje konto zostało utworzone. Zweryfikuj swój adres e-mail przed pierwszym zalogowaniem.</string>
+    <string name="ok">OK</string>
 </resources>

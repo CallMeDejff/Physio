@@ -42,9 +42,26 @@ open class PhysioAppViewModel : ViewModel() {
             viewModelScope.launch {
                 onError(messageToEmit)
             }
-        },
-        block = block
-    )
+        }
+    ) {
+        if (!isInternetAvailable()) {
+            val noInternetMessage = "Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie."
+            Log.d(tag, noInternetMessage)
+            onError(noInternetMessage)
+            return@launch
+        }
+        block()
+    }
+
+    private fun isInternetAvailable(): Boolean {
+        return try {
+            val process = Runtime.getRuntime().exec("ping -c 1 -W 5 8.8.8.8")
+            val exitValue = process.waitFor()
+            exitValue == 0
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     fun toggleItem(
         itemId: String,

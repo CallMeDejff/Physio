@@ -31,29 +31,6 @@ class AuthenticationServiceImpl @Inject constructor(
     override var currentUserId: String = ""
         get() = Firebase.auth.currentUser?.uid.orEmpty()
 
-    override suspend fun createUser(user: User) {
-        try {
-            val userDocRef = firestore.collection(USERS_COLLECTION)
-                .document(user.uid)
-
-            userDocRef
-                .set(user)
-                .await()
-
-            userPreferences.setUser(
-                user.uid,
-                user.name,
-                user.lastname,
-                user.licenseNumber,
-                user.userType,
-                user.provider
-            )
-            Log.d(AUTHENTICATION_SERVICE_TAG, "createUser: $user")
-        } catch (e: Exception) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "createUser: Error creating user:", e)
-        }
-    }
-
     override suspend fun changePassword(newPassword: String): Result<Unit> {
         return try {
             val user = auth.currentUser ?: return Result.failure(Exception("User is not logged in"))
@@ -106,105 +83,84 @@ class AuthenticationServiceImpl @Inject constructor(
         return Firebase.auth.currentUser != null
     }
 
-    override suspend fun setUserInfo(userId: String): User? {
+    override suspend fun signInWithEmailVerification(
+        email: String,
+        password: String,
+        context: Context,
+        requireEmailVerification: Boolean
+    ): Result<Unit> {
         return try {
-            val documentSnapshot = firestore.collection(USERS_COLLECTION)
-                .document(userId)
-                .get()
-                .await()
+            val signInResult = auth.signInWithEmailAndPassword(email, password).await()
+            val currentUser = signInResult.user
 
-            if (documentSnapshot.exists()) {
-                val fetchedUser = documentSnapshot.toObject(User::class.java)?.also {
-                    if (userId == currentUserId) {
-                        userPreferences.setUser(
-                            it.uid,
-                            it.name,
-                            it.lastname,
-                            it.licenseNumber,
-                            it.userType,
-                            it.provider
-                        )
-                        Log.d(AUTHENTICATION_SERVICE_TAG, "Called user set in shared preferences")
+            if (currentUser != null) {
+                if (requireEmailVerification && !currentUser.isEmailVerified) {
+                    Result.failure(AuthError("Adres e-mail nie został zweryfikowany. Sprawdź swoją skrzynkę e-mail."))
+                } else {
+                    val userInfo = setUserInfo(currentUser.uid)
+                    if (userInfo != null) {
+                        updateEmailVerificationStatusInFirestore(currentUser.uid, currentUser.isEmailVerified)
+                        Result.success(Unit)
+                    } else {
+                        Result.failure(AuthError("Nie udało się pobrać informacji o użytkowniku."))
                     }
                 }
-                fetchedUser
             } else {
-                Log.e(AUTHENTICATION_SERVICE_TAG, "Document for userId $userId does not exist")
-                null
-            }
-        } catch (e: Exception) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "Error getting user info", e)
-            null
-        }
-    }
-
-    override suspend fun signIn(email: String, password: String, context: Context): Result<Unit> {
-        return try {
-            val signInResult = Firebase.auth.signInWithEmailAndPassword(email, password).await()
-            if (signInResult.user != null) {
-                val userId = signInResult.user?.uid
-                Log.d(AUTHENTICATION_SERVICE_TAG, "signInWithEmailAndPassword:success:$userId")
-                currentUserId = userId ?: ""
-
-                val userInfo = setUserInfo(currentUserId)
-                if (userInfo != null) {
-                    Result.success(Unit)
-                } else {
-                    Log.e(AUTHENTICATION_SERVICE_TAG, "Failed to fetch user info")
-                    Result.failure(AuthError("Nie udało się pobrać informacji o użytkowniku"))
-                }
-            } else {
-                Log.e(
-                    AUTHENTICATION_SERVICE_TAG,
-                    "signInWithEmailAndPassword:failure - no user returned"
-                )
-                Result.failure(AuthError("Logowanie nie powiodło się"))
+                Result.failure(AuthError("Logowanie nie powiodło się. Użytkownik nie został znaleziony."))
             }
         } catch (e: FirebaseAuthException) {
             val errorCode = e.errorCode
             val errorMessage =
                 authErrors[errorCode]?.let { context.getString(it) } ?: e.message ?: "Nieznany błąd"
-            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithEmailAndPassword:failure", e)
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithEmailVerification:failure", e)
             Result.failure(AuthError(errorMessage, errorCode))
-        } catch (e: FirebaseNetworkException) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithEmailAndPassword:network error", e)
-            Result.failure(AuthError("Błąd sieci. Sprawdź swoje połączenie.", "NETWORK_ERROR"))
         } catch (e: Exception) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithEmailAndPassword:unknown error", e)
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithEmailVerification:unknown error", e)
             Result.failure(AuthError("Wystąpił nieoczekiwany błąd.", null))
         }
     }
 
+    private suspend fun updateEmailVerificationStatusInFirestore(userId: String, isEmailVerified: Boolean) {
+        try {
+            val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
+            userDocRef.update("emailVerified", isEmailVerified).await()
+            Log.d(AUTHENTICATION_SERVICE_TAG, "Email verification status updated for user $userId")
+        } catch (e: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "Failed to update email verification status for user $userId", e)
+        }
+    }
+
     override suspend fun signInWithFacebook(
+        context: Context,
         token: String,
         onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
+        onFailure: (Throwable) -> Unit
     ) {
         val credential = FacebookAuthProvider.getCredential(token)
         try {
             val signInResult = auth.signInWithCredential(credential).await()
-            Log.d(
-                AUTHENTICATION_SERVICE_TAG,
-                "signInWithFacebook:success:${signInResult.user?.uid}"
-            )
             currentUserId = signInResult.user?.uid ?: ""
 
-            fetchUserLogInInfo(Provider.Facebook)
+            fetchUserLoginInfo(Provider.Facebook)
             onSuccess()
-        } catch (exception: Exception) {
-            Log.e(
-                AUTHENTICATION_SERVICE_TAG,
-                "signInWithFacebook: Firebase auth exception: ${exception.message}",
-                exception
-            )
-            onFailure(exception)
+        } catch (e: FirebaseAuthException) {
+            val errorCode = e.errorCode
+            val errorMessage = authErrors[errorCode]?.let { context.getString(it) } ?: e.message
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithFacebook:failure", e)
+            LoginManager.getInstance().logOut()
+            onFailure(AuthError(errorMessage ?: "Nieznany błąd", errorCode))
+        } catch (e: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithFacebook:unknown error", e)
+            LoginManager.getInstance().logOut()
+            onFailure(AuthError("Wystąpił nieoczekiwany błąd.", null))
         }
     }
 
     override suspend fun signInWithGoogle(
+        context: Context,
         token: String,
         onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
+        onFailure: (Throwable) -> Unit
     ) {
         val credential = GoogleAuthProvider.getCredential(token, null)
         try {
@@ -212,75 +168,119 @@ class AuthenticationServiceImpl @Inject constructor(
             Log.d(AUTHENTICATION_SERVICE_TAG, "signInWithGoogle:success:${signInResult.user?.uid}")
             currentUserId = signInResult.user?.uid ?: ""
 
-            fetchUserLogInInfo(Provider.Google)
+            fetchUserLoginInfo(Provider.Google)
             onSuccess()
-
-        } catch (exception: Exception) {
-            Log.e(
-                AUTHENTICATION_SERVICE_TAG,
-                "signInWithGoogle: Firebase auth exception: ${exception.message}",
-                exception
-            )
-            onFailure(exception)
+        } catch (e: FirebaseAuthException) {
+            val errorCode = e.errorCode
+            val errorMessage = authErrors[errorCode]?.let { context.getString(it) } ?: e.message
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithGoogle:failure", e)
+            onFailure(AuthError(errorMessage ?: "Nieznany błąd", errorCode))
+        } catch (e: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "signInWithGoogle:unknown error", e)
+            onFailure(AuthError("Wystąpił nieoczekiwany błąd.", null))
         }
     }
 
-    private suspend fun fetchUserLogInInfo(provider: Provider) {
-        val userDocRef = firestore.collection(USERS_COLLECTION).document(currentUserId)
-        val documentSnapshot = userDocRef.get().await()
-
-        if (documentSnapshot.exists()) {
-            Log.d(AUTHENTICATION_SERVICE_TAG, "createUser: User already exists.")
-
-            val userInfo = setUserInfo(currentUserId)
-            if (userInfo != null) {
-                Log.d(AUTHENTICATION_SERVICE_TAG, "Fetched user info: $userInfo")
-                Result.success(Unit)
-            } else {
-                Log.e(AUTHENTICATION_SERVICE_TAG, "Failed to fetch user info")
-                Result.failure(Exception("Nie udało się pobrać informacji o użytkowniku"))
-            }
-            return
+    override suspend fun createUser(user: User) {
+        try {
+            saveUser(user)
+            Log.d(AUTHENTICATION_SERVICE_TAG, "createUser: User created successfully: $user")
+        } catch (e: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "createUser: Error creating user", e)
         }
+    }
 
-        val providerToSet = provider.providerId
+    override suspend fun setUserInfo(userId: String): User? {
+        return fetchAndProcessUser(userId) { user ->
+            if (userId == currentUserId) {
+                userPreferences.setUser(
+                    user.uid,
+                    user.name,
+                    user.lastname,
+                    user.licenseNumber,
+                    user.userType,
+                    user.provider
+                )
+                Log.d(AUTHENTICATION_SERVICE_TAG, "User info updated in preferences")
+            }
+        }
+    }
 
-        val newUser = User(
-            uid = Firebase.auth.currentUser?.uid ?: "",
-            name = Firebase.auth.currentUser?.displayName ?: "",
-            email = Firebase.auth.currentUser?.email ?: "",
-            provider = providerToSet
+    private suspend fun fetchUserLoginInfo(provider: Provider) {
+        fetchAndProcessUser(currentUserId) { user ->
+            Log.d(AUTHENTICATION_SERVICE_TAG, "Fetched user info: $user")
+            userPreferences.setUser(
+                user.uid,
+                user.name,
+                user.lastname,
+                user.licenseNumber,
+                user.userType,
+                user.provider
+            )
+        } ?: run {
+            val newUser = User(
+                uid = auth.currentUser?.uid.orEmpty(),
+                name = auth.currentUser?.displayName.orEmpty(),
+                email = auth.currentUser?.email.orEmpty(),
+                provider = provider.providerId,
+                emailVerified = auth.currentUser?.isEmailVerified ?: false
+            )
+            saveUser(newUser)
+            Log.d(AUTHENTICATION_SERVICE_TAG, "Created new user: $newUser")
+                setUserInfo(currentUserId)
+
+        }
+    }
+
+
+
+    private suspend fun fetchAndProcessUser(
+        userId: String,
+        onUserFetched: (User) -> Unit
+    ): User? {
+        return try {
+            val documentSnapshot = firestore.collection(USERS_COLLECTION)
+                .document(userId)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val user = documentSnapshot.toObject(User::class.java)
+                user?.let { onUserFetched(it) }
+                user
+            } else {
+                Log.e(AUTHENTICATION_SERVICE_TAG, "User document does not exist for ID: $userId")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(AUTHENTICATION_SERVICE_TAG, "Error fetching user", e)
+            null
+        }
+    }
+
+    private suspend fun saveUser(user: User) {
+        firestore.collection(USERS_COLLECTION)
+            .document(user.uid)
+            .set(user)
+            .await()
+
+        userPreferences.setUser(
+            user.uid,
+            user.name,
+            user.lastname,
+            user.licenseNumber,
+            user.userType,
+            user.provider
         )
-        createUser(newUser)
-        Log.d(AUTHENTICATION_SERVICE_TAG, "createUser: $newUser")
-        setUserInfo(currentUserId)
     }
 
     override suspend fun signUp(email: String, password: String, context: Context): Result<Unit> {
         return try {
             val signUpResult = Firebase.auth.createUserWithEmailAndPassword(email, password).await()
             if (signUpResult.user != null) {
-                val userId = signUpResult.user?.uid
-                Log.d(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:success:$userId")
-
                 Firebase.auth.signInWithEmailAndPassword(email, password).await()
-                Log.d(
-                    AUTHENTICATION_SERVICE_TAG,
-                    "signInAfterSignUp:success:${Firebase.auth.currentUser?.uid}"
-                )
-
-                val userInfo = setUserInfo(userId ?: "")
-                if (userInfo != null) {
-                    Result.success(Unit)
-                } else {
-                    Log.e(AUTHENTICATION_SERVICE_TAG, "Failed to set user info")
-                    Result.failure(AuthError("Nie udało się ustawić informacji o użytkowniku"))
-                }
+                Result.success(Unit)
             } else {
-                Log.e(
-                    AUTHENTICATION_SERVICE_TAG,
-                    "createUserWithEmail:failure - no user returned"
-                )
                 Result.failure(AuthError("Rejestracja nie powiodła się"))
             }
         } catch (e: FirebaseAuthException) {
@@ -289,21 +289,13 @@ class AuthenticationServiceImpl @Inject constructor(
                 authErrors[errorCode]?.let { context.getString(it) } ?: e.message ?: "Nieznany błąd"
             Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:failure", e)
             Result.failure(AuthError(errorMessage, errorCode))
-        } catch (e: FirebaseNetworkException) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:network error", e)
-            Result.failure(AuthError("Błąd sieci. Sprawdź swoje połączenie.", "NETWORK_ERROR"))
         } catch (e: Exception) {
             Log.e(AUTHENTICATION_SERVICE_TAG, "createUserWithEmail:unknown error", e)
             Result.failure(AuthError("Wystąpił nieoczekiwany błąd.", null))
         }
     }
 
-
     override suspend fun signOut() {
-        Log.d(
-            AUTHENTICATION_SERVICE_TAG,
-            "signOut: signed out, provider: ${userPreferences.getAccountProvider()}"
-        )
         if (userPreferences.getAccountProvider() == Provider.Facebook.providerId) {
             LoginManager.getInstance().logOut()
         }

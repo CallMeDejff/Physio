@@ -16,7 +16,7 @@ android {
         applicationId = "com.dawidkubica.physio"
         minSdk = 33
         targetSdk = 34
-        versionCode = 2
+        versionCode = 6
         versionName = "1.0"
     }
     buildFeatures {
@@ -73,12 +73,14 @@ dependencies {
     implementation(libs.facebook.login)
     implementation(libs.coil.compose)
     implementation(libs.play.services.auth)
-    implementation("com.vanniktech:android-image-cropper:4.6.0")
-    implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation(libs.android.image.cropper)
+    implementation(libs.glide)
     kapt("com.github.bumptech.glide:compiler:4.12.0")
-    implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
-    implementation("androidx.compose.ui:ui-graphics:1.7.5")
-
+    implementation(libs.ffmpeg.kit.full)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.billing)
+    implementation(libs.purchases.core)
+    implementation(libs.purchases.ui)
 
     implementation(libs.converter.gson)
     implementation (libs.gson)

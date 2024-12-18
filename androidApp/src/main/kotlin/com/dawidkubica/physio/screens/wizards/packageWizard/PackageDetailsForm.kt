@@ -1,4 +1,4 @@
-package com.dawidkubica.physio.screens.wizards.packageWizard
+ package com.dawidkubica.physio.screens.wizards.packageWizard
 
 import android.net.Uri
 import android.util.Log
@@ -282,6 +282,7 @@ fun SelectFromListSection(
         Box(
             modifier = Modifier
                 .heightIn(200.dp, 300.dp)
+                .wrapContentHeight()
         ) {
             AutoCompleteDetailed(
                 itemList = exercisesList,

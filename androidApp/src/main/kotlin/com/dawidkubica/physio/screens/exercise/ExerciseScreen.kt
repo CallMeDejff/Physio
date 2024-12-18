@@ -2,7 +2,10 @@ package com.dawidkubica.physio.screens.exercise
 
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.AssignmentReturn
-import androidx.compose.material.icons.outlined.AssignmentReturn
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.Unsubscribe
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,9 +31,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,6 +61,7 @@ fun ExerciseScreen(
     val context = LocalContext.current
     var selectedMediaUrl by remember { mutableStateOf<String?>(null) }
     var selectedMediaType by remember { mutableStateOf<String?>(null) }
+    var isVideoPaused by remember { mutableStateOf(false) }
     val mediaUrl by viewModel.mediaUris.collectAsState()
 
     val configuration = LocalConfiguration.current
@@ -85,22 +86,17 @@ fun ExerciseScreen(
         }
     }
 
-    if (selectedMediaUrl != null && selectedMediaType != null) {
-        PreviewScreen(
-            mediaUrl = selectedMediaUrl!!,
-            mediaType = selectedMediaType!!,
-            isUrl = true,
-            onDismiss = {
-                selectedMediaUrl = null
-                selectedMediaType = null
-            }
-        )
-    } else {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         BottomSheetScaffold(
             scaffoldState = sheetState,
             sheetPeekHeight = remainingHeight,
             sheetContent = {
                 BottomSheetContent(
+                    isPaused = isVideoPaused,
                     popBackStack = popBackStack,
                     viewModel = viewModel,
                     packageId = packageId,
@@ -113,6 +109,27 @@ fun ExerciseScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             ScreenHeader(mediaUrl, headerHeight, viewModel)
+        }
+
+        if (selectedMediaUrl != null && selectedMediaType != null) {
+            isVideoPaused = true
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.7f))
+                    .clickable { }
+            ) {
+                PreviewScreen(
+                    mediaUrl = selectedMediaUrl!!,
+                    mediaType = selectedMediaType!!,
+                    isUrl = true,
+                    onDismiss = {
+                        isVideoPaused = false
+                        selectedMediaUrl = null
+                        selectedMediaType = null
+                    }
+                )
+            }
         }
     }
 }
@@ -166,6 +183,7 @@ fun ScreenHeader(mediaUrl: String?, headerHeight: Dp, viewModel: ExerciseViewMod
 @Composable
 @ExperimentalMaterial3Api
 fun BottomSheetContent(
+    isPaused: Boolean,
     popBackStack: () -> Unit,
     viewModel: ExerciseViewModel,
     packageId: String?,
@@ -179,19 +197,19 @@ fun BottomSheetContent(
         }
         onDispose {}
     }
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Top
             ) {
                 item {
-                    DescriptionView(viewModel = viewModel)
+                    DescriptionView(viewModel = viewModel, packageId = packageId)
                 }
 
                 item {
                     ExercisesView(
+                        isPaused = isPaused,
                         viewModel = viewModel,
-                        Modifier.wrapContentHeight(),
+                        modifier = Modifier.wrapContentHeight(),
                         onMediaClick = onMediaClick
                     )
                 }
@@ -204,8 +222,6 @@ fun BottomSheetContent(
                     )
                 }
             }
-
-
 }
 
 @Composable
@@ -217,8 +233,9 @@ fun NavigationButtons(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp),
-        horizontalArrangement = Arrangement.Center
+            .padding(vertical = 8.dp, horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Bottom
     ) {
         Button(
             onClick = { viewModel.onGoBackClick(popBackStack) },
@@ -252,23 +269,6 @@ fun NavigationButtons(
                         .size(36.dp)
                 )
             }
-            Spacer(modifier = Modifier.size(8.dp))
-        }
-
-        Button(
-            onClick = { viewModel.togglePackageFavoriteStatus(packageId.orEmpty()) },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Favorite,
-                contentDescription = "Favorites management",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(2.dp)
-                    .size(36.dp)
-            )
         }
     }
 }

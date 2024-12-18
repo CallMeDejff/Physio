@@ -26,11 +26,11 @@ fun SelectionButton(
             .fillMaxWidth()
             .border(
                 width = 2.dp,
-                color = if (selectedButton == buttonType) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                color = if (selectedButton == buttonType) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(16.dp)
             ),
         shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = if (selectedButton == buttonType) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+        colors = ButtonDefaults.buttonColors(containerColor = if (selectedButton == buttonType) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary)
     ) {
         Text(
             text = buttonType.displayName,

@@ -37,8 +37,9 @@ import com.dawidkubica.physio.ui.icons.Self_improvement
 @SuppressLint("UnrememberedMutableInteractionSource", "UnusedBoxWithConstraintsScope")
 @Composable
 fun ExercisesView(
-    viewModel: ExerciseViewModel,
     modifier: Modifier,
+    isPaused: Boolean,
+    viewModel: ExerciseViewModel,
     onMediaClick: (String, String) -> Unit
 ) {
     val context = LocalContext.current
@@ -47,8 +48,8 @@ fun ExercisesView(
     val equipmentList by viewModel.equipmentFullList.collectAsState()
 
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    var selectedTab by remember { mutableStateOf(ButtonType.WARMUP) }
-    val itemsToShow = if (selectedTab == ButtonType.WARMUP) warmups else exercises
+    var selectedTab by remember { mutableStateOf(ButtonType.EXERCISE) }
+    val itemsToShow = if (selectedTab == ButtonType.EXERCISE) exercises else warmups
     val pagerState = rememberPagerState(pageCount = { itemsToShow.size })
     val currentPage = remember { mutableStateOf(pagerState.currentPage) }
 
@@ -82,19 +83,26 @@ fun ExercisesView(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val buttons = listOf(
-                ButtonItem(
-                    type = ButtonType.WARMUP,
-                    text = "Rozgrzewka",
-                    icon = Person_celebrate,
-                    borderColor = MaterialTheme.colorScheme.primary
-                ),
+            val buttons = mutableListOf<ButtonItem>()
+
+            if (warmups.isNotEmpty()) {
+                buttons.add(
+                    ButtonItem(
+                        type = ButtonType.WARMUP,
+                        text = "Rozgrzewka",
+                        icon = Person_celebrate,
+                        borderColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+
+            buttons.add(
                 ButtonItem(
                     type = ButtonType.EXERCISE,
                     text = "Ćwiczenia",
                     icon = Self_improvement,
                     borderColor = MaterialTheme.colorScheme.primary
-                ),
+                )
             )
 
             MenuButtons(
@@ -130,6 +138,7 @@ fun ExercisesView(
 
                 if (isVisible.value) {
                     ExerciseCard(
+                        isPaused = isPaused,
                         exercise = exercise,
                         equipmentList = equipmentList,
                         onMediaClick = onMediaClick,

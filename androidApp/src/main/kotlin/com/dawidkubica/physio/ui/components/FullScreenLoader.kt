@@ -18,7 +18,7 @@ import com.dawidkubica.physio.R
 
 @Composable
 fun FullScreenLoader(
-    modifier: Modifier? = Modifier
+    modifier: Modifier? = Modifier,
 ) {
     Box(
         modifier = Modifier

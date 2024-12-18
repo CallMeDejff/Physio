@@ -36,6 +36,8 @@ class ReminderViewModel @Inject constructor(
     private val workManager = WorkManager.getInstance()
     private val _listedPackages = MutableStateFlow<Set<String>>(emptySet())
     val listedPackages: StateFlow<Set<String>> = _listedPackages
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
     private val fullDaysOfWeek: List<String> by lazy {
         context.resources.getStringArray(R.array.days_of_week_full).toList()
@@ -46,7 +48,15 @@ class ReminderViewModel @Inject constructor(
     }
 
     init {
+        _isLoading.update { true }
         initializeData()
+        _isLoading.update { false }
+    }
+
+    fun refreshData() {
+        _isRefreshing.update { true }
+        initializeData()
+        _isRefreshing.update { false }
     }
 
     private fun initializeData() {

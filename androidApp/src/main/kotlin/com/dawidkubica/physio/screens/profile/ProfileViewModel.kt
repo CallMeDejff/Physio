@@ -8,6 +8,7 @@ import com.dawidkubica.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,17 +27,19 @@ class ProfileViewModel @Inject constructor(
     val isEmailVerified: StateFlow<Boolean> = _isEmailVerified
     val _licenseNumber = MutableStateFlow("")
     val licenseNumber: StateFlow<String> = _licenseNumber
-
     val themeMode: StateFlow<ThemeMode> = userPreferences.themeModeFlow
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
     init {
+        _isLoading.update { true }
         fetchUserInformation()
+        _isLoading.update { false }
     }
 
     fun setThemeMode(newTheme: ThemeMode) {
         userPreferences.setThemeMode(newTheme)
     }
-
 
     fun onLogoutClick(openAndPopUp: (String, String) -> Unit) {
         launchCatching(
@@ -90,7 +93,17 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun fetchUserInformation() {
-        fetchUser(accountService, PROFILE_VIEW_MODEL_TAG)
+        launchCatching(
+            tag = PROFILE_VIEW_MODEL_TAG,
+            block = {
+                _isRefreshing.update { true }
+                try {
+                    fetchUser(accountService, PROFILE_VIEW_MODEL_TAG)
+                } finally {
+                    _isRefreshing.update { false }
+                }
+            }
+        )
     }
 
     companion object {

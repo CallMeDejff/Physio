@@ -188,13 +188,18 @@ fun ExerciseDetailsForm(
                     style = typography.labelLarge,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                AutoCompleteDetailed(
-                    itemList = equipmentList,
-                    selectedItems = selectedEquipment,
-                    onToggleItem = { equipmentId ->
-                        viewModel.toggleEquipment(equipmentId)
-                    },
-                )
+                Box(
+                    modifier = Modifier
+                        .heightIn(200.dp, 300.dp)
+                ) {
+                    AutoCompleteDetailed(
+                        itemList = equipmentList,
+                        selectedItems = selectedEquipment,
+                        onToggleItem = { equipmentId ->
+                            viewModel.toggleEquipment(equipmentId)
+                        },
+                    )
+                }
             }
 
             item {

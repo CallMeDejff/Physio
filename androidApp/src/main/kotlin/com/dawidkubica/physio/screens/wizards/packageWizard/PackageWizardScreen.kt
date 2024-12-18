@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ fun PackageWizardScreen(
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
+    val isUploading by viewModel.isUploading.collectAsState()
 
     LaunchedEffect(viewModel.message) {
         viewModel.message.collect { message ->
@@ -143,12 +145,16 @@ fun PackageWizardScreen(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(
-                        text = if (assignToPerson) "Przypisz" else if (isEditor || isEditorNextStep) "Edytuj" else "Utwórz",
-                        color = Color.White,
-                        style = typography.labelLarge,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    if (isUploading) {
+                        CircularProgressIndicator(color = Color.White)
+                    } else {
+                        Text(
+                            text = if (assignToPerson) "Przypisz" else if (isEditor || isEditorNextStep) "Edytuj" else "Utwórz",
+                            color = Color.White,
+                            style = typography.labelLarge,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.size(8.dp))

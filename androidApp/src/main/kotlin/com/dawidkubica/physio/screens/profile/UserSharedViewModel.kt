@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.ExercisePackage
+import com.dawidkubica.physio.models.Provider
 import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.ExercisePackageService
@@ -59,6 +60,7 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
                 _userLastname.value = user?.lastname ?: ""
                 _userEmail.value = user?.email ?: ""
                 _userType.value = user?.userType ?: 0
+                _isEmailVerified.value = user?.emailVerified ?: false
                 _userLicenseNumber.value = user?.licenseNumber ?: 0
                 _userAssignedPackages.value = user?.assignedPackages ?: emptyList()
                 _userFavoritePackages.value = user?.favoritePackages ?: emptyList()
@@ -66,6 +68,8 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
             }
         )
     }
-
-
+    fun mapProvider(provider: String?): Provider {
+        return Provider.values().find { it.providerId.equals(provider, ignoreCase = true) }
+            ?: Provider.Physio
+    }
 }

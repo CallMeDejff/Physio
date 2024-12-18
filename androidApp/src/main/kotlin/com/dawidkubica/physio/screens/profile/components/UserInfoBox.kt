@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,12 +34,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.R
+import com.dawidkubica.physio.core.navigate
+import com.dawidkubica.physio.models.Provider
+import com.dawidkubica.physio.navigation.ProfileScreen
 import com.dawidkubica.physio.ui.theme.GreenConfirmed
 import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun UserInfoBox(
+    navigate: (String) -> Unit,
+    providerId: Provider,
     userName: String,
     userLastname: String,
     userEmail: String,
@@ -66,7 +73,7 @@ fun UserInfoBox(
             ProfilePicture(
                 displayName = userName,
                 lastname = userLastname,
-                isEmailVerified = emailVerified
+                providerId = providerId
             )
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -83,7 +90,7 @@ fun UserInfoBox(
 
             Spacer(modifier = Modifier.size(4.dp))
 
-            PremiumStatusBox(isPremium = true)
+            PremiumStatusBox(isPremium = true, navigate = navigate)
 
             if (isExpanded) {
 
@@ -96,45 +103,13 @@ fun UserInfoBox(
                     )
                 }
 
-                UserInfoText(
-                    icon = if (emailVerified) Icons.Outlined.Done else Icons.Outlined.DoNotDisturbOn,
-                    label = context.getString(R.string.verified_account)
-                )
+                if (providerId == Provider.Physio) {
+                    UserInfoText(
+                        icon = if (emailVerified) Icons.Outlined.Done else Icons.Outlined.DoNotDisturbOn,
+                        label = context.getString(R.string.verified_account)
+                    )
+                }
             }
-        }
-    }
-}
-
-
-@Composable
-fun PremiumStatusBox(
-    isPremium: Boolean
-) {
-    Box(
-        modifier = Modifier
-            .background(
-                color = if (isPremium) GreenConfirmed else RedConfirmed,
-                shape = RoundedCornerShape(24.dp)
-            )
-            .padding(start = 22.dp, end = 22.dp, top = 4.dp, bottom = 4.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Premium",
-                style = typography.headlineLarge,
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Icon(
-                imageVector = if (isPremium) Icons.Outlined.Check else Icons.Outlined.DoNotDisturbOn,
-                tint = Color.White,
-                contentDescription = "Premium check"
-            )
         }
     }
 }

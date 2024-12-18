@@ -1,6 +1,8 @@
 package com.dawidkubica.physio.screens.favorites
 
 import android.content.Context
+import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Category
 import com.dawidkubica.physio.models.ExercisePackage
@@ -14,6 +16,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -31,18 +35,39 @@ class FavoritesViewModel @Inject constructor(
     val userName: StateFlow<String> = _userName
     private val _nextReminder = MutableStateFlow<Reminder?>(null)
     var nextReminder: StateFlow<Reminder?> = _nextReminder
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
     init {
+        _isLoading.update { true }
         fetchUserPackages()
         fetchUserType()
         fetchReminders()
         fetchDiscoverPackages()
+        _isLoading.update { false }
+    }
+
+    fun refreshContent() {
+        launchCatching(
+            tag = FAVORITES_VIEW_MODEL_TAG,
+            block = {
+                _isRefreshing.update { true }
+                try {
+                    fetchUserPackages()
+                    fetchDiscoverPackages()
+                    fetchUserType()
+                    fetchReminders()
+                } finally {
+                    _isRefreshing.update { false }
+                }
+            })
     }
 
     private fun fetchUserPackages() {
         launchCatching(
             tag = FAVORITES_VIEW_MODEL_TAG,
             block = {
+                Log.d(FAVORITES_VIEW_MODEL_TAG, "Fetching user packages")
                 val userPackages = exercisePackageService.getUserExercisePackages()
                 _userFavoritePackagesList.value =
                     userPackages.favoritePackages as List<ExercisePackage>
@@ -57,6 +82,7 @@ class FavoritesViewModel @Inject constructor(
         launchCatching(
             tag = FAVORITES_VIEW_MODEL_TAG,
             block = {
+                Log.d(FAVORITES_VIEW_MODEL_TAG, "Fetching discover packages")
                 val packages = exercisePackageService.getDiscoverSectionPackages()
                 _discoverPackagesList.value = packages
             })
@@ -73,6 +99,7 @@ class FavoritesViewModel @Inject constructor(
                 val reminders = accountService.getRemindersForUser()
                 _reminders.value = reminders
                 _nextReminder.value = getNextReminder(reminders)
+                Log.d(FAVORITES_VIEW_MODEL_TAG, "Fetching reminders: ${reminders}")
             }
         )
     }
@@ -83,59 +110,40 @@ class FavoritesViewModel @Inject constructor(
         currentCalendar.timeInMillis = currentTimeMillis
 
         val remindersWithTimeInMillis = reminders.mapNotNull { reminder ->
-            val reminderTimeInMillis = getReminderTimeInMillis(reminder.dayOfWeek, reminder.time)
+            val dayOfWeekInt = mapDayOfWeekToCalendar(reminder.dayOfWeek)
+            val reminderCalendar = Calendar.getInstance()
 
-            reminderTimeInMillis.let {
-                val reminderCalendar = Calendar.getInstance()
-                val dayOfWeekInt = mapDayOfWeekToCalendar(reminder.dayOfWeek)
-                reminderCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeekInt)
+            reminderCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeekInt)
+            val (hour, minute) = reminder.time.split(":").map { it.toInt() }
+            reminderCalendar.set(Calendar.HOUR_OF_DAY, hour)
+            reminderCalendar.set(Calendar.MINUTE, minute)
+            reminderCalendar.set(Calendar.SECOND, 0)
+            reminderCalendar.set(Calendar.MILLISECOND, 0)
 
-                val (hour, minute) = reminder.time.split(":").map { it.toInt() }
-                reminderCalendar.set(Calendar.HOUR_OF_DAY, hour)
-                reminderCalendar.set(Calendar.MINUTE, minute)
-                reminderCalendar.set(Calendar.SECOND, 0)
-                reminderCalendar.set(Calendar.MILLISECOND, 0)
-
-                if (reminderCalendar.timeInMillis < currentTimeMillis) {
-                    reminderCalendar.add(Calendar.WEEK_OF_YEAR, 1)
-                }
-
-                reminder to reminderCalendar.timeInMillis
+            if (reminderCalendar.timeInMillis < currentTimeMillis) {
+                reminderCalendar.add(Calendar.WEEK_OF_YEAR, 1)
             }
+
+            //Log.d("ReminderDebug", "Reminder: ${reminder.topic}, Time: ${reminderCalendar.time}")
+            reminder to reminderCalendar.timeInMillis
         }
 
-        val futureReminders = remindersWithTimeInMillis
-            .filter { it.second != null && it.second > currentTimeMillis }
-
-        return futureReminders.minByOrNull { it.second }?.first
-    }
-
-
-    private fun getReminderTimeInMillis(dayOfWeek: String, time: String): Long {
-        val calendar = Calendar.getInstance()
-        val (hour, minute) = time.split(":").map { it.toInt() }
-
-        calendar.set(Calendar.HOUR_OF_DAY, hour)
-        calendar.set(Calendar.MINUTE, minute)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val dayOfWeekInt = mapDayOfWeekToCalendar(dayOfWeek)
-        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeekInt)
-
-        return calendar.timeInMillis
+        val nextReminder = remindersWithTimeInMillis.minByOrNull { it.second }?.first
+        //Log.d("ReminderDebug", "Next Reminder: $nextReminder")
+        return nextReminder
     }
 
     private fun mapDayOfWeekToCalendar(dayOfWeek: String): Int {
-        val daysOfWeek = context.resources.getStringArray(R.array.days_of_week_full)
+        val daysOfWeek = context.resources.getStringArray(R.array.days_of_week)
 
-        return when (dayOfWeek) {
-            daysOfWeek[0] -> Calendar.MONDAY
-            daysOfWeek[1] -> Calendar.TUESDAY
-            daysOfWeek[2] -> Calendar.WEDNESDAY
-            daysOfWeek[3] -> Calendar.THURSDAY
-            daysOfWeek[4] -> Calendar.FRIDAY
-            daysOfWeek[5] -> Calendar.SATURDAY
-            daysOfWeek[6] -> Calendar.SUNDAY
+        return when (dayOfWeek.uppercase()) {
+            daysOfWeek[0].uppercase() -> Calendar.MONDAY
+            daysOfWeek[1].uppercase() -> Calendar.TUESDAY
+            daysOfWeek[2].uppercase() -> Calendar.WEDNESDAY
+            daysOfWeek[3].uppercase() -> Calendar.THURSDAY
+            daysOfWeek[4].uppercase() -> Calendar.FRIDAY
+            daysOfWeek[5].uppercase() -> Calendar.SATURDAY
+            daysOfWeek[6].uppercase() -> Calendar.SUNDAY
             else -> Calendar.MONDAY
         }
     }

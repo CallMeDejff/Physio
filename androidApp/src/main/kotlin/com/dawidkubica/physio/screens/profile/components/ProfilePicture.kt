@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,13 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dawidkubica.physio.models.Provider
+import com.dawidkubica.physio.ui.icons.FacebookIcon
+import com.dawidkubica.physio.ui.icons.GoogleIcon
 import com.dawidkubica.physio.ui.theme.GreenConfirmed
-import com.dawidkubica.physio.ui.theme.RedConfirmed
 
 @Composable
 fun ProfilePicture(
     displayName: String, lastname: String = "",
-    isEmailVerified: Boolean,
+    providerId: Provider,
 ) {
     val firstLetter = displayName.firstOrNull()?.toString()?.uppercase() ?: ""
     val lastLetter = lastname.firstOrNull()?.toString()?.uppercase() ?: ""
@@ -65,13 +71,37 @@ fun ProfilePicture(
             Box(
                 modifier = Modifier
                     .size(24.dp)
-                    .background(if (isEmailVerified) GreenConfirmed else RedConfirmed, shape = CircleShape)
+                    .background(
+                        color = if (providerId == Provider.Physio) GreenConfirmed else (MaterialTheme.colorScheme.surface),
+                        shape = CircleShape
+                    )
                     .border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.surface,
                         shape = CircleShape
                     )
-            )
+            ) {
+                if (providerId == Provider.Physio) {
+                } else {
+                    Icon(
+                        imageVector = when (providerId) {
+                            //Provider.Physio -> PhysioLogo
+                            Provider.Google -> GoogleIcon
+                            Provider.Facebook -> FacebookIcon
+                            else -> Icons.AutoMirrored.Outlined.HelpOutline
+                        },
+                        contentDescription = when (providerId) {
+                            Provider.Physio -> "Verified by Physio"
+                            Provider.Google -> "Verified by Google"
+                            Provider.Facebook -> "Verified by Facebook"
+                            else -> "Unknown provider"
+                        },
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+
         }
     }
 }

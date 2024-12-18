@@ -48,12 +48,21 @@ class LoginViewModel @Inject constructor(
                 _isLoading.update { true }
 
                 authenticationService.signInWithFacebook(
-                    token,
+                    token = token,
                     onSuccess = {
                         _isLoading.update { false }
                         openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                     },
-                    onFailure = { _isLoading.update { false } }
+                    context = context,
+                    onFailure = { exception ->
+                        val errorMessage = if (exception is AuthError) {
+                            exception.message
+                        } else {
+                            context.getString(R.string.facebook_login_failed)
+                        }
+                        _message.update { errorMessage }
+                        _isLoading.update { false }
+                    }
                 )
             }
         )
@@ -67,14 +76,23 @@ class LoginViewModel @Inject constructor(
             block = {
                 _isLoading.update { true }
                 if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    val googleIdTokenCredential =
-                        GoogleIdTokenCredential.createFrom(credential.data)
-                    authenticationService.signInWithGoogle(googleIdTokenCredential.idToken,
+                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    authenticationService.signInWithGoogle(
+                        context = context,
+                        token = googleIdTokenCredential.idToken,
                         onSuccess = {
                             _isLoading.update { false }
                             openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                         },
-                        onFailure = { _isLoading.update { false } }
+                        onFailure = { throwable ->
+                            val errorMessage = if (throwable is AuthError) {
+                                throwable.message
+                            } else {
+                                context.getString(R.string.google_login_failed)
+                            }
+                            _message.update { errorMessage }
+                            _isLoading.update { false }
+                        }
                     )
                 } else {
                     _isLoading.update { false }
@@ -92,7 +110,7 @@ class LoginViewModel @Inject constructor(
                 errorMessage = context.getString(R.string.login_failed),
                 onError = { message -> _message.emit(message) },
                 block = {
-                    val signInResult = authenticationService.signIn(email, password, context)
+                    val signInResult = authenticationService.signInWithEmailVerification(email, password, context, true)
                     if (signInResult.isSuccess) {
                         _isLoading.update { false }
                         openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)

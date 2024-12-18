@@ -25,10 +25,11 @@ import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
 fun ExerciseCard(
+    modifier: Modifier,
+    isPaused: Boolean,
     exercise: Exercise,
     equipmentList: List<Pair<String, String>>,
     onMediaClick: (String, String) -> Unit,
-    modifier: Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -49,6 +50,7 @@ fun ExerciseCard(
         ) {
             item {
                 MediaView(
+                    isPaused = isPaused,
                     mediaUrls = exercise.mediaUrls,
                     mediaType = exercise.mediaType,
                     onMediaClick = { mediaUrl ->

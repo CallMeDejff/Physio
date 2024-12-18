@@ -12,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,17 +54,25 @@ class SearchViewModel @Inject constructor(
     val matchingPackages: StateFlow<List<ExercisePackage>> = _matchingPackages
     private val _filteredPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     val filteredPackages: StateFlow<List<ExercisePackage>> = _filteredPackagesList.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
-    fun onAddExerciseClick(navigate: (String) -> Unit) {
-        navigate(WizardScreen.CreatorWizard.route)
+    fun initializeData(){
+        _isLoading.update { true }
+        fetchData()
+        _isLoading.update { false }
     }
 
-    fun filterPackagesList(query: String) {
-        _filteredPackagesList.value = if (query.isEmpty()) {
-            _matchingPackages.value
-        } else {
-            _matchingPackages.value.filter { it.name.contains(query, ignoreCase = true) }
-        }
+    fun refreshData() {
+        _isRefreshing.value = true
+        fetchData()
+        _isRefreshing.value = false
+    }
+
+    fun fetchData() {
+        loadEquipmentList()
+        loadConditionList()
+        loadBodyPartsList()
     }
 
     fun filterConditionsList(query: String) {
@@ -123,7 +132,7 @@ class SearchViewModel @Inject constructor(
             })
     }
 
-    fun searchForMatchingPackages() {
+    fun searchForMatchingPackages(searchText: String) {
         launchCatching(
             tag = SEARCH_VIEW_MODEL_TAG,
             errorMessage = context.getString(R.string.error_search_packages),
@@ -138,7 +147,7 @@ class SearchViewModel @Inject constructor(
 
                 if (matchingPackages.isNotEmpty()) {
                     _matchingPackages.value = matchingPackages
-                    _filteredPackagesList.value = _matchingPackages.value
+                    filterPackagesList(searchText) // Automatyczne filtrowanie po wyszukiwaniu
                 } else {
                     _matchingPackages.value = emptyList()
                     _filteredPackagesList.value = _matchingPackages.value
@@ -147,6 +156,14 @@ class SearchViewModel @Inject constructor(
                 _isLoadingResults.value = false
             }
         )
+    }
+
+    fun filterPackagesList(query: String) {
+        _filteredPackagesList.value = if (query.isEmpty()) {
+            _matchingPackages.value
+        } else {
+            _matchingPackages.value.filter { it.name.contains(query, ignoreCase = true) }
+        }
     }
 
     fun toggleEquipment(equipmentId: String) {

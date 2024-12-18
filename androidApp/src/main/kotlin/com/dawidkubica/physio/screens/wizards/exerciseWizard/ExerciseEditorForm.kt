@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -68,16 +69,22 @@ fun ExerciseEditorForm(
                         modifier = Modifier.height(32.dp)
                     )
 
-                    AutoCompleteDetailed(
-                        itemList = exercisesList,
-                        selectedItems = selectedExercise,
-                        onToggleItem = { exerciseId ->
-                            viewModel.toggleExercises(
-                                exerciseId,
-                                false
-                            )
-                        }
-                    )
+                    Box(
+                        modifier = Modifier
+                            .heightIn(200.dp, 300.dp)
+                            .wrapContentHeight()
+                    ) {
+                        AutoCompleteDetailed(
+                            itemList = exercisesList,
+                            selectedItems = selectedExercise,
+                            onToggleItem = { exerciseId ->
+                                viewModel.toggleExercises(
+                                    exerciseId,
+                                    false
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

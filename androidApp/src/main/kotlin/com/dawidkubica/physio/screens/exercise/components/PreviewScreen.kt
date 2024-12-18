@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +33,6 @@ import coil.compose.AsyncImage
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
 @Composable
 fun PreviewScreen(
     mediaUrl: String,
@@ -42,73 +43,60 @@ fun PreviewScreen(
     val context = LocalContext.current
     val isVideo = mediaType == "video" || (!isUrl && context.contentResolver.getType(Uri.parse(mediaUrl))?.startsWith("video/") == true)
 
-    var videoAspectRatio by remember { mutableStateOf(16 / 9f) } // Domyślne proporcje
+    var videoAspectRatio by remember { mutableStateOf(16 / 9f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(Color.Black.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center
     ) {
-        if (isVideo) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(videoAspectRatio)
-                    .clip(RoundedCornerShape(16.dp))
-            ) {
-                VideoPlayer(
-                    videoUrl = mediaUrl,
-                    onVideoSizeChanged = { width, height ->
-                        videoAspectRatio = if (width > 0 && height > 0) width.toFloat() / height else 16 / 9f
-                    }
+        Box(
+            modifier = Modifier
+                .padding(2.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .wrapContentSize()
+        ) {
+            if (isVideo) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(videoAspectRatio)
+                        .clip(RoundedCornerShape(16.dp))
+                ) {
+                    VideoPlayer(
+                        videoUrl = mediaUrl,
+                        onVideoSizeChanged = { width, height ->
+                            videoAspectRatio = if (width > 0 && height > 0) width.toFloat() / height else 16 / 9f
+                        }
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = mediaUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Fit
                 )
             }
-        } else {
-            AsyncImage(
-                model = mediaUrl,
-                contentDescription = null,
+
+            IconButton(
+                onClick = { onDismiss() },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16 / 9f)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Fit
-            )
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "Close preview",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
-
-        IconButton(
-            onClick = { onDismiss() },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = "Close preview",
-                tint = Color.White
-            )
-        }
-    }
-}
-
-
-@Composable
-fun Content(
-    mediaUrl: String,
-    mediaType: String?,
-    isVideo: Boolean,
-) {
-    if (isVideo) {
-        VideoPlayer(videoUrl = mediaUrl)
-    } else {
-        AsyncImage(
-            model = mediaUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Fit
-        )
     }
 }
 

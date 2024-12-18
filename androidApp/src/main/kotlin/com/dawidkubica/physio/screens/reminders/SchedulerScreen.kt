@@ -13,14 +13,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,8 +46,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.R
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
+import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchedulerScreen(
     navigate: (String) -> Unit,
@@ -53,6 +59,7 @@ fun SchedulerScreen(
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
     val reminders by viewModel.reminders.observeAsState(emptyList())
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val daysOfWeek = stringArrayResource(id = R.array.days_of_week).toList()
     var selectedDay by remember { mutableIntStateOf(0) }
@@ -72,100 +79,89 @@ fun SchedulerScreen(
         }
     }
 
-    if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    } else {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-        ) {
-            Box(
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refreshData() }
+    ) {
+        if (isLoading) {
+            FullScreenLoader()
+        } else {
+            Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 60.dp, top = 10.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(8.dp)
             ) {
-                Column {
-                    Text(
-                        text = buildAnnotatedString {
-                            append(stringResource(id = R.string.scheduler_title) + " ")
-                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append(stringResource(id = R.string.scheduler_title_highlight))
-                            }
-                        },
-                        style = typography.headlineLarge,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.scheduler_subtitle),
-                        style = typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 60.dp, top = 10.dp)
+                ) {
+                    LazyColumn {
+                        item {
+                            HeaderSection()
+                        }
 
                         item {
-                            DayTile(
-                                day = "+",
-                                isSelected = true,
-                                onClick = {
-                                    viewModel.onAddReminderClick(navigate)
-                                }
-                            )
-                        }
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            ) {
 
-                        items(daysOfWeek.size) { index ->
-                            DayTile(
-                                day = daysOfWeek[index],
-                                isSelected = selectedDay == index,
-                                onClick = {
-                                    selectedDay = index
-                                }
-                            )
-                        }
-                    }
-
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { page ->
-                        val dayReminders = reminders.filter { it.dayOfWeek == daysOfWeek[page] }
-
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            dayReminders.forEach { reminder ->
-                                ReminderItem(
-                                    reminder = reminder,
-                                    deletable = true,
-                                    onDelete = {
-                                        viewModel.onDeleteReminderClick(reminder.id)
-                                    }
-                                )
-                            }
-
-                            if (dayReminders.isEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(32.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.no_results),
-                                        style = typography.labelMedium,
-                                        color = Color.Gray
+                                item {
+                                    DayTile(
+                                        day = "+",
+                                        isSelected = true,
+                                        onClick = {
+                                            viewModel.onAddReminderClick(navigate)
+                                        }
                                     )
+                                }
+
+                                items(daysOfWeek.size) { index ->
+                                    DayTile(
+                                        day = daysOfWeek[index],
+                                        isSelected = selectedDay == index,
+                                        onClick = {
+                                            selectedDay = index
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        item {
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxWidth()
+                            ) { page ->
+                                val dayReminders = reminders.filter { it.dayOfWeek == daysOfWeek[page] }
+
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    dayReminders.forEach { reminder ->
+                                        ReminderItem(
+                                            reminder = reminder,
+                                            deletable = true,
+                                            onDelete = {
+                                                viewModel.onDeleteReminderClick(reminder.id)
+                                            }
+                                        )
+                                    }
+
+                                    if (dayReminders.isEmpty()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(32.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.no_results),
+                                                style = typography.labelMedium,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -175,7 +171,6 @@ fun SchedulerScreen(
         }
     }
 }
-
 
 @Composable
 fun DayTile(
@@ -189,7 +184,11 @@ fun DayTile(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp))
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(8.dp)
+            )
             .background(backgroundColor)
             .clickable(onClick = onClick)
             .padding(8.dp)
@@ -202,6 +201,26 @@ fun DayTile(
             style = typography.bodyMedium
         )
     }
+}
+
+@Composable
+fun HeaderSection() {
+    Text(
+        text = buildAnnotatedString {
+            append(stringResource(id = R.string.scheduler_title) + " ")
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                append(stringResource(id = R.string.scheduler_title_highlight))
+            }
+        },
+        style = typography.headlineLarge,
+    )
+    Text(
+        text = stringResource(id = R.string.scheduler_subtitle),
+        style = typography.headlineSmall,
+        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
 

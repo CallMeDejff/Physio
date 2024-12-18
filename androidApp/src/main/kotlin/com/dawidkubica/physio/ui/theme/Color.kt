@@ -13,6 +13,14 @@ val blue2 = Color(0xFF1C213F)
 val GreenConfirmed = Color(0xFF198754)
 val RedConfirmed = Color(0xFFA3333E)
 
+val newPrimary = Color(0xFF313C7A)
+val newSecondary = Color(0xFF426291)
+val newTertiary = Color(0xFF93A9C0)
+
+val newDarkPrimary = Color(0xFF34BECA)
+val newDarkSecondary = Color(0xFF426291)
+val newDarkTertiary = Color(0xFF39424D)
+
 val Purple80 = Color(0xFFD2D6FF)
 val PurpleGrey80 = Color(0xFFC2C9DC)
 val PurpleGrey80Alpha = Color(0xFF032C04)
@@ -41,7 +49,6 @@ val BackgroundLight = Color(0xFFFFFFFF)
 val SurfaceLight = PurpleGrey80
 val OnPrimaryLight = Color(0xFF000000)
 val OnSecondaryLight = Color(0xFF000000)
-
 
 //dark palette
 val DarkPrimary =  Purple40Alpha

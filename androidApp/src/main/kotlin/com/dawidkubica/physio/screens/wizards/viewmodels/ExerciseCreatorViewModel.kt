@@ -202,7 +202,7 @@ class ExerciseCreatorViewModel @Inject constructor(
         navigate: (String) -> Unit,
         isEdit: Boolean
     ) {
-        _isUploading.update { true }
+        _isLoading.update { true }
         setMediaType(context, _selectedMediaUris.value)
         val title = _exerciseTitle.value.orEmpty()
         val description = _exerciseDescription.value.orEmpty()
@@ -214,7 +214,7 @@ class ExerciseCreatorViewModel @Inject constructor(
             selectedEquipment = selectedEquipment
         ) { isValid ->
             if (!isValid) {
-                _isUploading.update { false }
+                _isLoading.update { false }
                 return@validateFields
             }
 
@@ -252,12 +252,12 @@ class ExerciseCreatorViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { action() }
                 .onSuccess {
-                    _isUploading.update { false }
+                    _isLoading.update { false }
                     _message.update { successMessage }
                     navigate(WizardScreen.CreatorWizard.route)
                 }
                 .onFailure {
-                    _isUploading.update { false }
+                    _isLoading.update { false }
                     _message.update { "Ups! Wystąpił błąd." }
                 }
         }

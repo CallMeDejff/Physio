@@ -26,7 +26,8 @@ import coil.compose.AsyncImage
 fun MediaView(
     mediaUrls: List<String>,
     mediaType: String,
-    onMediaClick: (String) -> Unit
+    onMediaClick: (String) -> Unit,
+    isPaused: Boolean = false
 ) {
     if (mediaUrls.isNotEmpty()) {
         val mediaUrl = mediaUrls.first()
@@ -49,8 +50,10 @@ fun MediaView(
 
                 "video" -> {
                     VideoPlayer(
+                        isPaused = isPaused,
                         videoUrl = mediaUrl,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        //onPause = onPauseVideo,
                     )
                 }
 
@@ -72,7 +75,9 @@ fun MediaView(
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(48.dp)
-                    .clickable { onMediaClick(mediaUrl) }
+                    .clickable {
+                        onMediaClick(mediaUrl)
+                    }
             )
         }
     } else {

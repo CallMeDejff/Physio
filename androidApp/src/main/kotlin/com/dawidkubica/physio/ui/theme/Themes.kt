@@ -10,9 +10,9 @@ import com.dawidkubica.physio.models.ThemeMode
 import androidx.compose.material3.MaterialTheme as Material3Theme
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkPrimary,
-    secondary = DarkSecondary,
-    tertiary = DarkTertiary,
+    primary = newDarkPrimary,
+    secondary = newDarkSecondary,
+    tertiary = newDarkTertiary,
     background = BackgroundDark,
     surface = SurfaceDark,
     onPrimary = OnPrimaryDark,
@@ -20,9 +20,12 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-        primary = Purple40,
-        secondary = PurpleGrey40,
-        tertiary = PurpleGrey80,
+        //primary = Purple40,
+    primary = newPrimary,
+        //secondary = PurpleGrey40,
+    secondary = newSecondary,
+        //tertiary = PurpleGrey80,
+    tertiary = newTertiary,
         background = Color(0xFFFFFFFF),
         surface = Color(0xFFFFFFFF),
         onPrimary = Color(0xFF000000),

@@ -11,6 +11,7 @@ import com.dawidkubica.physio.screens.change_password.ChangePasswordScreen
 import com.dawidkubica.physio.screens.change_password.ChangePasswordViewModel
 import com.dawidkubica.physio.screens.edit_user.EditUserScreen
 import com.dawidkubica.physio.screens.edit_user.EditUserViewModel
+import com.dawidkubica.physio.screens.profile.PaywallScreen
 
 fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
 
@@ -45,6 +46,12 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
                 navigate = { route -> navigate(navController, route) },
                 viewModel = viewModel,
                 reauthentication = false,
+            )
+        }
+
+        composable(route = ProfileScreen.PayWall.route) {
+            PaywallScreen(
+                popBackStack = { popUp(navController) },
             )
         }
     }

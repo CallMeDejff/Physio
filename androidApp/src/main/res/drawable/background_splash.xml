@@ -12,7 +12,7 @@
 
         <bitmap
             android:gravity="center"
-            android:src="@drawable/logo_clear_blue" />
+            android:src="@drawable/logo_clear" />
     </item>
 
 </layer-list>

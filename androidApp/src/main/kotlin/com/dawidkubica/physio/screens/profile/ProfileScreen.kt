@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -23,11 +24,13 @@ import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Provider
@@ -48,6 +55,7 @@ import com.dawidkubica.physio.screens.wizards.components.ActionButton
 import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     openAndPopUp: (String, String) -> Unit,
@@ -59,6 +67,7 @@ fun ProfileScreen(
     val showEmailVerificationDialog = remember { mutableStateOf(false) }
     val showAccountDeleteDialog = remember { mutableStateOf(false) }
     val isLoading by viewModel.isLoading.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val userLastname by viewModel.userLastname.collectAsState()
     val userEmail by viewModel.userEmail.collectAsState()
@@ -123,99 +132,113 @@ fun ProfileScreen(
         )
     }
 
-    if (isLoading) {
-        FullScreenLoader()
-    } else {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-        ) {
-            Box(
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.fetchUserInformation() }
+    ) {
+        if (isLoading) {
+            FullScreenLoader()
+        } else {
+            Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 25.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(8.dp)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
-                        .padding(top = 10.dp)
+                        .fillMaxSize()
+                        .padding(bottom = 25.dp)
                 ) {
-                    Text(
-                        text = context.getString(R.string.profile_settings_panel),
-                        style = typography.headlineLarge
-                    )
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 10.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = buildAnnotatedString {
+                                    append(stringResource(id = R.string.profile_settings_panel) + " ")
+                                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                        append(stringResource(id = R.string.profile_settings_panel_pt2))
+                                    }
+                                },
+                                style = typography.headlineLarge.copy(color = MaterialTheme.colorScheme.onBackground)
+                            )
+                            Text(
+                                text = context.getString(R.string.profile_customize),
+                                style = typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onBackground.copy(0.7f)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                    Text(
-                        text = context.getString(R.string.profile_customize),
-                        style = typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(0.7f)
-                    )
+                        item {
+                            UserInfoBox(
+                                navigate = navigate,
+                                userName = userName,
+                                userLastname = userLastname,
+                                userEmail = userEmail,
+                                userType = userType,
+                                userLicenseNumber = userLicenseNumber.toString(),
+                                emailVerified = emailVerified,
+                                providerId = viewModel.mapProvider(accProvider)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        item {
+                            ColorSchemeSelector(
+                                viewModel = viewModel,
+                                currentThemeMode = currentThemeMode
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                    UserInfoBox(
-                        userName = userName,
-                        userLastname = userLastname,
-                        userEmail = userEmail,
-                        userType = userType,
-                        userLicenseNumber = userLicenseNumber.toString(),
-                        emailVerified = emailVerified,
-                    )
+                        item {
+                            ActionButton(
+                                Icons.Outlined.Edit,
+                                context.getString(R.string.edit_user_data)
+                            ) { viewModel.onEditUserClick(navigate) }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        if (accProvider == Provider.Physio.providerId) {
+                            item {
+                                ActionButton(
+                                    Icons.AutoMirrored.Outlined.Message,
+                                    context.getString(R.string.change_email)
+                                ) { showEmailChangeDialog.value = true }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
 
-                    ColorSchemeSelector(
-                        viewModel = viewModel,
-                        currentThemeMode = currentThemeMode
-                    )
+                        if (accProvider == Provider.Physio.providerId) {
+                            item {
+                                ActionButton(
+                                    icon = Icons.Outlined.Password,
+                                    label = context.getString(R.string.change_password)
+                                ) { viewModel.onChangePasswordClick(navigate) }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        item {
+                            ActionButton(
+                                Icons.AutoMirrored.Outlined.Logout,
+                                context.getString(R.string.logout)
+                            ) { viewModel.onLogoutClick(openAndPopUp) }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                    ActionButton(
-                        Icons.Outlined.Edit,
-                        context.getString(R.string.edit_user_data)
-                    ) { viewModel.onEditUserClick(navigate) }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (accProvider == Provider.Physio.providerId) {
-                        ActionButton(
-                            Icons.AutoMirrored.Outlined.Message,
-                            context.getString(R.string.change_email)
-                        ) { showEmailChangeDialog.value = true }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        item {
+                            ActionButton(
+                                Icons.Outlined.DeleteForever,
+                                context.getString(R.string.delete_account)
+                            ) { showAccountDeleteDialog.value = true }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
-
-                    if (!emailVerified) {
-                        ActionButton(
-                            Icons.Outlined.VerifiedUser,
-                            context.getString(R.string.verify_email)
-                        ) { showEmailVerificationDialog.value = true }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    if (accProvider == Provider.Physio.providerId) {
-                        ActionButton(
-                            icon = Icons.Outlined.Password,
-                            label = context.getString(R.string.change_password)
-                        ) { viewModel.onChangePasswordClick(navigate) }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    ActionButton(
-                        Icons.AutoMirrored.Outlined.Logout,
-                        context.getString(R.string.logout)
-                    ) { viewModel.onLogoutClick(openAndPopUp) }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    ActionButton(
-                        Icons.Outlined.DeleteForever,
-                        context.getString(R.string.delete_account)
-                    ) { showAccountDeleteDialog.value = true }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

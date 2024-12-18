@@ -64,6 +64,7 @@ sealed class ProfileScreen(val route: String) {
     object EditUser : ProfileScreen(route = "edit_user")
     object ChangePasswordReauthorization : ProfileScreen(route = "change_password_reauthorization")
     object ChangePassword : ProfileScreen(route = "change_password")
+    object PayWall : ProfileScreen(route = "pay_wall")
 }
 
 sealed class CalendarScreen(val route: String) {
