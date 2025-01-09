@@ -37,7 +37,11 @@ fun LabeledTextField(
     ) {
         Text(
             text = label,
-            style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)),
+            style = typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground.copy(
+                    alpha = 0.7f
+                )
+            ),
             modifier = Modifier.padding(bottom = 6.dp, top = 6.dp)
         )
         OutlinedTextField(
@@ -50,7 +54,11 @@ fun LabeledTextField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                    style = typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.onBackground.copy(
+                            alpha = 0.6f
+                        )
+                    )
                 )
             },
             leadingIcon = {

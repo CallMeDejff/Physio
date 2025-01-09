@@ -31,10 +31,12 @@ class LoginViewModel @Inject constructor(
                 _message.update { context.getString(R.string.login_missing_email) }
                 Result.failure(Exception("Email address missing"))
             }
+
             password.isEmpty() -> {
                 _message.update { context.getString(R.string.login_missing_password) }
                 Result.failure(Exception("Password missing"))
             }
+
             else -> Result.success(Unit)
         }
     }
@@ -76,7 +78,8 @@ class LoginViewModel @Inject constructor(
             block = {
                 _isLoading.update { true }
                 if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    val googleIdTokenCredential =
+                        GoogleIdTokenCredential.createFrom(credential.data)
                     authenticationService.signInWithGoogle(
                         context = context,
                         token = googleIdTokenCredential.idToken,
@@ -110,13 +113,20 @@ class LoginViewModel @Inject constructor(
                 errorMessage = context.getString(R.string.login_failed),
                 onError = { message -> _message.emit(message) },
                 block = {
-                    val signInResult = authenticationService.signInWithEmailVerification(email, password, context, true)
+                    val signInResult = authenticationService.signInWithEmailVerification(
+                        email,
+                        password,
+                        context,
+                        true
+                    )
                     if (signInResult.isSuccess) {
                         _isLoading.update { false }
                         openAndPopUp(Graph.HOME, AuthScreen.SignIn.route)
                     } else {
                         val authError = signInResult.exceptionOrNull() as? AuthError
-                        _message.emit(authError?.message ?: context.getString(R.string.login_failed))
+                        _message.emit(
+                            authError?.message ?: context.getString(R.string.login_failed)
+                        )
                         _isLoading.update { false }
                     }
                 }

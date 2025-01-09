@@ -55,7 +55,8 @@ fun SignUpScreen(
         AlertDialog(
             onDismissRequest = {
                 openAndPopUp(Graph.AUTHENTICATION, Graph.AUTHENTICATION)
-                viewModel.dismissEmailVerificationDialog() },
+                viewModel.dismissEmailVerificationDialog()
+            },
             title = { Text(text = stringResource(R.string.verification_required_title)) },
             text = {
                 Text(text = stringResource(R.string.verification_required_message))

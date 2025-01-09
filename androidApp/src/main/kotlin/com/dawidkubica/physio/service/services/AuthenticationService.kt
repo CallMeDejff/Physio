@@ -16,18 +16,21 @@ interface AuthenticationService {
         context: Context,
         requireEmailVerification: Boolean = false
     ): Result<Unit>
+
     suspend fun signInWithGoogle(
         context: Context,
         token: String,
         onSuccess: () -> Unit,
         onFailure: (Throwable) -> Unit
     )
+
     suspend fun signInWithFacebook(
         context: Context,
         token: String,
         onSuccess: () -> Unit,
         onFailure: (Throwable) -> Unit
     )
+
     suspend fun signUp(email: String, password: String, context: Context): Result<Unit>
     suspend fun signOut()
     suspend fun updateEmail(email: String)

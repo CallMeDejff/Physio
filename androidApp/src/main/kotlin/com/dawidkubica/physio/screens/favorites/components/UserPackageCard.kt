@@ -1,6 +1,12 @@
 package com.dawidkubica.physio.screens.favorites.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,16 +24,18 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
-import com.dawidkubica.physio.ui.components.PremiumLabel
 import com.dawidkubica.physio.ui.theme.typography
 
 @Composable
@@ -38,6 +46,28 @@ fun UserPackageCard(
     imageUrl: String?,
     onClick: (String) -> Unit
 ) {
+    val gradientColors = listOf(Color.Magenta, Color.Cyan, Color.Magenta)
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+
+    val animatedOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 18000,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    val brush = Brush.linearGradient(
+        colors = gradientColors,
+        start = Offset(animatedOffset, 0f),
+        end = Offset(animatedOffset + 1600f, 300f),
+        tileMode = TileMode.Repeated
+    )
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -48,7 +78,21 @@ fun UserPackageCard(
             .clickable { onClick(id) }
             .width(320.dp)
             .fillMaxWidth()
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp))
+            .then(
+                if (isPremium) {
+                    Modifier.border(
+                        width = 2.dp,
+                        brush = brush,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                } else {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                }
+            )
     ) {
         Column {
             Box(
@@ -57,16 +101,6 @@ fun UserPackageCard(
                     .clip(RoundedCornerShape(16.dp))
                     .fillMaxWidth()
             ) {
-                if (isPremium) {
-                    PremiumLabel(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .zIndex(1f)
-                            .padding(8.dp),
-                        label = "P",
-                        typography = typography.headlineMedium
-                    )
-                }
                 if (imageUrl.isNullOrEmpty() || imageUrl == "null") {
                     HeaderView(
                         modifier = Modifier,

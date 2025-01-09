@@ -26,7 +26,11 @@ fun ActionButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp)
+            ),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {

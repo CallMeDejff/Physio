@@ -57,9 +57,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.dawidkubica.physio.screens.exercise.components.PreviewScreen
-import com.dawidkubica.physio.screens.exercise.components.getThumbnailFromUri
-import com.dawidkubica.physio.screens.exercise.components.getThumbnailFromUrl
+import com.dawidkubica.physio.core.Constants.FIREBASE_MEDIA_PREFIX
+import com.dawidkubica.physio.screens.video_player.PreviewScreen
+import com.dawidkubica.physio.screens.video_player.getThumbnailFromUri
+import com.dawidkubica.physio.screens.video_player.getThumbnailFromUrl
 import com.dawidkubica.physio.screens.wizards.components.ActionButton
 import com.dawidkubica.physio.screens.wizards.components.CheckboxWithText
 import com.dawidkubica.physio.screens.wizards.components.CustomAlertDialog
@@ -104,21 +105,35 @@ fun ExerciseDetailsForm(
 
     LaunchedEffect(selectedMediaUris) {
         if (selectedMediaUris.isNotEmpty()) {
+            if (!selectedMediaUris.toString().startsWith(FIREBASE_MEDIA_PREFIX)) {
+                viewModel.setMediaType(context, selectedMediaUris)
+            }
             val selectedMediaUri = selectedMediaUris.first()
+            val currentMediaType = viewModel.mediaType.value
             thumbnail = if (isEditorNextStep) {
-                when (mediaType) {
+                when (currentMediaType) {
                     "image" -> null
-                    "video" -> getThumbnailFromUrl(context, selectedMediaUri)
-                    else -> null
+                    "video" -> when (selectedMediaUri.scheme) {
+                        "http", "https" -> getThumbnailFromUrl(context, selectedMediaUri)
+                        "content", "file" -> getThumbnailFromUri(context, selectedMediaUri)
+                        else -> null
+                    }
+
+                    else -> {
+                        null
+                    }
                 }
             } else {
                 val mimeType = context.contentResolver.getType(selectedMediaUri)
                 when {
                     mimeType?.startsWith("image/") == true -> null
-                    mimeType?.startsWith("video/") == true -> getThumbnailFromUri(
-                        context,
-                        selectedMediaUri
-                    )
+                    mimeType?.startsWith("video/") == true -> {
+                        when (selectedMediaUri.scheme) {
+                            "http", "https" -> getThumbnailFromUrl(context, selectedMediaUri)
+                            "content", "file" -> getThumbnailFromUri(context, selectedMediaUri)
+                            else -> null
+                        }
+                    }
 
                     else -> null
                 }

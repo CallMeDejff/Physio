@@ -61,7 +61,11 @@ fun GoogleSignIn(
             }
         },
         modifier = Modifier
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), shape = RoundedCornerShape(16.dp))
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(16.dp)
+            )
             .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)

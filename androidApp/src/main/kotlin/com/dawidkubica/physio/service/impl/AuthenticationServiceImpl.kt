@@ -11,7 +11,6 @@ import com.dawidkubica.physio.service.authErrors
 import com.dawidkubica.physio.service.services.AuthenticationService
 import com.facebook.login.LoginManager
 import com.google.firebase.Firebase
-import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -99,7 +98,10 @@ class AuthenticationServiceImpl @Inject constructor(
                 } else {
                     val userInfo = setUserInfo(currentUser.uid)
                     if (userInfo != null) {
-                        updateEmailVerificationStatusInFirestore(currentUser.uid, currentUser.isEmailVerified)
+                        updateEmailVerificationStatusInFirestore(
+                            currentUser.uid,
+                            currentUser.isEmailVerified
+                        )
                         Result.success(Unit)
                     } else {
                         Result.failure(AuthError("Nie udało się pobrać informacji o użytkowniku."))
@@ -120,13 +122,20 @@ class AuthenticationServiceImpl @Inject constructor(
         }
     }
 
-    private suspend fun updateEmailVerificationStatusInFirestore(userId: String, isEmailVerified: Boolean) {
+    private suspend fun updateEmailVerificationStatusInFirestore(
+        userId: String,
+        isEmailVerified: Boolean
+    ) {
         try {
             val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
             userDocRef.update("emailVerified", isEmailVerified).await()
             Log.d(AUTHENTICATION_SERVICE_TAG, "Email verification status updated for user $userId")
         } catch (e: Exception) {
-            Log.e(AUTHENTICATION_SERVICE_TAG, "Failed to update email verification status for user $userId", e)
+            Log.e(
+                AUTHENTICATION_SERVICE_TAG,
+                "Failed to update email verification status for user $userId",
+                e
+            )
         }
     }
 
@@ -227,11 +236,10 @@ class AuthenticationServiceImpl @Inject constructor(
             )
             saveUser(newUser)
             Log.d(AUTHENTICATION_SERVICE_TAG, "Created new user: $newUser")
-                setUserInfo(currentUserId)
+            setUserInfo(currentUserId)
 
         }
     }
-
 
 
     private suspend fun fetchAndProcessUser(

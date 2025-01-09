@@ -6,8 +6,6 @@ import com.dawidkubica.physio.R
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.Provider
 import com.dawidkubica.physio.models.User
-import com.dawidkubica.physio.navigation.AuthScreen
-import com.dawidkubica.physio.navigation.Graph
 import com.dawidkubica.physio.service.AuthError
 import com.dawidkubica.physio.service.services.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -155,7 +153,9 @@ class SignUpViewModel @Inject constructor(
 
                 } else {
                     val authError = resultSignUp.exceptionOrNull() as? AuthError
-                    _signupMessage.emit(authError?.message ?: context.getString(R.string.signup_error))
+                    _signupMessage.emit(
+                        authError?.message ?: context.getString(R.string.signup_error)
+                    )
                     updateRepeatedPassword("")
                     updatePassword("")
                 }

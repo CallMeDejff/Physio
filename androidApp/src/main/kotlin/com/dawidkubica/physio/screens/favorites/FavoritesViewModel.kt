@@ -2,7 +2,6 @@ package com.dawidkubica.physio.screens.favorites
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.R
 import com.dawidkubica.physio.models.Category
 import com.dawidkubica.physio.models.ExercisePackage
@@ -17,7 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -27,7 +25,7 @@ class FavoritesViewModel @Inject constructor(
     private val accountService: AccountService,
     private val userPreferences: UserPreferences,
     @ApplicationContext private val context: Context
-) : UserSharedViewModel() {
+) : UserSharedViewModel(userPreferences) {
 
     private val _fetchedCategories = MutableStateFlow<List<Category>>(emptyList())
     val fetchedCategories: StateFlow<List<Category>> = _fetchedCategories
@@ -69,6 +67,9 @@ class FavoritesViewModel @Inject constructor(
             block = {
                 Log.d(FAVORITES_VIEW_MODEL_TAG, "Fetching user packages")
                 val userPackages = exercisePackageService.getUserExercisePackages()
+                _userPremiumPackagesList.value = userPackages.favoritePackages.filter {
+                    it?.premium ?: false
+                } as List<ExercisePackage>
                 _userFavoritePackagesList.value =
                     userPackages.favoritePackages as List<ExercisePackage>
                 _userAssignedPackagesList.value =
@@ -123,13 +124,10 @@ class FavoritesViewModel @Inject constructor(
             if (reminderCalendar.timeInMillis < currentTimeMillis) {
                 reminderCalendar.add(Calendar.WEEK_OF_YEAR, 1)
             }
-
-            //Log.d("ReminderDebug", "Reminder: ${reminder.topic}, Time: ${reminderCalendar.time}")
             reminder to reminderCalendar.timeInMillis
         }
 
         val nextReminder = remindersWithTimeInMillis.minByOrNull { it.second }?.first
-        //Log.d("ReminderDebug", "Next Reminder: $nextReminder")
         return nextReminder
     }
 
@@ -149,7 +147,6 @@ class FavoritesViewModel @Inject constructor(
     }
 
     private fun fetchCategories() {
-
         _fetchedCategories.value = listOf(
             Category(
                 context.getString(R.string.category_favorites),
@@ -161,6 +158,7 @@ class FavoritesViewModel @Inject constructor(
             ),
             Category(
                 context.getString(R.string.category_premium),
+                _userPremiumPackagesList.value,
                 isPremium = true
             ),
         )

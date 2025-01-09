@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.dawidkubica.physio.screens.video_player.VideoPlayer
 
 @Composable
 fun MediaView(
@@ -53,6 +54,7 @@ fun MediaView(
                         isPaused = isPaused,
                         videoUrl = mediaUrl,
                         modifier = Modifier.fillMaxWidth(),
+                        maxWidth = true
                         //onPause = onPauseVideo,
                     )
                 }

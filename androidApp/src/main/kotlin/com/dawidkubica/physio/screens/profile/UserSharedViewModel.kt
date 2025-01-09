@@ -1,5 +1,6 @@
 package com.dawidkubica.physio.screens.profile
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -7,12 +8,15 @@ import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.ExercisePackage
 import com.dawidkubica.physio.models.Provider
 import com.dawidkubica.physio.models.Reminder
+import com.dawidkubica.physio.service.UserPreferences
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-abstract class UserSharedViewModel : PhysioAppViewModel() {
+abstract class UserSharedViewModel(
+    private val userPreferences: UserPreferences? = null
+) : PhysioAppViewModel() {
 
     protected val _userName = MutableStateFlow("")
     protected val _userLastname = MutableStateFlow("")
@@ -26,6 +30,8 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
     protected val _userAssignedPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     protected val _discoverPackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     val discoverPackagesList: MutableStateFlow<List<ExercisePackage>> = _discoverPackagesList
+    val _userPremiumPackagesList: MutableStateFlow<List<ExercisePackage>> =
+        MutableStateFlow(emptyList())
     val _userFavoritePackagesList = MutableStateFlow<List<ExercisePackage>>(emptyList())
     val _reminders = MutableLiveData<List<Reminder>>()
     val reminders: LiveData<List<Reminder>> = _reminders
@@ -65,9 +71,15 @@ abstract class UserSharedViewModel : PhysioAppViewModel() {
                 _userAssignedPackages.value = user?.assignedPackages ?: emptyList()
                 _userFavoritePackages.value = user?.favoritePackages ?: emptyList()
                 _provider.value = user?.provider ?: ""
+
+                Log.d(tag, "User data fetched successfully")
+
+                userPreferences?.setUserName(_userName.value)
+                userPreferences?.setUserType(_userType.value)
             }
         )
     }
+
     fun mapProvider(provider: String?): Provider {
         return Provider.values().find { it.providerId.equals(provider, ignoreCase = true) }
             ?: Provider.Physio

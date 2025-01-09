@@ -66,8 +66,8 @@ fun ExerciseCard(
             item {
                 val decodedDescription =
                     Html.fromHtml(exercise.description, Html.FROM_HTML_MODE_LEGACY)
-                val truncatedDescription = if (!isExpanded && decodedDescription.length > 100) {
-                    "${decodedDescription.substring(0, 100)}..."
+                val truncatedDescription = if (!isExpanded && decodedDescription.length > 250) {
+                    "${decodedDescription.substring(0, 250)}..."
                 } else {
                     decodedDescription.toString()
                 }

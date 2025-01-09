@@ -59,7 +59,6 @@ import com.dawidkubica.physio.screens.search.components.ExercisePackageCard
 import com.dawidkubica.physio.ui.components.FilterableItemSelector
 import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
-import kotlinx.coroutines.flow.update
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,7 +141,7 @@ fun SearchContent(
                 onSearchTextChanged = onSearchTextChanged,
                 viewModel = viewModel,
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
 
             SearchResults(

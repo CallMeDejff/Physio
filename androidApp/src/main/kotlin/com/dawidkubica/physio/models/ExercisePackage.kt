@@ -12,5 +12,6 @@ data class ExercisePackage(
     val warmUpIds: List<String> = emptyList(),
     val exerciseIds: List<String> = emptyList(),
     val assignedTo: List<String> = emptyList(),
+    val favorites: List<String> = emptyList(),
     val mediaUrls: List<String> = emptyList(),
 )

@@ -19,7 +19,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 class AccountServiceImpl @Inject constructor(
-    private var userPreferences: UserPreferences
+    private var userPreferences: UserPreferences,
 ) : AccountService {
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -114,9 +114,17 @@ class AccountServiceImpl @Inject constructor(
 
                 val result = if (updatedFavorites.contains(packageId)) {
                     updatedFavorites.remove(packageId)
+                    Log.d(
+                        ACCOUNT_SERVICE_TAG,
+                        "toggleFavoritePackage: Package removed from favorites: $packageId"
+                    )
                     StorageResult.Removed(packageId)
                 } else {
                     updatedFavorites.add(packageId)
+                    Log.d(
+                        ACCOUNT_SERVICE_TAG,
+                        "toggleFavoritePackage: Package added to favorites: $packageId"
+                    )
                     StorageResult.Added(packageId)
                 }
 
@@ -153,7 +161,6 @@ class AccountServiceImpl @Inject constructor(
         }
     }
 
-
     override suspend fun assignPackageToUser(userId: String, packageId: String) {
         safeFirestoreCall {
             val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
@@ -165,7 +172,6 @@ class AccountServiceImpl @Inject constructor(
             Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId assigned to user $userId")
         }
     }
-
 
     override suspend fun removePackageFromUser(userId: String, packageId: String) {
         safeFirestoreCall {
@@ -179,11 +185,15 @@ class AccountServiceImpl @Inject constructor(
             }
 
             if (user.assignedPackages.contains(packageId)) {
-                val updatedAssignedPackages = user.assignedPackages.toList().filter { it != packageId }
+                val updatedAssignedPackages =
+                    user.assignedPackages.toList().filter { it != packageId }
                 userDocRef.update("assignedPackages", updatedAssignedPackages).await()
                 Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId removed from user $userId")
             } else {
-                Log.d(ACCOUNT_SERVICE_TAG, "Package $packageId not found in user's assigned packages: ${user.assignedPackages.toList()}")
+                Log.d(
+                    ACCOUNT_SERVICE_TAG,
+                    "Package $packageId not found in user's assigned packages: ${user.assignedPackages.toList()}"
+                )
             }
         }
     }

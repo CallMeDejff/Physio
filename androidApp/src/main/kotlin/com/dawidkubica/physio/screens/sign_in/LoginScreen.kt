@@ -83,20 +83,20 @@ fun LoginScreen(
                             bottom.linkTo(parent.bottom)
                         },
                 ) {
-                        LoginForm(
-                            emailState = emailState,
-                            passwordState = passwordState,
-                            isLoading = isLoading.value,
-                            openAndPopUp = openAndPopUp,
-                            onLoginClick = {
-                                viewModel.updateEmail(emailState.value.text)
-                                viewModel.updatePassword(passwordState.value.text)
-                                viewModel.onSignInClick(openAndPopUp)
-                            },
-                            onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
-                            onForgotPasswordClick = { viewModel.onForgotPasswordClick(navigate = navigate) },
-                            viewModel = viewModel,
-                        )
+                    LoginForm(
+                        emailState = emailState,
+                        passwordState = passwordState,
+                        isLoading = isLoading.value,
+                        openAndPopUp = openAndPopUp,
+                        onLoginClick = {
+                            viewModel.updateEmail(emailState.value.text)
+                            viewModel.updatePassword(passwordState.value.text)
+                            viewModel.onSignInClick(openAndPopUp)
+                        },
+                        onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
+                        onForgotPasswordClick = { viewModel.onForgotPasswordClick(navigate = navigate) },
+                        viewModel = viewModel,
+                    )
 
                 }
             }

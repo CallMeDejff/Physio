@@ -16,7 +16,7 @@ class ProfileViewModel @Inject constructor(
     private val accountService: AccountService,
     private val authenticationService: AuthenticationService,
     private var userPreferences: UserPreferences
-) : UserSharedViewModel() {
+) : UserSharedViewModel(userPreferences) {
 
     val userName: StateFlow<String> = _userName
     val userLastname: StateFlow<String> = _userLastname

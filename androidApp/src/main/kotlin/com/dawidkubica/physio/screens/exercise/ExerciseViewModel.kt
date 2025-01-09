@@ -57,11 +57,17 @@ class ExerciseViewModel @Inject constructor(
     private val _listAssignedUsers = MutableStateFlow<List<String>>(emptyList())
     val listAssignedUsers: StateFlow<List<String>> = _listAssignedUsers
 
+    private val _listFavoriteUsers = MutableStateFlow<List<String>>(emptyList())
+    val listFavoriteUsers: StateFlow<List<String>> = _listFavoriteUsers
+
     private val _fetchedExercises = MutableStateFlow<List<Exercise>>(emptyList())
     val fetchedExercises: StateFlow<List<Exercise>> = _fetchedExercises
 
     private val _fetchedWarmUps = MutableStateFlow<List<Exercise>>(emptyList())
     val fetchedWarmUps: StateFlow<List<Exercise>> = _fetchedWarmUps
+
+    private val _fetchedCombinedExercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val fetchedCombinedExercises: StateFlow<List<Exercise>> = _fetchedCombinedExercises
 
     private val _mediaUris = MutableStateFlow<String?>("")
     val mediaUris: StateFlow<String?> = _mediaUris
@@ -69,9 +75,15 @@ class ExerciseViewModel @Inject constructor(
     private val _isPremium = MutableStateFlow<Boolean?>(false)
     val isPremium: StateFlow<Boolean?> = _isPremium
 
+    private val _isFavorite = MutableStateFlow<Boolean>(false)
+    val isFavorite: StateFlow<Boolean> = _isFavorite
+
     fun checkUserAssigned(): Boolean {
-        if(_listAssignedUsers.value.toList().contains(accountService.currentUserId.toString())) {
-            Log.d(EXERCISE_VIEW_MODEL, "User is assigned to package: + ${_listAssignedUsers.value.toList()}")
+        if (_listAssignedUsers.value.toList().contains(accountService.currentUserId.toString())) {
+            Log.d(
+                EXERCISE_VIEW_MODEL,
+                "User is assigned to package: + ${_listAssignedUsers.value.toList()}"
+            )
             return true
         } else return false
     }
@@ -82,7 +94,10 @@ class ExerciseViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.update { true }
-                exercisePackageService.removePackageFromUser(accountService.currentUserId, packageId)
+                exercisePackageService.removePackageFromUser(
+                    accountService.currentUserId,
+                    packageId
+                )
                 _message.update { "Pakiet odpięty od uzytkownika" }
                 _isLoading.update { false }
             })
@@ -111,14 +126,19 @@ class ExerciseViewModel @Inject constructor(
                     _warmUpList.value = exPackage.warmUpIds
                     _exercisesList.value = exPackage.exerciseIds
                     _isPremium.value = exPackage.premium
+                    _listFavoriteUsers.value = exPackage.favorites
                     _listAssignedUsers.value = exPackage.assignedTo
                     authorId = exPackage.uid
                     _mediaUris.value = exPackage.mediaUrls.firstOrNull().toString()
                 }
+                checkUserFavorite()
+
                 val exercises = try {
                     _exercisesList.value.map { exerciseId ->
                         async { exerciseService.getExercise(exerciseId) }
                     }.awaitAll().filterNotNull()
+
+
                 } catch (e: Exception) {
                     Log.e(EXERCISE_VIEW_MODEL, "Error fetching exercises", e)
                     _isLoading.update { false }
@@ -136,13 +156,27 @@ class ExerciseViewModel @Inject constructor(
                 }
                 _fetchedWarmUps.value = warmups
                 _fetchedExercises.value = exercises
+                _fetchedCombinedExercises.value = _fetchedWarmUps.value + _fetchedExercises.value
 
                 val author = accountService.searchUser(authorId)
-                _packageAuthor.value = (author?.name + " " + author?.lastname) ?: ""
+                _packageAuthor.value = (author?.name + " " + author?.lastname)
                 _packageAuthorLicense.value = (author?.licenseNumber ?: "").toString()
                 _isLoading.update { false }
             }
         )
+    }
+
+    private fun checkUserFavorite() {
+        if (_listFavoriteUsers.value.toList().contains(accountService.currentUserId.toString())) {
+            _isFavorite.value = true
+            Log.d(
+                EXERCISE_VIEW_MODEL, "User is favorite: ${_listFavoriteUsers.value.toList()}"
+            )
+            return
+        } else {
+            _isFavorite.value = false
+            return
+        }
     }
 
     fun togglePackageFavoriteStatus(packageId: String) {
@@ -150,10 +184,12 @@ class ExerciseViewModel @Inject constructor(
             tag = EXERCISE_VIEW_MODEL,
             onError = { message -> _message.emit(message) },
             block = {
-                when (val result = accountService.toggleFavoritePackage(packageId)) {
+                when (val result = exercisePackageService.toggleFavoritePackage(packageId)) {
                     is StorageResult.Added -> {
                         Log.d(EXERCISE_VIEW_MODEL, "Package ${result.packageId} added to favorites")
                         _message.update { "Pakiet dodany do ulubionych" }
+
+                        _isFavorite.value = true
                     }
 
                     is StorageResult.Removed -> {
@@ -162,6 +198,7 @@ class ExerciseViewModel @Inject constructor(
                             "Package ${result.packageId} removed from favorites"
                         )
                         _message.update { "Pakiet usunięty z ulubionych" }
+                        _isFavorite.value = false
                     }
 
                     is StorageResult.Failure -> {

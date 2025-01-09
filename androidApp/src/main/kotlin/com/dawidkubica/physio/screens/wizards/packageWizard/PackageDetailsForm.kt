@@ -1,4 +1,4 @@
- package com.dawidkubica.physio.screens.wizards.packageWizard
+package com.dawidkubica.physio.screens.wizards.packageWizard
 
 import android.net.Uri
 import android.util.Log
@@ -166,10 +166,20 @@ fun PackageDetailsForm(
                 ItemSelectorSection(
                     conditionsList = filteredConditionsList,
                     bodyPartsList = filteredBodyPartsList,
-                    selectedConditions = selectedConditions ,
+                    selectedConditions = selectedConditions,
                     selectedBodyParts = selectedBodyParts,
-                    onToggleConditions = { conditionId -> viewModel.toggleCondition(conditionId, true)},
-                    onToggleBodyParts = { bodyPartId -> viewModel.toggleBodyPart(bodyPartId, true)},
+                    onToggleConditions = { conditionId ->
+                        viewModel.toggleCondition(
+                            conditionId,
+                            true
+                        )
+                    },
+                    onToggleBodyParts = { bodyPartId ->
+                        viewModel.toggleBodyPart(
+                            bodyPartId,
+                            true
+                        )
+                    },
                     onSearch = { query ->
                         viewModel.apply {
                             filterBodyPartsList(query)
@@ -306,8 +316,8 @@ fun ItemSelectorSection(
 ) {
     Box(
         modifier = Modifier
-        .wrapContentHeight()
-        .animateContentSize()
+            .wrapContentHeight()
+            .animateContentSize()
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),

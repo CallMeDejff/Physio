@@ -19,7 +19,9 @@ abstract class SharedViewModel : PhysioAppViewModel() {
     protected suspend fun loadConditionList(
         listService: ListService,
         _conditionsList: MutableStateFlow<List<Pair<String, String>>>,
-        _filteredConditionsList: MutableStateFlow<List<Pair<String, String>>> = MutableStateFlow(emptyList()),
+        _filteredConditionsList: MutableStateFlow<List<Pair<String, String>>> = MutableStateFlow(
+            emptyList()
+        ),
         tag: String
     ) {
         try {
@@ -40,7 +42,9 @@ abstract class SharedViewModel : PhysioAppViewModel() {
     protected suspend fun loadBodyPartsList(
         listService: ListService,
         _bodyPartsList: MutableStateFlow<List<Pair<String, String>>>,
-        _filteredBodyPartsList: MutableStateFlow<List<Pair<String, String>>> = MutableStateFlow(emptyList()),
+        _filteredBodyPartsList: MutableStateFlow<List<Pair<String, String>>> = MutableStateFlow(
+            emptyList()
+        ),
         tag: String
     ) {
         try {
@@ -70,7 +74,10 @@ abstract class SharedViewModel : PhysioAppViewModel() {
             onError = { message -> _message.emit(message) },
             block = {
                 _exercisesList.value = listService.getExercises(userEntriesOnly = userEntriesOnly)
-                Log.d(tag, "Exercises list loaded, item count: ${_exercisesList.value.size}, only user entries: $userEntriesOnly")
+                Log.d(
+                    tag,
+                    "Exercises list loaded, item count: ${_exercisesList.value.size}, only user entries: $userEntriesOnly"
+                )
             }
         )
     }

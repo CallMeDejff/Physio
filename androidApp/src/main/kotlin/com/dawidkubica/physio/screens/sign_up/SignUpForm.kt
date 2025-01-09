@@ -166,7 +166,10 @@ fun SignUpForm(
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             if (showProgress) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(20.dp))
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.size(20.dp)
+                )
             } else {
                 Text(
                     modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),

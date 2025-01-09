@@ -42,7 +42,11 @@ fun ReminderItem(
         modifier = Modifier
             .padding(vertical = 4.dp, horizontal = 4.dp)
             .fillMaxWidth()
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp))
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp)
+            )
     ) {
         Row(
             modifier = Modifier

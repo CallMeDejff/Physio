@@ -22,7 +22,6 @@ fun NavGraphBuilder.profileNavGraph(navController: NavHostController) {
 
         composable(route = ProfileScreen.EditUser.route) { backStackEntry ->
             val viewModel: EditUserViewModel = hiltViewModel(backStackEntry)
-
             EditUserScreen(
                 popBackStack = { popUp(navController) },
                 viewModel = viewModel

@@ -101,7 +101,10 @@ fun AutoCompleteDetailed(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(8.dp)
+                )
         ) {
             val filteredItems = when {
                 itemList.isNotEmpty() -> {
@@ -135,36 +138,44 @@ fun AutoCompleteDetailed(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 2.dp)
-                        .border(2.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
                 ) {
-                DropdownMenuItem(
-                    colors = MenuItemColors(
-                        textColor = MaterialTheme.colorScheme.primary,
-                        trailingIconColor = MaterialTheme.colorScheme.primary,
-                        leadingIconColor= MaterialTheme.colorScheme.primary,
-                        disabledTextColor= MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        disabledTrailingIconColor= MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        disabledLeadingIconColor= MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                    ),
-                    onClick = {
-                        onToggleItem(itemId)
-                        category = ""
-                        expanded = false
-                        focusRequester.requestFocus()
-                    },
-                    text = {
-                        Text(
-                            text = if (item is Pair<*, *>) item.second as String else "${(item as User).name} ${item.lastname}",
-                            style = typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    modifier = Modifier.background(Color.Transparent),
-                )
-                    }
+                    DropdownMenuItem(
+                        colors = MenuItemColors(
+                            textColor = MaterialTheme.colorScheme.primary,
+                            trailingIconColor = MaterialTheme.colorScheme.primary,
+                            leadingIconColor = MaterialTheme.colorScheme.primary,
+                            disabledTextColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.7f
+                            ),
+                            disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.7f
+                            ),
+                        ),
+                        onClick = {
+                            onToggleItem(itemId)
+                            category = ""
+                            expanded = false
+                            focusRequester.requestFocus()
+                        },
+                        text = {
+                            Text(
+                                text = if (item is Pair<*, *>) item.second as String else "${(item as User).name} ${item.lastname}",
+                                style = typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        modifier = Modifier.background(Color.Transparent),
+                    )
+                }
             }
         }
 
@@ -205,7 +216,11 @@ fun RemovableItemCard(label: String, onRemove: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp)
+            ),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)

@@ -32,7 +32,8 @@ class ChangePasswordViewModel @Inject constructor(
             onError = { message -> _message.emit(message) },
             block = {
                 _isLoading.update { true }
-                val authResult = authenticationService.signInWithEmailVerification(email, password, context)
+                val authResult =
+                    authenticationService.signInWithEmailVerification(email, password, context)
                 if (authResult.isSuccess) {
                     navigate(com.dawidkubica.physio.navigation.ProfileScreen.ChangePassword.route)
                     _isLoading.update { false }

@@ -35,11 +35,11 @@ fun FullScreenLoader(
                 .align(Alignment.Center)
                 .scale(0.7f)
         )
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(90.dp)
-            )
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(90.dp)
+        )
     }
 }

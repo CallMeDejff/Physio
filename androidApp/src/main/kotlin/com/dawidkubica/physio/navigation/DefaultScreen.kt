@@ -36,26 +36,26 @@ import androidx.navigation.compose.rememberNavController
 fun DefaultScreen() {
     val navController = rememberNavController()
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
-            bottomBar = {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
+        bottomBar = {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
 
-                if (currentRoute in listOf(
-                        BottomBarScreen.Home.route,
-                        BottomBarScreen.Search.route,
-                        BottomBarScreen.Scheduler.route,
-                        BottomBarScreen.Profile.route
-                    )
-                ) {
-                    BottomBar(navController = navController)
-                }
+            if (currentRoute in listOf(
+                    BottomBarScreen.Home.route,
+                    BottomBarScreen.Search.route,
+                    BottomBarScreen.Scheduler.route,
+                    BottomBarScreen.Profile.route
+                )
+            ) {
+                BottomBar(navController = navController)
             }
-        ) {
-            HomeNavGraph(navController = navController)
         }
+    ) {
+        HomeNavGraph(navController = navController)
+    }
 }
 
 @Composable

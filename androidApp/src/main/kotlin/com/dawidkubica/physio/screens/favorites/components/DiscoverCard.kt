@@ -35,7 +35,11 @@ fun DiscoverCard(
             .padding(4.dp)
             .wrapContentHeight(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f))
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(
+                alpha = 0.4f
+            )
+        )
     ) {
         Column {
 

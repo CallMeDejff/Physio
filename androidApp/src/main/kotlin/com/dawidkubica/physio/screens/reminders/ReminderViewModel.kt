@@ -14,6 +14,7 @@ import com.dawidkubica.physio.models.Reminder
 import com.dawidkubica.physio.navigation.CalendarScreen
 import com.dawidkubica.physio.screens.profile.UserSharedViewModel
 import com.dawidkubica.physio.screens.reminders.components.ReminderWorker
+import com.dawidkubica.physio.screens.wizards.services.Validator
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +39,10 @@ class ReminderViewModel @Inject constructor(
     val listedPackages: StateFlow<Set<String>> = _listedPackages
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+    private val topicError = MutableStateFlow<String?>(null)
+    private val dayOfWeekError = MutableStateFlow<String?>(null)
+    private val timeError = MutableStateFlow<String?>(null)
 
     private val fullDaysOfWeek: List<String> by lazy {
         context.resources.getStringArray(R.array.days_of_week_full).toList()
@@ -78,29 +83,62 @@ class ReminderViewModel @Inject constructor(
         }
     }
 
-    fun scheduleReminder(popBackStack: () -> Unit, dayOfWeek: String, time: String, topic: String) {
-        _isLoading.update { true }
-        val shortDay = mapFullDayToShort(dayOfWeek)
-
-        if (isReminderAlreadyScheduled(shortDay, topic)) {
-            _message.update { context.getString(R.string.reminder_already_exists) }
-            _isLoading.update { false }
-            return
-        }
-
-        val reminder = Reminder(dayOfWeek = shortDay, time = time, topic = topic)
-
-        Log.d(REMINDER_VIEWMODEL_TAG, "scheduleReminder: Scheduling reminder: $reminder")
-
-        viewModelScope.launch {
-            val reminderId = accountService.addReminderForUser(reminder)
-            reminderId?.let {
-                scheduleNotification(reminder, it)
-                fetchReminders(accountService, REMINDER_VIEWMODEL_TAG)
+    private fun validateFields(
+        topic: String,
+        dayOfWeek: String,
+        time: String,
+        onValidationResult: (Boolean) -> Unit
+    ) {
+        launchCatching(
+            tag = REMINDER_VIEWMODEL_TAG,
+            block = {
+                val isValid = Validator.validateFields(
+                    topic = topic,
+                    dayOfWeek = dayOfWeek,
+                    time = time,
+                    topicError = topicError,
+                    dayOfWeekError = dayOfWeekError,
+                    timeError = timeError,
+                    showMessage = { message -> _message.update { message } }
+                )
+                onValidationResult(isValid)
             }
-            _isLoading.update { false }
-            _message.update { context.getString(R.string.reminder_added) }
-            popBackStack()
+        )
+    }
+
+    fun scheduleReminder(popBackStack: () -> Unit, dayOfWeek: String, time: String, topic: String) {
+        validateFields(
+            topic = topic,
+            dayOfWeek = dayOfWeek,
+            time = time
+        ) { isValid ->
+            if (!isValid) {
+                _isLoading.update { false }
+                return@validateFields
+            }
+            _isLoading.update { true }
+            val shortDay = mapFullDayToShort(dayOfWeek)
+
+            if (isReminderAlreadyScheduled(shortDay, topic)) {
+                _message.update { context.getString(R.string.reminder_already_exists) }
+                _isLoading.update { false }
+                return@validateFields
+            }
+
+            val reminder = Reminder(dayOfWeek = shortDay, time = time, topic = topic)
+
+            Log.d(REMINDER_VIEWMODEL_TAG, "scheduleReminder: Scheduling reminder: $reminder")
+
+            viewModelScope.launch {
+                val reminderId = accountService.addReminderForUser(reminder)
+                reminderId?.let {
+                    scheduleNotification(reminder, it)
+                    fetchReminders(accountService, REMINDER_VIEWMODEL_TAG)
+                }
+                _isLoading.update { false }
+                _message.update { context.getString(R.string.reminder_added) }
+                popBackStack()
+            }
         }
     }
 

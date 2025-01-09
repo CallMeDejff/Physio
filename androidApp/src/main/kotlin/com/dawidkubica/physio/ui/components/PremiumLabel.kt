@@ -36,7 +36,7 @@ fun PremiumLabel(
     val gradientColors = listOf(Color.Magenta, Color.Cyan, Color.Magenta)
     val infiniteTransition = rememberInfiniteTransition()
 
-    val currentFontSizePx = with(LocalDensity.current) { typography?.fontSize?.toPx()  }
+    val currentFontSizePx = with(LocalDensity.current) { typography.fontSize.toPx() }
     val currentFontSizeDoublePx = currentFontSizePx?.times(15)
 
     val animatedOffset by infiniteTransition.animateFloat(

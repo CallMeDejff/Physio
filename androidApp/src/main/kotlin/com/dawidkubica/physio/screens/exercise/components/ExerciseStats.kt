@@ -24,7 +24,7 @@ import com.dawidkubica.physio.ui.theme.typography
 @Composable
 fun ExerciseStats(
     exercise: Exercise,
-    equipmentList: List<Pair<String, String>>
+    equipmentList: List<Pair<String, String>> = emptyList(),
 ) {
     Box(
         Modifier
@@ -50,7 +50,11 @@ fun ExerciseStats(
                     .align(Alignment.CenterHorizontally),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Icon(imageVector = Timer, contentDescription = "Timer Icon", tint = MaterialTheme.colorScheme.onBackground)
+                Icon(
+                    imageVector = Timer,
+                    contentDescription = "Timer Icon",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
                 Text(
                     text = ": " + if (exercise.time.toString() == "0") "-" else exercise.time.toString() + " min",
                     style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground)
@@ -58,13 +62,16 @@ fun ExerciseStats(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Icon(imageVector = Timelapse, contentDescription = "Timelapse Icon", tint = MaterialTheme.colorScheme.onBackground)
+                Icon(
+                    imageVector = Timelapse,
+                    contentDescription = "Timelapse Icon",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
                 Text(
                     text = ": " + if (exercise.time.toString() == "0") "-" else exercise.time.toString() + "x",
                     style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground)
                 )
             }
-
             EquipmentStats(exercise = exercise, equipmentList = equipmentList)
         }
     }

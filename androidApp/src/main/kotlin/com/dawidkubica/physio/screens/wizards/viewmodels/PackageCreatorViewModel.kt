@@ -102,7 +102,6 @@ class PackageCreatorViewModel @Inject constructor(
     private fun observeOnlyUserEntries() {
         viewModelScope.launch {
             _onlyUserEntries.collect { userEntriesOnly ->
-                Log.d(PACKAGE_VIEWMODEL_TAG, "Only user entries changed: $userEntriesOnly")
                 loadExercises(userEntriesOnly)
             }
         }
@@ -117,7 +116,7 @@ class PackageCreatorViewModel @Inject constructor(
     }
 
     fun loadExercises(
-    userEntriesOnly: Boolean,
+        userEntriesOnly: Boolean,
     ) {
         loadExercisesList(
             _exercisesList = _exercisesList,
@@ -323,7 +322,8 @@ class PackageCreatorViewModel @Inject constructor(
             onError = { message -> _message.update { message } },
             block = {
                 _isLoading.update { true }
-                val combinedExercises = _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
+                val combinedExercises =
+                    _selectedExercises.value.toList() + _selectedWarmUp.value.toList()
                 //val title = _packageName.value.orEmpty()
                 val description = _packageDescription.value.orEmpty()
                 val selectedConditions = _selectedConditions.value.toList()

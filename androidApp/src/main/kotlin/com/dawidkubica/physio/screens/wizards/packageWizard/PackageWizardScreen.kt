@@ -137,6 +137,7 @@ fun PackageWizardScreen(
                             isEditorNextStep -> {
                                 viewModel.onEditPackageClick(navigate, context)
                             }
+
                             else -> viewModel.onCreatePackageClick(navigate, context)
                         }
                     },

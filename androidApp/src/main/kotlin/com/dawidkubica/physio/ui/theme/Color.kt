@@ -51,7 +51,7 @@ val OnPrimaryLight = Color(0xFF000000)
 val OnSecondaryLight = Color(0xFF000000)
 
 //dark palette
-val DarkPrimary =  Purple40Alpha
+val DarkPrimary = Purple40Alpha
 val DarkSecondary = PurpleGrey40Alpha
 val DarkTertiary = PurpleGrey80Alpha
 

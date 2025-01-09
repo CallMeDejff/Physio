@@ -42,7 +42,8 @@ fun EditUserForm(
     licenseNumberState: MutableState<TextFieldValue>,
     userType: Int,
 ) {
-    val isLicenseChecked = remember { mutableStateOf(false) }
+
+    val isLicenseChecked = remember { mutableStateOf(userType == 1) }
 
     Column(
         modifier = Modifier

@@ -1,4 +1,4 @@
-package com.dawidkubica.physio.screens.exercise.components
+package com.dawidkubica.physio.screens.video_player
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Replay5
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -59,16 +62,17 @@ fun VideoPlayer(
     modifier: Modifier = Modifier,
     videoUrl: String,
     isPaused: Boolean = false,
-    onVideoSizeChanged: (Int, Int) -> Unit = { _, _ -> },
+    maxWidth: Boolean = false,
     onReplay: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-
     var controlsVisible by remember { mutableStateOf(true) }
     var currentPosition by remember { mutableStateOf(0L) }
     var videoDuration by remember { mutableStateOf(0L) }
     var isVideoEnded by remember { mutableStateOf(false) }
+    var videoAspectRatio by remember { mutableStateOf(16 / 9f) }
+    var playerView: PlayerView? = null
 
     val scope = rememberCoroutineScope()
 
@@ -94,7 +98,19 @@ fun VideoPlayer(
                     }
 
                     override fun onVideoSizeChanged(videoSize: VideoSize) {
-                        onVideoSizeChanged(videoSize.width, videoSize.height)
+                        videoAspectRatio = if (videoSize.width > 0 && videoSize.height > 0) {
+                            videoSize.width.toFloat() / videoSize.height
+                        } else {
+                            16 / 9f
+                        }
+
+                        playerView?.resizeMode = if (videoSize.height > videoSize.width) {
+                            android.util.Log.d("VideoPlayer", "Video is landscape")
+                            AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        } else {
+                            android.util.Log.d("VideoPlayer", "Video is portrait")
+                            AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        }
                     }
                 })
             }
@@ -103,7 +119,7 @@ fun VideoPlayer(
     fun showControls() {
         controlsVisible = true
         scope.launch {
-            delay(2000)
+            delay(1000)
             controlsVisible = false
         }
     }
@@ -124,6 +140,11 @@ fun VideoPlayer(
     }
 
     LaunchedEffect(Unit) {
+        controlsVisible = true
+        scope.launch {
+            delay(1000)
+            controlsVisible = false
+        }
         while (true) {
             currentPosition = exoPlayer.currentPosition
             videoDuration = exoPlayer.duration
@@ -138,6 +159,7 @@ fun VideoPlayer(
                 Lifecycle.Event.ON_DESTROY -> {
                     exoPlayer.release()
                 }
+
                 else -> Unit
             }
         }
@@ -152,7 +174,7 @@ fun VideoPlayer(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable { showControls() }
     ) {
         AndroidView(
@@ -161,18 +183,27 @@ fun VideoPlayer(
                     player = exoPlayer
                     setOnClickListener { showControls() }
                     useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .then(if (maxWidth) Modifier.fillMaxWidth() else Modifier.fillMaxHeight())
+                .align(Alignment.Center)
+                .aspectRatio(videoAspectRatio)
+                .clip(RoundedCornerShape(16.dp))
         )
 
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
+            modifier = Modifier.clip(RoundedCornerShape(16.dp))
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
                 if (isVideoEnded) {
                     ReplayControl(
                         onReplayClick = {
@@ -212,12 +243,12 @@ fun VideoPlayer(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun ReplayControl(
@@ -233,7 +264,6 @@ fun ReplayControl(
         )
     }
 }
-
 
 @Composable
 fun VideoControls(

@@ -81,7 +81,11 @@ fun CategoryTabs(
                         contentAlignment = Alignment.Center
                     ) {
                         if (category.isPremium) {
-                            PremiumLabel(label = category.title, typography = typography.headlineMedium, border = false)
+                            PremiumLabel(
+                                label = category.title,
+                                typography = typography.headlineMedium,
+                                border = false
+                            )
                         } else {
                             Text(
                                 text = category.title,

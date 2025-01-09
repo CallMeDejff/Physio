@@ -41,7 +41,11 @@ fun CheckboxWithText(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(if (isChecked) GreenConfirmed else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
+                .background(
+                    if (isChecked) GreenConfirmed else MaterialTheme.colorScheme.onBackground.copy(
+                        alpha = 0.7f
+                    )
+                )
                 .clickable { onCheckedChange(!isChecked) },
             contentAlignment = Alignment.Center
         ) {

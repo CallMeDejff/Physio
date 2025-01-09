@@ -32,6 +32,10 @@ fun WizardAccessButton(
             .padding(16.dp)
             .padding(bottom = 60.dp)
     ) {
-        Icon(Icons.Outlined.Edit, contentDescription = "floating action button.", tint = Color.White)
+        Icon(
+            Icons.Outlined.Edit,
+            contentDescription = "floating action button.",
+            tint = Color.White
+        )
     }
 }

@@ -24,6 +24,20 @@ class UserPreferences @Inject constructor(context: Context) {
         _themeModeFlow.value = mode
     }
 
+    fun setUserName(name: String) {
+        with(sharedPreferences.edit()) {
+            putString(USER_NAME_KEY, name)
+            apply()
+        }
+    }
+
+    fun setUserType(userType: Int) {
+        with(sharedPreferences.edit()) {
+            putInt(USER_TYPE, userType)
+            apply()
+        }
+    }
+
     fun getThemeMode(): ThemeMode {
         val modeName = sharedPreferences.getString("theme_mode", ThemeMode.SYSTEM.name)
         return ThemeMode.valueOf(modeName ?: ThemeMode.SYSTEM.name)

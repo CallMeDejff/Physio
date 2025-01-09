@@ -4,7 +4,6 @@ import android.content.Context
 import com.dawidkubica.physio.R
 import com.dawidkubica.physio.core.PhysioAppViewModel
 import com.dawidkubica.physio.models.ExercisePackage
-import com.dawidkubica.physio.navigation.WizardScreen
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import com.dawidkubica.physio.service.services.ListService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -57,7 +56,7 @@ class SearchViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
-    fun initializeData(){
+    fun initializeData() {
         _isLoading.update { true }
         fetchData()
         _isLoading.update { false }

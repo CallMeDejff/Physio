@@ -179,7 +179,11 @@ fun LoginForm(
                 }
             },
             onClick = { onSignUpClick() },
-            style = TextStyle(fontSize = 14.sp, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center),
+            style = TextStyle(
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center
+            ),
             modifier = Modifier
                 .fillMaxWidth()
         )

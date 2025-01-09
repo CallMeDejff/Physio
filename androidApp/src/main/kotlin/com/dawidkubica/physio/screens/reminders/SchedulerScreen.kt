@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -79,6 +77,10 @@ fun SchedulerScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
+
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = { viewModel.refreshData() }
@@ -135,7 +137,8 @@ fun SchedulerScreen(
                                 state = pagerState,
                                 modifier = Modifier.fillMaxWidth()
                             ) { page ->
-                                val dayReminders = reminders.filter { it.dayOfWeek == daysOfWeek[page] }
+                                val dayReminders =
+                                    reminders.filter { it.dayOfWeek == daysOfWeek[page] }
 
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     dayReminders.forEach { reminder ->
@@ -179,7 +182,10 @@ fun DayTile(
     onClick: () -> Unit
 ) {
     val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-    val textColor = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+    val textColor =
+        if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onBackground.copy(
+            alpha = 0.7f
+        )
 
     Box(
         modifier = Modifier

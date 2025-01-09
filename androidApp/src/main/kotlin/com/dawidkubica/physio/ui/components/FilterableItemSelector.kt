@@ -93,14 +93,18 @@ fun FilterableItemSelector(
                             .clickable { onToggleItem(item.first) }
                             .border(
                                 width = 1.dp,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                                    alpha = 0.7f
+                                ),
                                 shape = RoundedCornerShape(16.dp)
                             )
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = item.second,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = 0.7f
+                            ),
                             style = typography.labelMedium
                         )
                     }
@@ -117,7 +121,14 @@ fun FilterableItemSelector(
                     onSearch?.invoke(it)
                 },
                 textStyle = typography.labelMedium,
-                placeholder = { Text("Podaj nazwę", style = typography.labelMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))) },
+                placeholder = {
+                    Text(
+                        "Podaj nazwę",
+                        style = typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                        )
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)

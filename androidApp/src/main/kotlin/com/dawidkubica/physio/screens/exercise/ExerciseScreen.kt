@@ -1,9 +1,9 @@
 package com.dawidkubica.physio.screens.exercise
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -31,9 +31,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,14 +43,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import com.dawidkubica.physio.screens.exercise.components.DescriptionView
 import com.dawidkubica.physio.screens.exercise.components.ExercisesView
-import com.dawidkubica.physio.screens.exercise.components.PreviewScreen
 import com.dawidkubica.physio.screens.sign_in.components.HeaderView
+import com.dawidkubica.physio.screens.video_player.HorizontalPlayerScreen
+import com.dawidkubica.physio.screens.video_player.PreviewScreen
 import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 @ExperimentalMaterial3Api
 fun ExerciseScreen(
@@ -58,17 +61,46 @@ fun ExerciseScreen(
     viewModel: ExerciseViewModel,
     packageId: String?
 ) {
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
+    val fetchedCombinedExercises by viewModel.fetchedCombinedExercises.collectAsState()
+
+    if (packageId != null) {
+        LaunchedEffect(packageId) {
+            viewModel.getExercisePackage(packageId)
+        }
+    }
+
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE && fetchedCombinedExercises.isNotEmpty()) {
+        HorizontalPlayerScreen(
+            exercises = fetchedCombinedExercises,
+        )
+    } else {
+        VerticalScreen(
+            popBackStack = popBackStack,
+            packageId = packageId,
+            viewModel = viewModel,
+        )
+    }
+}
+
+@androidx.annotation.OptIn(UnstableApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VerticalScreen(
+    viewModel: ExerciseViewModel,
+    packageId: String?,
+    popBackStack: () -> Unit,
+) {
     val context = LocalContext.current
     var selectedMediaUrl by remember { mutableStateOf<String?>(null) }
     var selectedMediaType by remember { mutableStateOf<String?>(null) }
     var isVideoPaused by remember { mutableStateOf(false) }
     val mediaUrl by viewModel.mediaUris.collectAsState()
-
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val headerHeight = 240.dp
     val remainingHeight = (screenHeight - headerHeight).coerceAtLeast(0.dp) + 20.dp
-
     val sheetState = rememberBottomSheetScaffoldState()
 
     LaunchedEffect(viewModel.message) {
@@ -77,12 +109,6 @@ fun ExerciseScreen(
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                 viewModel.clearMessage()
             }
-        }
-    }
-
-    if (packageId != null) {
-        LaunchedEffect(packageId) {
-            viewModel.getExercisePackage(packageId)
         }
     }
 
@@ -117,7 +143,6 @@ fun ExerciseScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.7f))
-                    .clickable { }
             ) {
                 PreviewScreen(
                     mediaUrl = selectedMediaUrl!!,
@@ -139,19 +164,15 @@ fun ScreenHeader(mediaUrl: String?, headerHeight: Dp, viewModel: ExerciseViewMod
     val headerHeightAnimated by animateDpAsState(targetValue = headerHeight, label = "")
     val isLoading by viewModel.isLoading.collectAsState()
 
-
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header) = createRefs()
-
         if (isLoading) {
-                FullScreenLoader(
-                    Modifier
-                        .constrainAs(header)
+            FullScreenLoader(
+                Modifier
+                    .constrainAs(header)
                     { top.linkTo(parent.top) },
-                    )
-
+            )
         } else {
-
             if (mediaUrl.isNullOrEmpty() || mediaUrl == "null") {
                 HeaderView(
                     modifier = Modifier
@@ -197,31 +218,29 @@ fun BottomSheetContent(
         }
         onDispose {}
     }
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Top
-            ) {
-                item {
-                    DescriptionView(viewModel = viewModel, packageId = packageId)
-                }
-
-                item {
-                    ExercisesView(
-                        isPaused = isPaused,
-                        viewModel = viewModel,
-                        modifier = Modifier.wrapContentHeight(),
-                        onMediaClick = onMediaClick
-                    )
-                }
-
-                item {
-                    NavigationButtons(
-                        popBackStack = popBackStack,
-                        viewModel = viewModel,
-                        packageId = packageId
-                    )
-                }
-            }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Top
+    ) {
+        item {
+            DescriptionView(viewModel = viewModel, packageId = packageId)
+        }
+        item {
+            ExercisesView(
+                isPaused = isPaused,
+                viewModel = viewModel,
+                modifier = Modifier.wrapContentHeight(),
+                onMediaClick = onMediaClick
+            )
+        }
+        item {
+            NavigationButtons(
+                popBackStack = popBackStack,
+                viewModel = viewModel,
+                packageId = packageId
+            )
+        }
+    }
 }
 
 @Composable

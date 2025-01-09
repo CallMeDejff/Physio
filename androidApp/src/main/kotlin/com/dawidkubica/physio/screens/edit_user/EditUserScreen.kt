@@ -53,7 +53,6 @@ fun EditUserScreen(
     val lastnameState = remember { mutableStateOf(TextFieldValue(userLastname)) }
     val licenseNumberState =
         remember { mutableStateOf(TextFieldValue(userLicenseNumber.toString())) }
-    val userTypeState = remember { mutableStateOf(userType) }
 
     LaunchedEffect(userName, userLastname, userLicenseNumber) {
         viewModel.fetchUserInformation()
@@ -109,7 +108,7 @@ fun EditUserScreen(
                     nameState = nameState,
                     lastnameState = lastnameState,
                     licenseNumberState = licenseNumberState,
-                    userType = userTypeState.value
+                    userType = userType
                 )
             }
 

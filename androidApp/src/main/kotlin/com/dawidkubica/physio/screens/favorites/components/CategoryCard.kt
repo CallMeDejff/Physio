@@ -36,7 +36,11 @@ fun CategoryCard(
             bottomStart = 16.dp,
             bottomEnd = 16.dp
         ),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f))
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(
+                alpha = 0.4f
+            )
+        )
     ) {
         if (exercisePackages.isNotEmpty()) {
             LazyRow(
@@ -56,7 +60,7 @@ fun CategoryCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(226.dp),
+                    .height(225.dp),
                 contentAlignment = Alignment.Center,
             )
             {

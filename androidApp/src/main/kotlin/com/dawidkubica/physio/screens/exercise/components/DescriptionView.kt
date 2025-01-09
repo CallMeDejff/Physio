@@ -8,6 +8,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,17 +19,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dawidkubica.physio.screens.exercise.ExerciseViewModel
 import com.dawidkubica.physio.ui.theme.RedConfirmed
 import com.dawidkubica.physio.ui.theme.typography
@@ -60,6 +60,7 @@ fun DescriptionView(
     val packageDescription = viewModel.packageDescription.collectAsState()
     val packageAuthor = viewModel.packageAuthor.collectAsState()
     val packageAuthorLicense = viewModel.packageAuthorLicense.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
 
     Box(
         modifier = Modifier
@@ -67,6 +68,7 @@ fun DescriptionView(
             .wrapContentSize(Alignment.TopStart),
         contentAlignment = Alignment.TopCenter
     ) {
+        Log.d("DescriptionView", "Favorite status: $isFavorite")
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -89,12 +91,15 @@ fun DescriptionView(
                 )
 
                 IconButton(
-                    onClick = { viewModel.togglePackageFavoriteStatus(packageId.orEmpty()) }
+                    onClick = {
+                        viewModel.togglePackageFavoriteStatus(packageId.orEmpty())
+                        Log.d("DescriptionView", "Favorite button clicked: $isFavorite")
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Favorite,
                         contentDescription = "Favorites management",
-                        tint = RedConfirmed,
+                        tint = if (isFavorite) RedConfirmed else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .padding(2.dp)
                             .size(36.dp)

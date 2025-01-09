@@ -20,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,8 +48,6 @@ import com.dawidkubica.physio.screens.favorites.components.WizardAccessButton
 import com.dawidkubica.physio.screens.reminders.components.ReminderItem
 import com.dawidkubica.physio.ui.components.FullScreenLoader
 import com.dawidkubica.physio.ui.theme.typography
-import androidx.compose.material3.pulltorefresh.*
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Indicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +73,10 @@ fun FavoritesScreen(
                 viewModel.clearMessage()
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshContent()
     }
 
     PullToRefreshBox(
@@ -144,7 +147,6 @@ fun FavoritesScreen(
         }
     }
 }
-
 
 
 @Composable
@@ -265,7 +267,7 @@ fun DiscoverSection(
                             .align(Alignment.Start)
                     )
                     Text(
-                        text = stringResource(id = R.string.greeting_what_to_train),
+                        text = stringResource(id = R.string.greeting_what_to_train_subtitile),
                         style = typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )

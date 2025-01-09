@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.dawidkubica.physio.screens.video_player.getThumbnailFromUrl
 
 @Composable
 fun VideoThumbnail(mediaUrl: String, onMediaClick: (String) -> Unit) {

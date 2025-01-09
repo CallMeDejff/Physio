@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Sync
-import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -84,6 +82,10 @@ fun ProfileScreen(
                 viewModel.clearMessage()
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserInformation()
     }
 
     if (showEmailChangeDialog.value) {

@@ -2,6 +2,7 @@ package com.dawidkubica.physio.service.services
 
 import android.net.Uri
 import com.dawidkubica.physio.models.ExercisePackage
+import com.dawidkubica.physio.models.StorageResult
 import com.dawidkubica.physio.models.UserPackages
 
 interface ExercisePackageService {
@@ -15,7 +16,9 @@ interface ExercisePackageService {
         conditionIds: List<String>,
         equipmentIds: List<String>
     ): List<ExercisePackage>
+
     suspend fun getUserExercisePackages(): UserPackages
     suspend fun removePackageFromUser(userId: String, packageId: String)
     suspend fun updateExercisePackage(exercisePackage: ExercisePackage, mediaUris: List<Uri>)
+    suspend fun toggleFavoritePackage(packageId: String): StorageResult?
 }

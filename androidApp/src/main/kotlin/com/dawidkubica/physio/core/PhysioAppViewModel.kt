@@ -45,7 +45,8 @@ open class PhysioAppViewModel : ViewModel() {
         }
     ) {
         if (!isInternetAvailable()) {
-            val noInternetMessage = "Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie."
+            val noInternetMessage =
+                "Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie."
             Log.d(tag, noInternetMessage)
             onError(noInternetMessage)
             return@launch

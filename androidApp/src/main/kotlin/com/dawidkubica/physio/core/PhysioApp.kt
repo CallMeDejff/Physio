@@ -14,7 +14,6 @@ import com.dawidkubica.physio.ui.theme.PhysioBarTheme
 
 @Composable
 fun PhysioApp(navController: NavHostController, userPreferences: UserPreferences) {
-
     val themeMode by userPreferences.themeModeFlow.collectAsState()
 
     PhysioBarTheme(themeMode = themeMode) {

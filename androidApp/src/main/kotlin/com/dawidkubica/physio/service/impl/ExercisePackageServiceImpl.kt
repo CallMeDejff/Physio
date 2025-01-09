@@ -3,11 +3,11 @@ package com.dawidkubica.physio.service.impl
 import android.net.Uri
 import android.util.Log
 import com.dawidkubica.physio.models.ExercisePackage
+import com.dawidkubica.physio.models.StorageResult
 import com.dawidkubica.physio.models.UserPackages
 import com.dawidkubica.physio.service.AuthError
 import com.dawidkubica.physio.service.services.AccountService
 import com.dawidkubica.physio.service.services.AuthenticationService
-import com.dawidkubica.physio.service.services.CacheManager
 import com.dawidkubica.physio.service.services.ExercisePackageService
 import com.dawidkubica.physio.service.services.FileStorageService
 import com.google.firebase.Firebase
@@ -22,7 +22,6 @@ class ExercisePackageServiceImpl @Inject constructor(
     private val auth: AuthenticationService,
     private val fileStorageService: FileStorageService,
     private val accountService: AccountService,
-    private val cacheManager: CacheManager
 ) : ExercisePackageService {
 
     var currentUserId: String = ""
@@ -38,7 +37,8 @@ class ExercisePackageServiceImpl @Inject constructor(
                 .get()
                 .await()
 
-            val exercisePackageMaps = discoverDocument["discover_section"] as? List<Map<String, String>>
+            val exercisePackageMaps =
+                discoverDocument["discover_section"] as? List<Map<String, String>>
             val exercisePackageIds = exercisePackageMaps?.mapNotNull { it["id"] } ?: emptyList()
             Log.d(EXERCISE_PACKAGE_SERVICE_TAG, "Package IDs found: $exercisePackageIds")
 
@@ -57,7 +57,11 @@ class ExercisePackageServiceImpl @Inject constructor(
                     val exercisePackage = packageSnapshot.toObject(ExercisePackage::class.java)
                     exercisePackage
                 } catch (e: Exception) {
-                    Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error fetching package with ID: $packageId", e)
+                    Log.e(
+                        EXERCISE_PACKAGE_SERVICE_TAG,
+                        "Error fetching package with ID: $packageId",
+                        e
+                    )
                     null
                 }
             }
@@ -65,6 +69,34 @@ class ExercisePackageServiceImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error fetching discover section packages", e)
             emptyList()
+        }
+    }
+
+    override suspend fun toggleFavoritePackage(packageId: String): StorageResult? {
+        return safeFirestoreCall {
+            val packageDocRef =
+                firestore.collection(EXERCISE_PACKAGES_COLLECTION).document(packageId)
+            val userRef = auth.currentUserId
+
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(packageDocRef)
+                val exercisePackage = snapshot.toObject(ExercisePackage::class.java)
+                    ?: throw Exception("Package document not found")
+                val updatedFavorites = exercisePackage.favorites.toMutableSet()
+
+                val result = if (updatedFavorites.contains(userRef)) {
+                    updatedFavorites.remove(userRef)
+                    StorageResult.Removed(userRef)
+                } else {
+                    updatedFavorites.add(userRef)
+                    StorageResult.Added(userRef)
+                }
+
+                transaction.update(packageDocRef, "favorites", updatedFavorites.toList())
+                result
+            }.await()
+
+            accountService.toggleFavoritePackage(packageId)
         }
     }
 
@@ -355,6 +387,15 @@ class ExercisePackageServiceImpl @Inject constructor(
 
         } catch (e: Exception) {
             Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Error removing package from user", e)
+        }
+    }
+
+    private suspend fun <T> safeFirestoreCall(operation: suspend () -> T): T? {
+        return try {
+            operation()
+        } catch (e: Exception) {
+            Log.e(EXERCISE_PACKAGE_SERVICE_TAG, "Firestore operation failed", e)
+            null
         }
     }
 

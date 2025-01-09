@@ -109,14 +109,12 @@ class ListServiceImpl @Inject constructor(
                     userEntriesOnly -> {
                         if (uid == currentUserId && id != null && title != null) id to title else null
                     }
+
                     else -> {
                         if ((uid == currentUserId || !nonPublic) && id != null && title != null) id to title else null
                     }
                 }
             }
-
-            cacheManager.setCachedExercisesList(filteredExercises)
-
             filteredExercises
         } catch (e: Exception) {
             Log.e(LIST_SERVICE_TAG, "getExercises: Error getting exercises", e)

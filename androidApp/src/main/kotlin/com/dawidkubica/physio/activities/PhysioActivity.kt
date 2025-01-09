@@ -8,12 +8,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.dawidkubica.physio.core.Constants.AUTH_PORT
 import com.dawidkubica.physio.core.Constants.FIRESTORE_PORT
@@ -27,7 +27,6 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @SuppressLint("RestrictedApi")
@@ -46,6 +45,7 @@ class PhysioActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             PhysioApp(navController = navController, userPreferences = sharedPreferences)
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         }
 
         requestPermissionLauncher = registerForActivityResult(

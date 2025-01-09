@@ -3,14 +3,12 @@ package com.dawidkubica.physio.screens.wizards.services
 import android.content.Context
 import android.net.Uri
 import com.arthenica.ffmpegkit.FFmpegKit
+import com.dawidkubica.physio.core.Constants.FIREBASE_MEDIA_PREFIX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
 object MediaProcessor {
-
-    private const val FIREBASE_MEDIA_PREFIX = "https://firebasestorage.googleapis.com/"
-
     suspend fun processMedia(
         context: Context,
         uri: Uri,
@@ -45,10 +43,24 @@ object MediaProcessor {
                     throw IllegalArgumentException("Wideo jest zbyt długie (maksymalna długość to 5 minut).")
                 }
 
-                if (resolution != null && (resolution.first > 2000 || resolution.second > 1200)) {
-                    val outputFile = File(context.cacheDir, "converted_video.mp4").absolutePath
-                    val command =
-                        "-i $filePath -vf scale=1920:1080 -c:v libx264 -preset fast -crf 23 -c:a aac $outputFile"
+                if (resolution != null) {
+                    val outputFile: String
+                    val command: String
+
+                    if (resolution.first > resolution.second && (resolution.first > 2000 || resolution.second > 1200)) {
+                        outputFile =
+                            File(context.cacheDir, "converted_landscape_video.mp4").absolutePath
+                        command =
+                            "-i $filePath -vf scale=1920:1080 -c:v libx264 -preset fast -crf 23 -c:a aac $outputFile"
+                    } else if (resolution.second > resolution.first && (resolution.second > 2000 || resolution.first > 1200)) {
+                        outputFile =
+                            File(context.cacheDir, "converted_portrait_video.mp4").absolutePath
+                        command =
+                            "-i $filePath -vf scale=1080:1920 -c:v libx264 -preset fast -crf 23 -c:a aac $outputFile"
+                    } else {
+                        onSuccess(uri)
+                        return@withContext
+                    }
 
                     val convertSession = FFmpegKit.execute(command)
 
@@ -61,6 +73,7 @@ object MediaProcessor {
                 } else {
                     onSuccess(uri)
                 }
+
             }
         } catch (e: Exception) {
             onError(e.message ?: "Nieznany błąd.")

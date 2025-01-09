@@ -2,6 +2,7 @@ package com.dawidkubica.physio.screens.wizards.viewmodels
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.dawidkubica.physio.models.Exercise
 import com.dawidkubica.physio.navigation.WizardScreen
@@ -69,7 +70,6 @@ class ExerciseCreatorViewModel @Inject constructor(
 
     private val titleError = MutableStateFlow<String?>(null)
     private val descriptionError = MutableStateFlow<String?>(null)
-    private val equipmentError = MutableStateFlow<String?>(null)
 
     init {
         observeOnlyUserEntries()
@@ -95,10 +95,8 @@ class ExerciseCreatorViewModel @Inject constructor(
                 val isValid = Validator.validateFields(
                     title = title,
                     description = description,
-                    selectedEquipment = selectedEquipment,
                     titleError = titleError,
                     descriptionError = descriptionError,
-                    equipmentError = equipmentError,
                     showMessage = { message -> _message.update { message } }
                 )
                 onValidationResult(isValid)
@@ -203,7 +201,6 @@ class ExerciseCreatorViewModel @Inject constructor(
         isEdit: Boolean
     ) {
         _isLoading.update { true }
-        setMediaType(context, _selectedMediaUris.value)
         val title = _exerciseTitle.value.orEmpty()
         val description = _exerciseDescription.value.orEmpty()
         val selectedEquipment = _selectedEquipment.value.toList()
@@ -286,21 +283,22 @@ class ExerciseCreatorViewModel @Inject constructor(
         _exerciseDescription.value = description
     }
 
-    private fun setMediaType(context: Context, uris: List<Uri>) {
-        viewModelScope.launch {
-            uris.forEach { uri ->
-                val mimeType = context.contentResolver.getType(uri)
-                if (mimeType?.startsWith("image/") == true) {
-                    _mediaType.value = "image"
-                } else if (mimeType?.startsWith("video/") == true) {
-                    _mediaType.value = "video"
-                    processVideo(context, uri)
-                } else {
-                    _mediaType.value = null
-                }
+    suspend fun setMediaType(context: Context, uris: List<Uri>) {
+        uris.forEach { uri ->
+            val mimeType = context.contentResolver.getType(uri)
+            if (mimeType?.startsWith("image/") == true) {
+                Log.d(EXERCISE_VIEWMODEL_TAG, "Media type is image")
+                _mediaType.value = "image"
+            } else if (mimeType?.startsWith("video/") == true) {
+                Log.d(EXERCISE_VIEWMODEL_TAG, "Media type is video")
+                _mediaType.value = "video"
+                processVideo(context, uri)
+            } else {
+                Log.d(EXERCISE_VIEWMODEL_TAG, "Media type is else")
             }
         }
     }
+
 
     private fun processVideo(context: Context, uri: Uri) {
         viewModelScope.launch {

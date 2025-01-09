@@ -54,6 +54,7 @@ fun ExercisePackageCard(
     onClick: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
@@ -65,7 +66,11 @@ fun ExercisePackageCard(
             .widthIn(max = 400.dp)
             .fillMaxWidth()
             .heightIn(max = 250.dp)
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp))
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp)
+            )
     ) {
         Column {
             Box(
@@ -75,10 +80,11 @@ fun ExercisePackageCard(
                     .fillMaxWidth()
             ) {
                 if (isPremium) {
-                    PremiumLabel(modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .zIndex(1f)
-                        .padding(8.dp),
+                    PremiumLabel(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .zIndex(1f)
+                            .padding(8.dp),
                         label = "Premium",
                         typography = typography.headlineMedium
                     )
