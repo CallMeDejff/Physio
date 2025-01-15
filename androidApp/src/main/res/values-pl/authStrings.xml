@@ -120,6 +120,7 @@
     <string name="category_premium">Premium</string>
     <string name="greeting_user">Cześć, %1$s 👋</string>
     <string name="greeting_what_to_train">Co dzisiaj zamierzasz ćwiczyć?</string>
+    <string name="greeting_what_to_train_subtitile">Nowe pakiety dostępne w Premium</string>
     <string name="discover_section_title">Odkryj coś nowego:</string>
     <string name="no_items_to_display">Brak elementów do wyświetlenia</string>
     <string name="edit_user_data_screen">Edytuj swoje dane.</string>
